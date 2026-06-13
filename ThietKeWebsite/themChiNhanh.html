@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khởi Tạo Điểm Kinh Doanh Mới | Co-Lab Enterprise</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0b0f19;
+        }
+        /* Mượt mà thanh cuộn nội dung form */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0f19;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="text-gray-100 min-h-screen flex overflow-hidden">
+
+    <aside class="w-80 bg-[#090d16] border-r border-gray-800/60 p-6 flex flex-col justify-between hidden xl:flex flex-shrink-0 h-screen">
+        <div>
+            <div class="flex items-center gap-3.5 px-3 mb-10">
+                <div class="w-11 h-11 bg-gradient-to-tr from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                    <i class="fas fa-network-wired text-xl"></i>
+                </div>
+                <div>
+                    <span class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">Co-Lab Hub</span>
+                    <span class="block text-[10px] text-indigo-400 font-bold tracking-widest uppercase mt-0.5">Root Control</span>
+                </div>
+            </div>
+
+            <div class="space-y-7">
+                <div>
+                    <p class="text-[11px] text-gray-500 uppercase font-extrabold tracking-widest px-4 mb-3">Bảng điều khiển</p>
+                    <nav class="space-y-1">
+                        <a href="#" class="flex items-center gap-4 py-3.5 px-4 rounded-2xl text-gray-400 hover:bg-gray-800/40 hover:text-gray-100 transition">
+                            <i class="fas fa-chart-pie text-lg"></i> Tổng quan chung
+                        </a>
+                        <a href="#" class="flex items-center gap-4 py-3.5 px-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-semibold shadow-lg transition">
+                            <i class="fas fa-store text-lg"></i> Quản lý Chi nhánh
+                        </a>
+                        <a href="#" class="flex items-center gap-4 py-3.5 px-4 rounded-2xl text-gray-400 hover:bg-gray-800/40 hover:text-gray-100 transition">
+                            <i class="fas fa-user-shield text-lg"></i> Ban Quản Lý (Admins)
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 bg-gray-800/20 rounded-2xl border border-gray-800/50 flex items-center gap-3">
+            <img src="https://ui-avatars.com/api/?name=Root+Admin&background=4f46e5&color=fff" class="w-9 h-9 rounded-xl">
+            <div class="overflow-hidden">
+                <p class="text-xs font-bold text-gray-200 truncate">Super Admin</p>
+                <p class="text-[10px] text-gray-500">Tài khoản tối cao</p>
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 p-6 lg:p-10 h-screen overflow-y-auto w-full">
+        
+        <div class="mb-8">
+            <a href="./QuanLiChiNhanh.html" class="inline-flex items-center gap-2 text-xs font-bold text-indigo-400 hover:text-indigo-300 uppercase tracking-wider mb-3 group">
+                <i class="fas fa-arrow-left transition-transform group-hover:-translate-x-1"></i> Quay lại danh sách
+            </a>
+            <h1 class="text-3xl font-extrabold tracking-tight text-white">Khởi tạo điểm kinh doanh mới</h1>
+            <p class="text-sm text-gray-400 mt-1">Thiết lập cơ sở dữ liệu gốc, định cấu hình tài nguyên hệ thống ban đầu.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <div class="lg:col-span-2 space-y-6">
+                <form class="space-y-6">
+                    
+                    <div class="bg-[#111827]/40 border border-gray-800/60 rounded-[2rem] p-6 lg:p-8 space-y-6">
+                        <div class="flex items-center gap-3 border-b border-gray-800 pb-4">
+                            <span class="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-xs font-bold">01</span>
+                            <h2 class="text-lg font-bold text-white">Thông tin cơ bản & Định danh</h2>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Tên chi nhánh <span class="text-rose-500">*</span></label>
+                                <input type="text" placeholder="Ví dụ: Co-Lab Cơ sở Quận 3" class="w-full px-4 py-3 bg-[#090d16]/80 border border-gray-800 rounded-xl text-sm text-gray-200 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Mã định danh (Workspace ID) <span class="text-rose-500">*</span></label>
+                                <input type="text" placeholder="Ví dụ: WS-HCM-003" class="w-full px-4 py-3 bg-[#090d16]/80 border border-gray-800 rounded-xl text-sm font-mono text-indigo-400 placeholder-gray-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Địa chỉ chi tiết <span class="text-rose-500">*</span></label>
+                            <input type="text" placeholder="Số nhà, tên đường, phường/xã, quận/huyện..." class="w-full px-4 py-3 bg-[#090d16]/80 border border-gray-800 rounded-xl text-sm text-gray-200 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                        </div>
+                    </div>
+
+                    <div class="bg-[#111827]/40 border border-gray-800/60 rounded-[2rem] p-6 lg:p-8 space-y-6">
+                        <div class="flex items-center gap-3 border-b border-gray-800 pb-4">
+                            <span class="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-xs font-bold">02</span>
+                            <h2 class="text-lg font-bold text-white">Phân bổ tài nguyên & Quản trị</h2>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Hạn mức nhân sự (Staff Quota) <span class="text-rose-500">*</span></label>
+                                <div class="relative">
+                                    <input type="number" min="1" max="100" value="5" class="w-full pl-4 pr-12 py-3 bg-[#090d16]/80 border border-gray-800 rounded-xl text-sm text-gray-200 focus:outline-none focus:border-indigo-500">
+                                    <span class="absolute right-4 top-3.5 text-xs font-bold text-gray-500 uppercase">Suất</span>
+                                </div>
+                                <p class="text-[11px] text-gray-500 mt-1.5">Số lượng tài khoản nhân viên (Staff) tối đa được phép kích hoạt.</p>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Bổ nhiệm Quản lý trưởng (Branch Admin)</label>
+                                <select class="w-full px-4 py-3 bg-[#090d16]/80 border border-gray-800 rounded-xl text-sm text-gray-400 focus:outline-none focus:border-indigo-500">
+                                    <option value="">-- Chọn nhân sự quản lý có sẵn --</option>
+                                    <option value="1">Nguyễn Thu Thủy (ID: PM-094)</option>
+                                    <option value="2">Hoàng Đình Trọng (ID: PM-102)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#111827]/40 border border-gray-800/60 rounded-[2rem] p-6 lg:p-8 space-y-6">
+                        <div class="flex items-center gap-3 border-b border-gray-800 pb-4">
+                            <span class="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-xs font-bold">03</span>
+                            <h2 class="text-lg font-bold text-white">Hồ sơ thiết kế sơ đồ mặt bằng</h2>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Ảnh đại diện chi nhánh</label>
+                            <div class="border-2 border-dashed border-gray-800 rounded-2xl p-8 text-center hover:border-indigo-500/40 hover:bg-indigo-500/[0.01] transition cursor-pointer group">
+                                <i class="fas fa-cloud-upload-alt text-3xl text-gray-600 group-hover:text-indigo-400 transition mb-3"></i>
+                                <p class="text-sm font-medium text-gray-400">Kéo thả ảnh tại đây hoặc <span class="text-indigo-400 group-hover:underline">Duyệt file</span></p>
+                                <p class="text-xs text-gray-600 mt-1">Định dạng JPG, PNG chất lượng cao (Tối đa 5MB)</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-4 pt-4 border-t border-gray-800/60">
+                        <button type="button" class="px-6 py-3 border border-gray-800 text-gray-400 hover:text-white rounded-xl text-sm font-bold hover:bg-gray-800/40 transition">Hủy bỏ</button>
+                        <button type="submit" class="px-8 py-3 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 transition">Khởi tạo & Cấu hình sơ đồ</button>
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-indigo-950/40 border border-indigo-500/20 rounded-[2rem] p-6 text-indigo-200">
+                    <h3 class="font-bold text-white mb-3 flex items-center gap-2">
+                        <i class="fas fa-info-circle text-indigo-400"></i> Quy chuẩn vận hành chuỗi
+                    </h3>
+                    <ul class="space-y-3.5 text-xs text-indigo-300/90 leading-relaxed list-disc pl-4">
+                        <li><strong>Workspace ID</strong> là duy nhất trên toàn hệ thống và hoàn toàn không thể chỉnh sửa sau khi khởi tạo thành công nhằm phục vụ thống kê dòng tiền.</li>
+                        <li>Hạn mức <strong>Staff Quota</strong> mặc định ban đầu là 5. Cấp Root Admin có quyền nâng hoặc hạ hạn mức này bất cứ lúc nào tại trang quản trị chi tiết.</li>
+                        <li>Sau bước này, hệ thống sẽ tự động chuyển hướng đến màn hình **Vẽ sơ đồ mặt bằng tọa độ** để định vị vị trí ghế và phòng họp trên lưới 2D.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-[#111827]/40 border border-gray-800/60 rounded-[2rem] p-6 text-center">
+                    <div class="w-12 h-12 bg-[#090d16] border border-gray-800 rounded-xl flex items-center justify-center text-amber-500 mx-auto mb-3 shadow-inner">
+                        <i class="fas fa-shield-halved"></i>
+                    </div>
+                    <h4 class="font-bold text-sm text-gray-300">Chế độ tạo: Khóa đặt chỗ</h4>
+                    <p class="text-xs text-gray-500 mt-1 max-w-[200px] mx-auto leading-normal">Chi nhánh mới tạo sẽ ở trạng thái ẩn (Draft) cho đến khi bạn bật công tắc kích hoạt công khai.</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+</body>
+</html>

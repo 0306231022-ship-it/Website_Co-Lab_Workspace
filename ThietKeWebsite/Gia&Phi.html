@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cấu hình Bảng giá & Phí | Co-Lab Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0b0f19;
+        }
+        .glass-card {
+            background: rgba(17, 24, 39, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+    </style>
+</head>
+<body class="text-gray-100 min-h-screen flex overflow-hidden">
+
+    <aside class="w-80 bg-[#090d16] border-r border-gray-800/60 p-6 flex flex-col justify-between hidden xl:flex flex-shrink-0 h-screen">
+        <div>
+            <div class="flex items-center gap-3.5 px-3 mb-10">
+                <div class="w-11 h-11 bg-gradient-to-tr from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                    <i class="fas fa-wallet text-xl"></i>
+                </div>
+                <div>
+                    <span class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">Co-Lab Finance</span>
+                    <span class="block text-[10px] text-indigo-400 font-bold tracking-widest uppercase mt-0.5">Pricing Module</span>
+                </div>
+            </div>
+            <nav class="space-y-2">
+                <a href="#" class="flex items-center gap-4 py-3 px-4 rounded-xl text-gray-400 hover:bg-gray-800/40 transition text-sm">
+                    <i class="fas fa-arrow-left"></i> Quay lại Chi nhánh
+                </a>
+                <a href="#" class="flex items-center gap-4 py-3.5 px-4 rounded-2xl bg-indigo-600/10 text-indigo-400 font-bold border border-indigo-500/20 shadow-lg text-sm">
+                    <i class="fas fa-tags text-lg"></i> Cấu hình giá & phí
+                </a>
+            </nav>
+        </div>
+    </aside>
+
+    <main class="flex-1 p-6 lg:p-10 h-screen overflow-y-auto w-full">
+        
+        <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-10">
+            <div>
+                <div class="flex items-center gap-3">
+                    <h1 class="text-3xl font-black text-white tracking-tight">Cấu hình Tài chính</h1>
+                    <span class="text-xs font-mono px-2.5 py-1 bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 rounded-md">#WS-HCM-001</span>
+                </div>
+                <p class="text-sm text-gray-400 mt-1">Thiết lập biểu giá thuê không gian, thuế suất và chính sách phạt cho cơ sở Quận 1.</p>
+            </div>
+            <div class="flex gap-3">
+                <button class="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-sm font-bold border border-gray-700 transition">Hủy thay đổi</button>
+                <button class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/30 transition">Áp dụng bảng giá mới</button>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+            
+            <div class="xl:col-span-2 space-y-8">
+                
+                <section class="glass-card p-6 lg:p-8 rounded-[2.5rem] space-y-6">
+                    <div class="flex items-center gap-3 border-b border-gray-800/80 pb-4">
+                        <div class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center"><i class="fas fa-couch text-sm"></i></div>
+                        <h2 class="text-lg font-bold text-white">Giá Thuê Không Gian Cơ Bản</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-[#090d16]/60 border border-gray-800 p-4 rounded-2xl space-y-3">
+                            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block">Chỗ ngồi cá nhân (Hot Desk)</span>
+                            <div class="relative">
+                                <input type="text" value="30.000" class="w-full pl-4 pr-16 py-3 bg-[#0b0f19] border border-gray-800 rounded-xl font-mono text-lg font-bold text-white focus:border-indigo-500 outline-none">
+                                <span class="absolute right-4 top-3.5 text-xs text-gray-500 font-bold">VND / Giờ</span>
+                            </div>
+                        </div>
+                        <div class="bg-[#090d16]/60 border border-gray-800 p-4 rounded-2xl space-y-3">
+                            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block">Bàn làm việc riêng (Dedicated Desk)</span>
+                            <div class="relative">
+                                <input type="text" value="50.000" class="w-full pl-4 pr-16 py-3 bg-[#0b0f19] border border-gray-800 rounded-xl font-mono text-lg font-bold text-white focus:border-indigo-500 outline-none">
+                                <span class="absolute right-4 top-3.5 text-xs text-gray-500 font-bold">VND / Giờ</span>
+                            </div>
+                        </div>
+                        <div class="bg-[#090d16]/60 border border-gray-800 p-4 rounded-2xl space-y-3">
+                            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block">Phòng họp (Meeting Room)</span>
+                            <div class="relative">
+                                <input type="text" value="200.000" class="w-full pl-4 pr-16 py-3 bg-[#0b0f19] border border-gray-800 rounded-xl font-mono text-lg font-bold text-white focus:border-indigo-500 outline-none">
+                                <span class="absolute right-4 top-3.5 text-xs text-gray-500 font-bold">VND / Giờ</span>
+                            </div>
+                        </div>
+                        <div class="bg-[#090d16]/60 border border-gray-800 p-4 rounded-2xl space-y-3">
+                            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block">Không gian sự kiện / Studio</span>
+                            <div class="relative">
+                                <input type="text" value="600.000" class="w-full pl-4 pr-16 py-3 bg-[#0b0f19] border border-gray-800 rounded-xl font-mono text-lg font-bold text-white focus:border-indigo-500 outline-none">
+                                <span class="absolute right-4 top-3.5 text-xs text-gray-500 font-bold">VND / Giờ</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="glass-card p-6 lg:p-8 rounded-[2.5rem] space-y-6">
+                    <div class="flex items-center justify-between border-b border-gray-800/80 pb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center"><i class="fas fa-bolt text-sm"></i></div>
+                            <h2 class="text-lg font-bold text-white">Cấu hình giá linh hoạt (Giờ cao điểm)</h2>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-gray-400 uppercase">Kích hoạt</span>
+                            <div class="w-9 h-5 bg-indigo-600 rounded-full relative cursor-pointer">
+                                <div class="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-[#090d16]/40 p-4 border border-gray-800 rounded-2xl">
+                            <label class="block text-[11px] font-bold text-gray-500 uppercase mb-2">Hệ số nhân (Surcharge)</label>
+                            <input type="number" step="0.1" value="1.2" class="w-full px-3 py-2.5 bg-[#0b0f19] border border-gray-800 rounded-xl text-sm font-bold text-amber-400 focus:border-indigo-500 outline-none">
+                            <span class="text-[10px] text-gray-600 mt-1.5 block">Nhân 1.2 lần giá gốc</span>
+                        </div>
+                        <div class="bg-[#090d16]/40 p-4 border border-gray-800 rounded-2xl">
+                            <label class="block text-[11px] font-bold text-gray-500 uppercase mb-2">Khung bắt đầu</label>
+                            <input type="time" value="14:00" class="w-full px-3 py-2.5 bg-[#0b0f19] border border-gray-800 rounded-xl text-sm text-gray-300 focus:border-indigo-500 outline-none">
+                        </div>
+                        <div class="bg-[#090d16]/40 p-4 border border-gray-800 rounded-2xl">
+                            <label class="block text-[11px] font-bold text-gray-500 uppercase mb-2">Khung kết thúc</label>
+                            <input type="time" value="17:00" class="w-full px-3 py-2.5 bg-[#0b0f19] border border-gray-800 rounded-xl text-sm text-gray-300 focus:border-indigo-500 outline-none">
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="space-y-6">
+                
+                <div class="glass-card p-6 rounded-[2.5rem] space-y-5">
+                    <h3 class="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                        <i class="fas fa-percentage text-indigo-400"></i> Thuế & Phí hệ thống
+                    </h3>
+                    
+                    <div>
+                        <label class="block text-xs text-gray-400 font-bold mb-2">Thuế giá trị gia tăng (VAT)</label>
+                        <div class="relative">
+                            <input type="number" value="10" class="w-full pl-4 pr-10 py-2.5 bg-[#090d16] border border-gray-800 rounded-xl font-bold text-white outline-none focus:border-indigo-500">
+                            <span class="absolute right-4 top-3 text-sm font-bold text-gray-500">%</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-gray-400 font-bold mb-2">Phí dịch vụ tích hợp (Service Fee)</label>
+                        <div class="relative">
+                            <input type="text" value="2.000" class="w-full pl-4 pr-16 py-2.5 bg-[#090d16] border border-gray-800 rounded-xl font-bold text-white outline-none focus:border-indigo-500">
+                            <span class="absolute right-4 top-3 text-xs font-bold text-gray-500">VND/Lượt</span>
+                        </div>
+                        <span class="text-[10px] text-gray-600 mt-1 block">Áp dụng trên mỗi đơn đặt chỗ thành công.</span>
+                    </div>
+                </div>
+
+                <div class="glass-card p-6 rounded-[2.5rem] space-y-5">
+                    <h3 class="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center gap-2 text-rose-400">
+                        <i class="fas fa-circle-exclamation"></i> Quy định phạt hủy lịch
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div class="p-3.5 bg-rose-950/20 border border-rose-500/10 rounded-xl space-y-2">
+                            <span class="text-xs font-bold text-rose-300 block">Hủy trước dưới 2 tiếng</span>
+                            <div class="relative">
+                                <input type="number" value="50" class="w-full pl-4 pr-10 py-2 bg-[#090d16] border border-gray-800 rounded-lg text-sm text-white outline-none focus:border-rose-500">
+                                <span class="absolute right-4 top-2 text-sm font-bold text-gray-500">%</span>
+                            </div>
+                            <span class="text-[10px] text-gray-600 block">Khách hàng bị trừ 50% tiền cọc giữ chỗ.</span>
+                        </div>
+
+                        <div class="p-3.5 bg-gray-800/20 border border-gray-800 rounded-xl space-y-2">
+                            <span class="text-xs font-bold text-gray-400 block">Hủy trước trên 12 tiếng</span>
+                            <div class="relative">
+                                <input type="number" value="0" class="w-full pl-4 pr-10 py-2 bg-[#090d16] border border-gray-800 rounded-lg text-sm text-white outline-none">
+                                <span class="absolute right-4 top-2 text-sm font-bold text-gray-500">%</span>
+                            </div>
+                            <span class="text-[10px] text-gray-600 block">Hoàn trả tiền cọc toàn bộ (0% phí phạt).</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+</body>
+</html>

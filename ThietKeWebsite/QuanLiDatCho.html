@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Đơn Đặt Chỗ | Co-Lab Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0b0f19;
+        }
+        .glass-card {
+            background: rgba(17, 24, 39, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+    </style>
+</head>
+<body class="text-gray-100 min-h-screen flex overflow-hidden">
+
+    <aside class="w-80 bg-[#090d16] border-r border-gray-800/60 p-6 flex flex-col justify-between hidden xl:flex flex-shrink-0 h-screen">
+        <div>
+            <div class="flex items-center gap-3.5 px-3 mb-10">
+                <div class="w-11 h-11 bg-gradient-to-tr from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                    <i class="fas fa-calendar-check text-xl"></i>
+                </div>
+                <div>
+                    <span class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">Co-Lab Desk</span>
+                    <span class="block text-[10px] text-indigo-400 font-bold tracking-widest uppercase mt-0.5">Booking Center</span>
+                </div>
+            </div>
+
+            <nav class="space-y-1">
+                <a href="#" class="flex items-center gap-4 py-3 px-4 rounded-xl text-gray-400 hover:bg-gray-800/40 transition text-sm">
+                    <i class="fas fa-chart-pie"></i> Tổng quan chung
+                </a>
+                <a href="#" class="flex items-center gap-4 py-3.5 px-4 rounded-2xl bg-indigo-600/10 text-indigo-400 font-bold border border-indigo-500/20 shadow-lg text-sm">
+                    <i class="fas fa-receipt text-lg"></i> Quản lý đơn đặt chỗ
+                </a>
+                <a href="#" class="flex items-center gap-4 py-3 px-4 rounded-xl text-gray-400 hover:bg-gray-800/40 transition text-sm">
+                    <i class="fas fa-map-location-dot"></i> Sơ đồ mặt bằng 2D
+                </a>
+            </nav>
+        </div>
+    </aside>
+
+    <main class="flex-1 p-6 lg:p-10 h-screen overflow-y-auto w-full">
+        
+        <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
+            <div>
+                <h1 class="text-3xl font-black text-white tracking-tight">Sổ Đăng Ký Đặt Phòng & Chỗ</h1>
+                <p class="text-sm text-gray-400 mt-1">Quản lý trạng thái sử dụng không gian, duyệt check-in/out thực tế cho khách hàng.</p>
+            </div>
+            
+            <button class="px-5 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/20 flex items-center gap-2.5 transition">
+                <i class="fas fa-qrcode text-base"></i> Quét Mã Check-in
+            </button>
+        </header>
+
+        <div class="flex flex-wrap items-center gap-2 mb-6 border-b border-gray-800 pb-4">
+            <button class="px-4 py-2 bg-gray-800 text-white text-xs font-bold rounded-xl border border-gray-700/60">Tất cả đơn (420)</button>
+            <button class="px-4 py-2 text-amber-400 hover:bg-amber-500/5 text-xs font-bold rounded-xl transition">Chờ nhận chỗ (12)</button>
+            <button class="px-4 py-2 text-emerald-400 hover:bg-emerald-500/5 text-xs font-bold rounded-xl transition">Đang sử dụng (24)</button>
+            <button class="px-4 py-2 text-gray-400 hover:bg-gray-800/40 text-xs font-bold rounded-xl transition">Đã hoàn thành (380)</button>
+            <button class="px-4 py-2 text-rose-400 hover:bg-rose-500/5 text-xs font-bold rounded-xl transition">Đã hủy lịch (4)</button>
+        </div>
+
+        <div class="glass-card rounded-[2.5rem] border border-gray-800 overflow-hidden">
+            
+            <div class="p-6 bg-[#090d16]/50 border-b border-gray-800/60 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="relative w-full sm:w-80">
+                    <span class="absolute left-4 top-3 text-gray-500 text-xs"><i class="fas fa-search"></i></span>
+                    <input type="text" placeholder="Tìm tên khách, mã đơn, số ghế..." class="w-full pl-10 pr-4 py-2 bg-[#0b0f19] border border-gray-800 rounded-xl text-xs text-gray-300 outline-none focus:border-indigo-500">
+                </div>
+                <span class="text-xs font-bold text-gray-500 font-mono">Cơ sở hiển thị: Quận 1</span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-[#090d16]/30 border-b border-gray-800 text-[11px] font-black uppercase tracking-wider text-gray-500">
+                            <th class="p-5">Mã Đơn / Khách Hàng</th>
+                            <th class="p-5">Loại Không Gian</th>
+                            <th class="p-5">Vị Trí Cụ Thể (2D ID)</th>
+                            <th class="p-5">Khung Thời Gian Đặt</th>
+                            <th class="p-5 text-center">Trạng Thái</th>
+                            <th class="p-5 text-right">Thao Tác Lễ Tân</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-800/40 text-sm text-gray-300">
+                        
+                        <tr class="hover:bg-gray-800/10 transition">
+                            <td class="p-5">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-mono text-xs font-bold">BK</div>
+                                    <div>
+                                        <span class="font-bold text-white block font-mono text-xs">#COLAB-9831</span>
+                                        <span class="text-xs text-gray-400">Lê Văn Thành • 0912.xxx.xxx</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="p-5">
+                                <span class="px-2.5 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold rounded-lg"><i class="fas fa-couch text-[10px] mr-1.5"></i>Hot Desk (Ghế tự do)</span>
+                            </td>
+                            <td class="p-5">
+                                <span class="font-mono font-bold text-white bg-gray-800 px-2 py-1 rounded text-xs border border-gray-700/50">Dãy bàn A - Ghế A01</span>
+                            </td>
+                            <td class="p-5">
+                                <span class="block text-xs font-bold text-gray-300">Hôm nay (08:00 - 17:00)</span>
+                                <span class="block text-[10px] text-gray-500">Thời gian thuê: 9 tiếng</span>
+                            </td>
+                            <td class="p-5 text-center">
+                                <span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-full inline-block">Đang sử dụng</span>
+                            </td>
+                            <td class="p-5 text-right">
+                                <button class="px-3 py-1.5 bg-gray-800 hover:bg-rose-600/20 text-gray-300 hover:text-rose-400 rounded-lg text-xs font-bold border border-gray-700 transition">
+                                    <i class="fas fa-right-from-bracket mr-1"></i> Check-out
+                                </button>
+                            </td>
+                        </tr>
+
+                        <tr class="hover:bg-gray-800/10 transition">
+                            <td class="p-5">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center font-mono text-xs font-bold">BK</div>
+                                    <div>
+                                        <span class="font-bold text-white block font-mono text-xs">#COLAB-9832</span>
+                                        <span class="text-xs text-gray-400">Cty Công Nghệ ABC (12 người)</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="p-5">
+                                <span class="px-2.5 py-1 bg-violet-500/10 border border-violet-500/20 text-violet-400 text-xs font-bold rounded-lg"><i class="fas fa-door-open text-[10px] mr-1.5"></i>Phòng Họp Alpha</span>
+                            </td>
+                            <td class="p-5">
+                                <span class="font-mono font-bold text-white bg-gray-800 px-2 py-1 rounded text-xs border border-gray-700/50">Tầng 1 - ROOM-01</span>
+                            </td>
+                            <td class="p-5">
+                                <span class="block text-xs font-bold text-gray-300">Hôm nay (14:00 - 16:00)</span>
+                                <span class="block text-[10px] text-indigo-400 font-bold"><i class="fas fa-clock text-[9px] mr-1"></i>Sắp đến (Còn 2 tiếng)</span>
+                            </td>
+                            <td class="p-5 text-center">
+                                <span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 text-xs font-bold rounded-full inline-block">Chờ nhận chỗ</span>
+                            </td>
+                            <td class="p-5 text-right space-x-1">
+                                <button class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold shadow-md transition">
+                                    <i class="fas fa-user-check mr-1"></i> Cho nhận phòng
+                                </button>
+                                <button class="p-1.5 bg-gray-800/50 text-gray-500 hover:text-rose-400 rounded-lg transition" title="Hủy đơn hoặc đổi lịch"><i class="fas fa-ellipsis-v text-xs px-1"></i></button>
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <div class="mt-6 p-4 bg-indigo-950/20 border border-indigo-500/10 rounded-2xl text-xs text-indigo-300 leading-relaxed">
+            <i class="fas fa-circle-info text-indigo-400 mr-1"></i>
+            <strong>Nguyên lý kết nối bảng dữ liệu (Database Relationship):</strong> Mỗi bản ghi đặt lịch sẽ lưu thông tin trong bảng `Bookings`. Khi bấm nút **"Cho nhận phòng / Check-in"**, hệ thống sẽ thực hiện đồng thời 2 lệnh: 
+            (1) Đổi trạng thái đơn hàng `bookings.status = 'active'`, 
+            (2) Đổi trạng thái tọa độ ghế trên sơ đồ 2D `desks.status = 'occupied'` để chặn không cho khách khác đặt trùng vào khung giờ đó.
+        </div>
+
+    </main>
+
+</body>
+</html>

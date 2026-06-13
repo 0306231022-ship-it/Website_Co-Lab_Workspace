@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thiết Kế Sơ Đồ Tọa Độ 2D | Co-Lab Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0b0f19;
+        }
+        /* Tạo lưới Grid tọa độ vô hạn giống các phần mềm thiết kế */
+        .blueprint-grid {
+            background-size: 30px 30px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-color: #070a12;
+        }
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+<body class="text-gray-100 min-h-screen flex overflow-hidden">
+
+    <aside class="w-20 bg-[#090d16] border-r border-gray-800/60 flex flex-col items-center py-6 justify-between flex-shrink-0 h-screen">
+        <div class="space-y-6 flex flex-col items-center">
+            <a href="#" class="w-12 h-12 rounded-xl bg-gray-800/50 hover:bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white transition group relative">
+                <i class="fas fa-arrow-left"></i>
+                <span class="absolute left-24 px-2 py-1 bg-gray-900 text-[10px] font-bold rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-50">Cấu hình chi tiết</span>
+            </a>
+            
+            <hr class="w-8 border-gray-800">
+
+            <button class="w-12 h-12 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-600/30 group relative">
+                <i class="fas fa-mouse-pointer"></i>
+                <span class="absolute left-24 px-2 py-1 bg-gray-900 text-[10px] font-bold rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-50">Chọn & Di chuyển</span>
+            </button>
+
+            <button class="w-12 h-12 rounded-xl bg-gray-800/40 text-gray-400 hover:text-gray-200 flex items-center justify-center group relative border border-gray-800/60">
+                <i class="fas fa-couch text-sm"></i>
+                <span class="absolute left-24 px-2 py-1 bg-gray-900 text-[10px] font-bold rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-50">+ Thêm Ghế Đơn</span>
+            </button>
+
+            <button class="w-12 h-12 rounded-xl bg-gray-800/40 text-gray-400 hover:text-gray-200 flex items-center justify-center group relative border border-gray-800/60">
+                <i class="fas fa-door-open text-sm"></i>
+                <span class="absolute left-24 px-2 py-1 bg-gray-900 text-[10px] font-bold rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-50">+ Vẽ Phòng Họp</span>
+            </button>
+
+            <button class="w-12 h-12 rounded-xl bg-gray-800/40 text-gray-400 hover:text-gray-200 flex items-center justify-center group relative border border-gray-800/60">
+                <i class="fas fa-border-top-left text-sm"></i>
+                <span class="absolute left-24 px-2 py-1 bg-gray-900 text-[10px] font-bold rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-50">Khu vực (Zone)</span>
+            </button>
+        </div>
+
+        <div class="space-y-3 flex flex-col items-center">
+            <button class="w-10 h-10 rounded-lg bg-gray-800/40 text-gray-400 hover:text-white flex items-center justify-center text-xs"><i class="fas fa-plus"></i></button>
+            <button class="w-10 h-10 rounded-lg bg-gray-800/40 text-gray-400 hover:text-white flex items-center justify-center text-xs"><i class="fas fa-minus"></i></button>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-screen relative overflow-hidden">
+        
+        <header class="w-full h-16 border-b border-gray-800/60 px-6 flex items-center justify-between absolute top-0 left-0 z-10 glass-panel">
+            <div class="flex items-center gap-3">
+                <h1 class="font-black text-white text-base tracking-tight">Sơ đồ tọa độ mặt bằng</h1>
+                <span class="text-[10px] font-mono px-2 py-0.5 bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 rounded">Tầng trệt - Cơ sở Q.1</span>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <span class="text-xs text-gray-500 font-mono">Đã lưu: Vừa xong</span>
+                <button class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-indigo-600/20 transition">Xuất bản sơ đồ</button>
+            </div>
+        </header>
+
+        <div class="flex-1 blueprint-grid w-full h-full pt-16 flex items-center justify-center relative select-none">
+            
+            <div class="w-[800px] h-[500px] bg-[#0c1222]/90 border-2 border-indigo-500/30 rounded-3xl p-8 relative shadow-2xl shadow-indigo-950/20">
+                
+                <div class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-mono text-gray-600">Chiều dài: 40m</div>
+                <div class="absolute -left-14 top-1/2 -translate-y-1/2 text-[10px] font-mono text-gray-600 rotate-90">Chiều rộng: 25m</div>
+
+                <div class="absolute top-8 left-8 w-60 h-40 bg-indigo-500/5 border border-indigo-500/40 rounded-2xl p-4 flex flex-col justify-between group cursor-pointer hover:border-indigo-400 transition">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-xs font-bold text-white block">Phòng Họp Alpha</span>
+                            <span class="text-[10px] text-indigo-400 font-mono">ID: ROOM-01 • X:30, Y:30</span>
+                        </div>
+                        <span class="text-[10px] px-1.5 py-0.5 bg-indigo-500/10 text-indigo-300 rounded font-bold">12 Chỗ</span>
+                    </div>
+                    <div class="text-[10px] text-gray-500 flex items-center gap-2">
+                        <i class="fas fa-tv"></i> <i class="fas fa-chalkboard"></i> <i class="fas fa-wifi"></i>
+                    </div>
+                </div>
+
+                <div class="absolute bottom-8 left-8 space-y-4">
+                    <span class="text-[11px] font-black uppercase tracking-wider text-gray-500 block">Dãy bàn Hotdesk A</span>
+                    
+                    <div class="grid grid-cols-4 gap-3">
+                        <div class="w-11 h-11 bg-rose-500/10 border border-rose-500/40 text-rose-400 rounded-xl flex flex-col items-center justify-center text-[10px] font-mono font-bold cursor-not-allowed group relative">
+                            <span>A01</span>
+                            <span class="absolute -bottom-8 px-2 py-0.5 bg-gray-950 text-[9px] rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap text-gray-400 z-50 border border-gray-800">Đang sử dụng</span>
+                        </div>
+                        <div class="w-11 h-11 bg-emerald-500/10 border border-emerald-500/40 text-emerald-400 rounded-xl flex flex-col items-center justify-center text-[10px] font-mono font-bold cursor-pointer hover:bg-emerald-500/20 transition">
+                            <span>A02</span>
+                        </div>
+                        <div class="w-11 h-11 bg-emerald-500/10 border border-emerald-500/40 text-emerald-400 rounded-xl flex flex-col items-center justify-center text-[10px] font-mono font-bold cursor-pointer hover:bg-emerald-500/20 transition">
+                            <span>A03</span>
+                        </div>
+                        <div class="w-11 h-11 bg-amber-500/10 border border-amber-500/40 text-amber-400 rounded-xl flex flex-col items-center justify-center text-[10px] font-mono font-bold cursor-pointer hover:bg-amber-500/20 transition">
+                            <i class="fas fa-wrench text-[9px]"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="absolute top-8 right-8 w-48 h-48 bg-violet-500/5 border border-violet-500/30 rounded-2xl p-4 flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-white block">Studio Thu Âm</span>
+                        <span class="text-[10px] text-violet-400 font-mono">ID: STD-02</span>
+                    </div>
+                    <span class="w-max text-[9px] px-1.5 py-0.5 bg-violet-500/10 text-violet-300 rounded font-bold">Cách âm chuyên sâu</span>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="w-72 glass-panel rounded-2xl p-5 absolute bottom-6 right-6 z-10 space-y-4">
+            <h3 class="text-xs font-black uppercase tracking-wider text-gray-400 flex items-center gap-2">
+                <i class="fas fa-circle-info text-indigo-400"></i> Thuộc tính phần tử chọn
+            </h3>
+            
+            <div class="bg-[#090d16]/80 p-3 rounded-xl border border-gray-800 space-y-2.5">
+                <div class="flex justify-between items-center text-xs">
+                    <span class="text-gray-500">Loại đối tượng:</span>
+                    <span class="font-bold text-white">Chỗ ngồi cá nhân</span>
+                </div>
+                <div class="flex justify-between items-center text-xs">
+                    <span class="text-gray-500">Mã hiển thị:</span>
+                    <span class="font-mono text-indigo-400 font-bold">Mã ghế: A01</span>
+                </div>
+                <hr class="border-gray-800">
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                        <span class="text-gray-500 block mb-1 text-[10px] uppercase">Tọa độ X</span>
+                        <input type="number" value="120" class="w-full px-2 py-1.5 bg-[#0b0f19] border border-gray-800 rounded font-mono text-white outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <span class="text-gray-500 block mb-1 text-[10px] uppercase">Tọa độ Y</span>
+                        <input type="number" value="340" class="w-full px-2 py-1.5 bg-[#0b0f19] border border-gray-800 rounded font-mono text-white outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex gap-2">
+                <button class="flex-1 py-2 bg-gray-800 text-gray-400 text-xs font-bold rounded-lg hover:text-white transition">Xóa vị trí</button>
+                <button class="flex-1 py-2 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-500 transition">Cập nhật tọa độ</button>
+            </div>
+        </div>
+
+    </main>
+
+</body>
+</html>

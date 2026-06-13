@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trạm Quét Mã Check-in | Co-Lab OS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0b0f19;
+        }
+        .glass-card {
+            background: rgba(17, 24, 39, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        /* Hiệu ứng tia laser chạy quét mã QR */
+        @keyframes laser-scan {
+            0% { top: 10%; }
+            50% { top: 90%; }
+            100% { top: 10%; }
+        }
+        .laser-line {
+            animation: laser-scan 3s infinite linear;
+        }
+    </style>
+</head>
+<body class="text-gray-100 min-h-screen flex overflow-hidden">
+
+    <aside class="w-80 bg-[#090d16] border-r border-gray-800/60 p-6 flex flex-col justify-between hidden xl:flex flex-shrink-0 h-screen">
+        <div>
+            <div class="flex items-center gap-3.5 px-3 mb-10">
+                <div class="w-11 h-11 bg-gradient-to-tr from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                    <i class="fas fa-qrcode text-xl"></i>
+                </div>
+                <div>
+                    <span class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">Co-Lab Access</span>
+                    <span class="block text-[10px] text-indigo-400 font-bold tracking-widest uppercase mt-0.5">Gate Controller</span>
+                </div>
+            </div>
+            <nav class="space-y-1">
+                <a href="#" class="flex items-center gap-4 py-3 px-4 rounded-xl text-gray-400 hover:bg-gray-800/40 transition text-sm">
+                    <i class="fas fa-arrow-left"></i> Quay lại Đơn đặt chỗ
+                </a>
+                <a href="#" class="flex items-center gap-4 py-3.5 px-4 rounded-2xl bg-indigo-600/10 text-indigo-400 font-bold border border-indigo-500/20 shadow-lg text-sm">
+                    <i class="fas fa-camera text-lg"></i> Trạm quét QR Code
+                </a>
+            </nav>
+        </div>
+    </aside>
+
+    <main class="flex-1 p-6 lg:p-10 h-screen overflow-y-auto w-full flex flex-col">
+        
+        <header class="mb-8">
+            <h1 class="text-3xl font-black text-white tracking-tight">Hệ Thống Check-in Tự Động</h1>
+            <p class="text-sm text-gray-400 mt-1">Đưa mã QR trên ứng dụng điện thoại của khách hàng vào vùng quét để xác thực quyền truy cập.</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1">
+            
+            <div class="lg:col-span-5 flex flex-col justify-between space-y-4">
+                <div class="glass-card p-6 rounded-[2.5rem] flex-1 flex flex-col items-center justify-center relative overflow-hidden bg-black/40 border border-gray-800">
+                    
+                    <div class="w-full aspect-square max-w-[320px] border border-gray-800 rounded-3xl relative flex items-center justify-center bg-[#070a12]">
+                        
+                        <div class="absolute top-4 left-4 w-6 h-6 border-t-4 border-l-4 border-indigo-500 rounded-tl"></div>
+                        <div class="absolute top-4 right-4 w-6 h-6 border-t-4 border-r-4 border-indigo-500 rounded-tr"></div>
+                        <div class="absolute bottom-4 left-4 w-6 h-6 border-b-4 border-l-4 border-indigo-500 rounded-bl"></div>
+                        <div class="absolute bottom-4 right-4 w-6 h-6 border-b-4 border-r-4 border-indigo-500 rounded-br"></div>
+                        
+                        <div class="laser-line absolute left-4 right-4 h-0.5 bg-indigo-500 shadow-lg shadow-indigo-500/80 z-10"></div>
+
+                        <i class="fas fa-qrcode text-8xl text-gray-800/40"></i>
+                    </div>
+
+                    <div class="mt-6 flex items-center gap-2 text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-full font-mono">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> CAMERA ACTIVE • 30 FPS
+                    </div>
+                </div>
+
+                <div class="glass-card p-4 rounded-2xl flex items-center gap-3">
+                    <input type="text" placeholder="Nhập mã đơn thủ công (VD: BK-9831)..." class="flex-1 bg-[#090d16] border border-gray-800 rounded-xl px-4 py-2.5 text-xs text-gray-200 outline-none focus:border-indigo-500 font-mono">
+                    <button class="px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-white font-bold text-xs rounded-xl transition">Tìm kiếm</button>
+                </div>
+            </div>
+
+            <div class="lg:col-span-7">
+                <div class="glass-card p-6 lg:p-8 rounded-[2.5rem] h-full flex flex-col justify-between space-y-6">
+                    
+                    <div>
+                        <h2 class="text-xs font-black uppercase tracking-widest text-gray-400 mb-4 flex items-center gap-2">
+                            <i class="fas fa-id-card text-indigo-400"></i> Thông tin đối chiếu dữ liệu gốc
+                        </h2>
+
+                        <div class="bg-indigo-600/5 border border-indigo-500/20 rounded-3xl p-5 space-y-5">
+                            
+                            <div class="flex items-center gap-4 border-b border-gray-800/80 pb-4">
+                                <img src="https://ui-avatars.com/api/?name=Van+Thanh&background=4f46e5&color=fff" class="w-12 h-12 rounded-xl">
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-white text-base">Lê Văn Thành</span>
+                                        <span class="text-[10px] bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 px-2 py-0.5 rounded font-mono font-bold">Mã: #COLAB-9831</span>
+                                    </div>
+                                    <span class="text-xs text-gray-500 block font-mono">Thành viên phổ thông • 0912.234.xxx</span>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 text-xs font-medium">
+                                <div class="space-y-1">
+                                    <span class="text-gray-500 block">Sản phẩm đặt lịch:</span>
+                                    <span class="text-white block font-bold"><i class="fas fa-couch text-indigo-400 mr-1.5"></i> Hot Desk (Ghế ngồi tự do)</span>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="text-gray-500 block">Vị trí mặt bằng định vị:</span>
+                                    <span class="text-indigo-400 block font-mono font-bold">Khu A — Vị trí bàn đơn A01</span>
+                                </div>
+                                <div class="space-y-1 mt-2">
+                                    <span class="text-gray-500 block">Khung giờ đặt chỗ hợp lệ:</span>
+                                    <span class="text-white block font-bold">Hôm nay (08:00 - 17:00)</span>
+                                </div>
+                                <div class="space-y-1 mt-2">
+                                    <span class="text-gray-500 block">Trạng thái thanh toán phí:</span>
+                                    <span class="text-emerald-400 block font-bold"><i class="fas fa-circle-check text-[10px] mr-1"></i> Đã thanh toán qua VNPay</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="mt-4 p-3 bg-amber-500/5 border border-amber-500/10 text-amber-500/90 rounded-xl text-xs flex items-center gap-2">
+                            <i class="fas fa-circle-exclamation text-xs"></i>Khách hàng đến đúng khung giờ đăng ký. Luồng Check-in đủ điều kiện kích hoạt.
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3 pt-4 border-t border-gray-800">
+                        <button type="button" class="px-5 py-3 border border-gray-800 text-gray-400 hover:text-white rounded-xl text-xs font-bold hover:bg-gray-800/40 transition">Từ chối truy cập</button>
+                        
+                        <button type="button" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition">
+                            <i class="fas fa-door-open"></i> Phê Duyệt Check-in & Mở Khóa Chỗ Ngồi
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+</body>
+</html>
