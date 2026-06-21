@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giao diện Thêm Chi nhánh - Co-Lab Admin</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 font-sans antialiased text-gray-800 h-screen overflow-hidden flex flex-col">
+<div id="edit-category-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-950/40 backdrop-blur-xs"></div>
+    
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-2xl w-full max-w-md overflow-hidden relative z-10 flex flex-col max-h-[90vh]">
+        
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div class="flex items-center space-x-2.5">
+                <div class="w-8 h-8 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center text-sm">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900">Chỉnh sửa danh mục ghế</h3>
+                    <p class="text-[11px] text-slate-400 font-medium">Cập nhật thông tin phân loại danh mục hệ thống</p>
+                </div>
+            </div>
+            <button type="button" class="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer">
+                <i class="fa-solid fa-xmark text-base"></i>
+            </button>
+        </div>
+        
+        <form id="edit-category-form" class="flex flex-col flex-1 overflow-y-auto">
+            <div class="p-6 space-y-4 flex-1">
+                
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wide flex items-center gap-1">
+                        Mã danh mục (ID_DANHMUC)
+                    </label>
+                    <div class="relative flex items-center">
+                        <input type="text" readonly value="1"
+                               class="w-full text-xs font-mono font-bold px-3.5 py-2.5 bg-slate-100/80 border border-slate-200 text-slate-500 rounded-xl cursor-not-allowed tracking-wider">
+                        <span class="absolute right-3.5 text-[10px] bg-slate-200 text-slate-600 font-bold px-1.5 py-0.5 rounded font-sans flex items-center gap-1">
+                            <i class="fa-solid fa-lock text-[9px]"></i> Khóa chính PK
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="space-y-1.5">
+                    <label for="edit-ten-danh-muc" class="text-xs font-bold text-slate-600 uppercase tracking-wide flex items-center gap-1">
+                        Tên danh mục ghế (TEN_DANHMUC) <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="text" id="edit-ten-danh-muc" required maxlength="255" value="Ghế Công thái học (Ergonomic)" 
+                           class="w-full text-sm px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl shadow-3xs focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100 transition-all font-medium text-slate-800">
+                    <div class="flex justify-between items-center text-[10px] text-slate-400 font-medium">
+                        <span>Giới hạn tối đa 255 ký tự.</span>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label for="edit-trang-thai" class="text-xs font-bold text-slate-600 uppercase tracking-wide flex items-center gap-1">
+                        Trạng thái danh mục (TRANG_THAI)
+                    </label>
+                    <select id="edit-trang-thai" class="w-full text-sm px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl shadow-3xs focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100 transition-all font-medium text-slate-700">
+                        <option value="1" selected>1 - Cho phép hoạt động (Active)</option>
+                        <option value="0">0 - Tạm khóa / Bảo trì (Inactive)</option>
+                    </select>
+                </div>
+
+                <div class="bg-amber-50/60 border border-amber-100 rounded-xl p-3 flex items-start gap-2.5">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-600 text-xs mt-0.5"></i>
+                    <div class="space-y-0.5">
+                        <span class="text-[10px] font-bold text-amber-800 uppercase tracking-wide block">Lưu ý hệ thống</span>
+                        <p class="text-[11px] text-slate-500 font-medium leading-relaxed">
+                            Nếu bạn chuyển danh mục này sang trạng thái <span class="font-bold text-amber-700">0 - Tạm khóa</span>, toàn bộ các ghế thuộc danh mục này trên sơ đồ sẽ tự động ẩn khỏi giao diện đặt chỗ của khách hàng.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+            
+            <div class="px-6 py-3.5 border-t border-slate-100 bg-slate-50/50 flex items-center justify-end space-x-2 shrink-0">
+                <button type="button" class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-600 text-xs font-bold rounded-xl border border-slate-200 transition-all cursor-pointer">
+                    Hủy bỏ
+                </button>
+                <button type="submit" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl border border-amber-500 transition-all shadow-md shadow-amber-100 cursor-pointer">
+                    <i class="fa-solid fa-check mr-1"></i> Lưu thay đổi
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Co-lab Workspace - Chi tiết hóa đơn</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Inter", "sans-serif"], mono: ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "monospace"] },
+          colors: {
+            brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 900: '#1e3a8a' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .custom-scrollbar:hover::-webkit-scrollbar-thumb { background: #94a3b8; }
+    
+    /* Hiệu ứng viền giấy đứt nét cho phần dưới cùng của hóa đơn */
+    .receipt-edge {
+      background-image: linear-gradient(to right, #cbd5e1 50%, rgba(255,255,255,0) 0%);
+      background-position: bottom;
+      background-size: 10px 1px;
+      background-repeat: repeat-x;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans antialiased flex h-screen overflow-hidden">
+
+  <!-- SIDEBAR (Giữ nguyên) -->
+  <aside class="w-72 bg-white border-r border-slate-200 shadow-sm flex flex-col justify-between h-full z-20 hidden md:flex">
+     <!-- Logo & Branding -->
+       <div class="px-8 pt-8 pb-6 border-b border-slate-100">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-gradient-to-br from-brand-500 to-brand-600 text-white rounded-xl flex items-center justify-center font-bold text-xl shadow-lg shadow-brand-500/30">
+          <i class="fa-solid fa-layer-group"></i>
+        </div>
+        <div>
+          <h1 class="font-extrabold text-xl tracking-tight text-slate-900">Co-lab<span class="text-brand-500">.</span></h1>
+          <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-widest">Workspace</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex-1 overflow-y-auto pt-6 px-4 custom-scrollbar">
+      <div class="mb-6">
+        <p class="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Khám phá</p>
+        <nav class="space-y-1.5">
+          <a href="#" class="flex items-center justify-between px-4 py-3 bg-brand-50 text-brand-600 rounded-xl relative group transition-all duration-300">
+            <div class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-brand-600 rounded-r-md"></div>
+            <div class="flex items-center gap-3 font-semibold">
+              <i class="fa-solid fa-house w-5 text-center text-lg"></i>
+              <span>Trang chủ</span>
+            </div>
+          </a>
+
+       
+        </nav>
+      </div>
+         <div class="mb-6">
+        <p class="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Cá nhân</p>
+        <nav class="space-y-1.5">
+          <a href="#" class="flex items-center justify-between px-4 py-3 bg-brand-50 text-brand-600 rounded-xl relative group transition-all duration-300">
+            <div class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-brand-600 rounded-r-md"></div>
+            <div class="flex items-center gap-3 font-semibold">
+             <i class="fa-solid fa-id-card"></i>
+              <span>Thông tin cá nhân</span>
+            </div>
+          </a>
+          <a href="#" class="flex items-center justify-between px-4 py-3 bg-brand-50 text-brand-600 rounded-xl relative group transition-all duration-300">
+  <div class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-brand-600 rounded-r-md"></div>
+  
+  <!-- Phần chữ và Icon bên trái -->
+  <div class="flex items-center gap-3 font-semibold">
+    <i class="fa-solid fa-clock-rotate-left w-5 text-center text-lg"></i>
+    <span>Lịch sử đặt lịch</span>
+  </div>
+
+  <!-- Badge số lượng bên phải -->
+  <span class="bg-brand-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+    12
+  </span>
+</a>
+        <a href="#" class="flex items-center justify-between px-4 py-3 bg-brand-50 text-brand-600 rounded-xl relative group transition-all duration-300">
+  <div class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-brand-600 rounded-r-md"></div>
+  
+  <!-- Phần chữ và Icon bên trái -->
+  <div class="flex items-center gap-3 font-semibold">
+  <i class="fas fa-envelope"></i>
+    <span>Thông báo</span>
+  </div>
+
+  <!-- Badge số lượng bên phải -->
+  <span class="bg-brand-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+    12
+  </span>
+</a>
+
+
+       
+        </nav>
+      </div>
+    </div>
+
+    <!-- KHU VỰC ĐĂNG NHẬP ĐƯỢC LÀM GỌN LẠI -->
+    <div class="p-3 m-4 bg-slate-50 rounded-xl border border-slate-200 text-center shadow-sm">
+      <h4 class="text-xs font-bold text-slate-800 flex items-center justify-center gap-1.5 mb-1">
+        <i class="fa-solid fa-lock text-brand-500"></i> Trải nghiệm đầy đủ
+      </h4>
+      <p class="text-[10px] text-slate-500 mb-3 px-1 leading-tight">Đăng nhập để xem sơ đồ và tiến hành đặt chỗ.</p>
+      
+      <!-- Đưa 2 nút lên cùng một hàng nằm ngang (Side-by-side) -->
+      <div class="flex gap-2">
+        <button class="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-semibold py-1.5 rounded-lg text-xs transition shadow-sm">
+          Đăng nhập
+        </button>
+        <button class="flex-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-semibold py-1.5 rounded-lg text-xs transition">
+          Đăng ký
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="flex-1 overflow-y-auto relative custom-scrollbar">
+    
+    <!-- TOP HEADER & ACTIONS -->
+    <header class="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center px-8 sticky top-0 z-10 justify-between">
+    <h2 class="text-lg font-bold text-slate-800">Khám phá không gian</h2>
+      <div class="flex gap-3">
+         <span class="text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full flex items-center gap-2">
+           <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Hệ thống hoạt động bình thường
+         </span>
+      </div>
+    </header>
+<div class=" px-4 py-4 flex items-center justify-between w-full">
+  <div class="flex items-center gap-4">
+    <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-brand-600 transition">
+      <i class="fa-solid fa-arrow-left text-sm"></i>
+    </button>
+    <h2 class="text-lg font-bold text-slate-800">Chi tiết Hóa đơn</h2>
+  </div>
+
+  <div class="flex gap-3">
+    <button class="px-4 py-2 bg-white border border-slate-200 text-slate-600 text-sm font-semibold rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 shadow-sm">
+      <i class="fa-solid fa-download"></i> Tải PDF
+    </button>
+    <button class="px-4 py-2 bg-brand-600 text-white text-sm font-semibold rounded-lg hover:bg-brand-700 transition-colors flex items-center gap-2 shadow-sm shadow-brand-500/30">
+      <i class="fa-solid fa-print"></i> In Hóa đơn
+    </button>
+  </div>
+</div>
+    <div class="p-8 max-w-4xl mx-auto pb-20">
+      
+      <!-- INVOICE PAPER CARD -->
+      <div class="bg-white rounded-md shadow-lg border border-slate-200 overflow-hidden relative">
+        <!-- Stripe top -->
+         
+        <div class="h-2 w-full bg-brand-600"></div>
+
+        <div class="p-10 md:p-14">
+          
+          <!-- Hóa đơn Header -->
+          <div class="flex flex-col md:flex-row justify-between items-start mb-12 gap-8">
+            <!-- Company Info -->
+            <div>
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-brand-600 text-white rounded-lg flex items-center justify-center font-bold text-xl">
+                  <i class="fa-solid fa-layer-group"></i>
+                </div>
+                <h1 class="font-extrabold text-2xl tracking-tight text-slate-900">Co-lab Workspace</h1>
+              </div>
+              <p class="text-sm text-slate-500 leading-relaxed">
+                123 Nguyễn Đình Chiểu, Phường 6, Quận 3<br>
+                Thành phố Hồ Chí Minh, Việt Nam<br>
+               website: www.co-labworkspace.com<br>
+            
+              </p>
+            </div>
+
+            <!-- Invoice Title & Meta -->
+            <div class="md:text-right">
+              <h2 class="text-3xl font-black text-slate-200 tracking-widest uppercase mb-2">Hóa đơn</h2>
+              <p class="text-sm font-bold text-slate-800 mb-1">Mã hóa đơn: <span class="font-mono font-normal">INV-2026-88921</span></p>
+              <p class="text-sm text-slate-500">Ngày lập: 19/06/2026</p>
+              <div class="mt-4 inline-flex items-center gap-2 bg-emerald-50 text-emerald-600 border border-emerald-200 px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider">
+                <i class="fa-solid fa-check"></i> Đã thanh toán
+              </div>
+            </div>
+          </div>
+
+          <!-- Thông tin 2 bên (Khách hàng & Đặt lịch) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12 border-t border-b border-slate-100 py-8">
+            <!-- Cột trái: Khách hàng -->
+            <div>
+              <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Thông tin khách hàng</h3>
+              <p class="text-base font-bold text-slate-800 mb-1">Nguyễn Sinh Viên</p>
+              <p class="text-sm text-slate-500 mb-1">Email: nguyensinhvien@gmail.com</p>
+            </div>
+            
+            <!-- Cột phải: Thông tin Giao dịch -->
+            <div>
+              <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Thông tin giao dịch</h3>
+              <table class="w-full text-sm">
+                <tbody>
+                  <tr>
+                    <td class="text-slate-500 py-1">Mã đặt chỗ:</td>
+                    <td class="text-slate-800 font-bold text-right font-mono">#CL-88921</td>
+                  </tr>
+                  <tr>
+                    <td class="text-slate-500 py-1">Phương thức thanh toán:</td>
+                    <td class="text-slate-800 font-bold text-right">VNPay</td>
+                  </tr>
+                  <tr>
+                    <td class="text-slate-500 py-1">Mã giao dịch VNPay:</td>
+                    <td class="text-slate-800 font-medium text-right font-mono text-xs">VNP20260619XYZ</td>
+                  </tr>
+                  <tr>
+                    <td class="text-slate-500 py-1">Thời gian thanh toán:</td>
+                    <td class="text-slate-800 font-medium text-right">14:05 - 19/06/2026</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Bảng Chi tiết dịch vụ -->
+          <div class="mb-10">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider border-y border-slate-200">
+                  <th class="py-3 px-4 font-bold">Mô tả dịch vụ</th>
+                  <th class="py-3 px-4 font-bold text-center">Thời lượng</th>
+                  <th class="py-3 px-4 font-bold text-right">Đơn giá</th>
+                  <th class="py-3 px-4 font-bold text-right">Thành tiền</th>
+                </tr>
+              </thead>
+              <tbody class="text-sm">
+                <tr class="border-b border-slate-100">
+                  <td class="py-4 px-4">
+                    <p class="font-bold text-slate-800">Gói thuê chỗ ngồi cá nhân</p>
+                    <p class="text-xs text-slate-500 mt-1">Vị trí: Bàn A-01, Khu làm việc mở (Zone A)</p>
+                    <p class="text-xs text-slate-500">Thời gian: 08:00 - 12:00, Ngày 20/06/2026</p>
+                  </td>
+                  <td class="py-4 px-4 text-center font-medium text-slate-600">4 giờ</td>
+                  <td class="py-4 px-4 text-right font-medium text-slate-600">30.000đ</td>
+                  <td class="py-4 px-4 text-right font-bold text-slate-800">120.000đ</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Phần Tổng tiền -->
+          <div class="flex justify-end">
+            <div class="w-full md:w-1/2 lg:w-2/5">
+              <div class="space-y-3 text-sm">
+                <div class="flex justify-between items-center text-slate-600 px-4">
+                  <span>Tổng tiền dịch vụ:</span>
+                  <span class="font-medium">120.000đ</span>
+                </div>
+                <!-- Bỏ VAT và Mã giảm giá theo yêu cầu -->
+                <div class="flex justify-between items-center bg-brand-50 px-4 py-3 rounded-lg border border-brand-100">
+                  <span class="text-brand-900 font-extrabold text-base">TỔNG CỘNG:</span>
+                  <span class="text-brand-600 font-extrabold text-xl">120.000đ</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer của hóa đơn -->
+          <div class="mt-16 pt-8 receipt-edge text-center">
+            <i class="fa-solid fa-heart text-rose-500 mb-2"></i>
+            <p class="text-sm font-bold text-slate-800">Cảm ơn bạn đã lựa chọn Co-lab Workspace!</p>
+            <p class="text-xs text-slate-400 mt-1">Hóa đơn điện tử này có giá trị lưu hành nội bộ và xác nhận dịch vụ hợp lệ.</p>
+          </div>
+
+        </div>
+      </div>
+      
+    </div>
+  </main>
+
+</body>
+</html>

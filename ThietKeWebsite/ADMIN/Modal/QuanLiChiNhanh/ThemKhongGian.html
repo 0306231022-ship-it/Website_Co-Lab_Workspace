@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giao diện Thêm Không gian - Co-Lab Admin</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 font-sans antialiased text-gray-800 h-screen flex items-center justify-center p-4">
+
+    <div id="modal-them-khong-gian" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        
+        <div class="bg-white w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden border border-gray-100 flex flex-col">
+            
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-lg border border-indigo-100">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-extrabold text-gray-900 leading-tight">Thêm không gian mới</h2>
+                        <p class="text-xs text-gray-400 font-medium">Thuộc: <span class="text-indigo-600 font-bold">Co-Lab Quận 1</span></p>
+                    </div>
+                </div>
+                <a href="#" class="text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg w-8 h-8 flex items-center justify-center transition-all">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </a>
+            </div>
+
+            <form id="formAddSpace" class="p-6 space-y-6 overflow-y-auto max-h-[calc(100vh-160px)]" enctype="multipart/form-data">
+                
+                <div class="space-y-2">
+                    <label class="block text-xs font-black text-gray-400 uppercase tracking-widest">Tên không gian <span class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-400">
+                            <i class="fa-solid fa-font text-sm"></i>
+                        </span>
+                        <input type="text" name="TEN_KHONG_GIAN" required
+                               placeholder="Ví dụ: Khu vực Creative Zone, Phòng họp M2..." 
+                               class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-gray-900 font-semibold placeholder:text-gray-400 placeholder:font-normal">
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-xs font-black text-gray-400 uppercase tracking-widest">Loại không gian <span class="text-red-500">*</span></label>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        
+                        <label class="relative flex items-start p-4 rounded-xl border border-gray-200 bg-white cursor-pointer transition-all hover:border-indigo-300 has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-50/30 group">
+                            <input type="radio" name="LOAI_KHONG_GIAN" value="chung" class="hidden" checked>
+                            <div class="w-9 h-9 bg-gray-50 text-gray-500 group-hover:bg-indigo-50 group-hover:text-indigo-600 rounded-xl flex items-center justify-center text-base border border-gray-100 shrink-0 transition-colors group-has-[:checked]:bg-indigo-600 group-has-[:checked]:text-white group-has-[:checked]:border-indigo-600">
+                                <i class="fa-solid fa-users-viewfinder"></i>
+                            </div>
+                            <div class="ml-3 pr-4 flex flex-col">
+                                <span class="text-sm font-bold text-gray-700 transition-colors group-has-[:checked]:text-indigo-900">Không gian chung</span>
+                                <span class="text-[11px] text-gray-400 mt-0.5 leading-snug group-has-[:checked]:text-indigo-600/80">Khu vực mở, chỗ ngồi linh hoạt, vãng lai</span>
+                            </div>
+                            <div class="absolute top-4 right-4 text-indigo-600 text-xs opacity-0 scale-50 transition-all group-has-[:checked]:opacity-100 group-has-[:checked]:scale-100">
+                                <i class="fa-solid fa-circle-check text-sm"></i>
+                            </div>
+                        </label>
+
+                        <label class="relative flex items-start p-4 rounded-xl border border-gray-200 bg-white cursor-pointer transition-all hover:border-purple-300 has-[:checked]:border-purple-600 has-[:checked]:bg-purple-50/30 group">
+                            <input type="radio" name="LOAI_KHONG_GIAN" value="thue" class="hidden">
+                            <div class="w-9 h-9 bg-gray-50 text-gray-500 group-hover:bg-purple-50 group-hover:text-purple-600 rounded-xl flex items-center justify-center text-base border border-gray-100 shrink-0 transition-colors group-has-[:checked]:bg-purple-600 group-has-[:checked]:text-white group-has-[:checked]:border-purple-600">
+                                <i class="fa-solid fa-door-open"></i>
+                            </div>
+                            <div class="ml-3 pr-4 flex flex-col">
+                                <span class="text-sm font-bold text-gray-700 transition-colors group-has-[:checked]:text-purple-900">Phòng cho thuê</span>
+                                <span class="text-[11px] text-gray-400 mt-0.5 leading-snug group-has-[:checked]:text-purple-600/80">Phòng họp, văn phòng riêng, khép kín</span>
+                            </div>
+                            <div class="absolute top-4 right-4 text-purple-600 text-xs opacity-0 scale-50 transition-all group-has-[:checked]:opacity-100 group-has-[:checked]:scale-100">
+                                <i class="fa-solid fa-circle-check text-sm"></i>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-xs font-black text-gray-400 uppercase tracking-widest">Hình ảnh không gian <span class="text-red-500">*</span></label>
+                    
+                    <div class="border-2 border-dashed border-gray-200 rounded-xl p-5 bg-gray-50/50 hover:bg-white hover:border-indigo-500 transition-all flex flex-col items-center justify-center text-center group">
+                        <div class="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mb-2.5 group-hover:scale-110 transition-transform duration-300 border border-indigo-100">
+                            <i class="fa-solid fa-cloud-arrow-up text-lg"></i>
+                        </div>
+                        
+                        <p class="text-xs font-bold text-gray-800 mb-1">Click vào nút bên dưới để chọn hình ảnh</p>
+                        <p class="text-[11px] text-gray-400 mb-4">Định dạng hỗ trợ: JPG, PNG, WEBP (Hệ thống chỉ nhận 1 ảnh)</p>
+
+                        <input type="file" name="ANH_KHONG_GIAN" accept="image/*" required
+                               class="text-xs text-gray-500 font-medium max-w-full
+                                      file:mr-3 file:py-2 file:px-4 file:border-0 file:text-xs file:font-bold file:rounded-lg
+                                      file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 file:transition-colors file:cursor-pointer
+                                      focus:outline-none cursor-pointer">
+                    </div>
+                </div>
+
+            </form>
+
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end space-x-3 shrink-0">
+                <button type="button" class="px-5 py-2.5 text-sm font-bold text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-xl transition cursor-pointer">
+                    Hủy bỏ
+                </button>
+                <button type="submit" form="formAddSpace" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition shadow-md shadow-indigo-600/20 flex items-center cursor-pointer">
+                    <i class="fa-solid fa-plus mr-2 text-xs"></i> Khởi tạo ngay
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

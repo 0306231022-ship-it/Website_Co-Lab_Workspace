@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Co-lab Workspace - Thông báo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Inter", "sans-serif"] },
+          colors: {
+            brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 900: '#1e3a8a' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .custom-scrollbar:hover::-webkit-scrollbar-thumb { background: #94a3b8; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased flex h-screen overflow-hidden">
+
+  <aside class="w-72 bg-white border-r border-slate-200 shadow-sm flex flex-col justify-between h-full z-20 hidden md:flex">
+      <!-- Logo & Branding -->
+       <div class="px-8 pt-8 pb-6 border-b border-slate-100">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-gradient-to-br from-brand-500 to-brand-600 text-white rounded-xl flex items-center justify-center font-bold text-xl shadow-lg shadow-brand-500/30">
+          <i class="fa-solid fa-layer-group"></i>
+        </div>
+        <div>
+          <h1 class="font-extrabold text-xl tracking-tight text-slate-900">Co-lab<span class="text-brand-500">.</span></h1>
+          <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-widest">Workspace</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex-1 overflow-y-auto pt-6 px-4 custom-scrollbar">
+      <div class="mb-6">
+        <p class="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Khám phá</p>
+        <nav class="space-y-1.5">
+          <a href="#" class="flex items-center justify-between px-4 py-3 bg-brand-50 text-brand-600 rounded-xl relative group transition-all duration-300">
+            <div class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-brand-600 rounded-r-md"></div>
+            <div class="flex items-center gap-3 font-semibold">
+              <i class="fa-solid fa-house w-5 text-center text-lg"></i>
+              <span>Trang chủ</span>
+            </div>
+          </a>
+
+       
+        </nav>
+      </div>
+         <div class="mb-6">
+        <p class="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Cá nhân</p>
+        <nav class="space-y-1.5">
+          <a href="#" class="flex items-center justify-between px-4 py-3 bg-brand-50 text-brand-600 rounded-xl relative group transition-all duration-300">
+            <div class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-brand-600 rounded-r-md"></div>
+            <div class="flex items-center gap-3 font-semibold">
+             <i class="fa-solid fa-id-card"></i>
+              <span>Thông tin cá nhân</span>
+            </div>
+          </a>
+          <a href="#" class="flex items-center justify-between px-4 py-3 bg-brand-50 text-brand-600 rounded-xl relative group transition-all duration-300">
+  <div class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-brand-600 rounded-r-md"></div>
+  
+  <!-- Phần chữ và Icon bên trái -->
+  <div class="flex items-center gap-3 font-semibold">
+    <i class="fa-solid fa-clock-rotate-left w-5 text-center text-lg"></i>
+    <span>Lịch sử đặt lịch</span>
+  </div>
+
+  <!-- Badge số lượng bên phải -->
+  <span class="bg-brand-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+    12
+  </span>
+</a>
+        <a href="#" class="flex items-center justify-between px-4 py-3 bg-brand-50 text-brand-600 rounded-xl relative group transition-all duration-300">
+  <div class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-brand-600 rounded-r-md"></div>
+  
+  <!-- Phần chữ và Icon bên trái -->
+  <div class="flex items-center gap-3 font-semibold">
+  <i class="fas fa-envelope"></i>
+    <span>Thông báo</span>
+  </div>
+
+  <!-- Badge số lượng bên phải -->
+  <span class="bg-brand-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+    12
+  </span>
+</a>
+
+
+       
+        </nav>
+      </div>
+    </div>
+
+    <!-- KHU VỰC ĐĂNG NHẬP ĐƯỢC LÀM GỌN LẠI -->
+    <div class="p-3 m-4 bg-slate-50 rounded-xl border border-slate-200 text-center shadow-sm">
+      <h4 class="text-xs font-bold text-slate-800 flex items-center justify-center gap-1.5 mb-1">
+        <i class="fa-solid fa-lock text-brand-500"></i> Trải nghiệm đầy đủ
+      </h4>
+      <p class="text-[10px] text-slate-500 mb-3 px-1 leading-tight">Đăng nhập để xem sơ đồ và tiến hành đặt chỗ.</p>
+      
+      <!-- Đưa 2 nút lên cùng một hàng nằm ngang (Side-by-side) -->
+      <div class="flex gap-2">
+        <button class="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-semibold py-1.5 rounded-lg text-xs transition shadow-sm">
+          Đăng nhập
+        </button>
+        <button class="flex-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-semibold py-1.5 rounded-lg text-xs transition">
+          Đăng ký
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="flex-1 overflow-y-auto relative bg-slate-50 custom-scrollbar">
+    
+    <header class="h-16 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center px-8 sticky top-0 z-10 gap-4 justify-between">
+      <h2 class="text-lg font-bold text-slate-800">Khám phá không gian</h2>
+      <div class="flex gap-3">
+         <span class="text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full flex items-center gap-2">
+           <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Hệ thống hoạt động bình thường
+         </span>
+      </div>
+    </header>
+
+    <div class="p-8 max-w-4xl mx-auto space-y-8">
+      
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <nav class="text-sm font-medium text-slate-500 flex items-center gap-2 mb-3">
+            <a href="#" class="hover:text-brand-600 transition">Cá nhân</a>
+            <i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>
+            <span class="text-slate-800 font-bold">Thông báo</span>
+          </nav>
+          <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Thông báo của bạn</h1>
+          <p class="text-sm text-slate-500 mt-1">Cập nhật những thông tin mới nhất về lịch đặt và hệ thống.</p>
+        </div>
+        <button class="text-sm font-semibold text-brand-600 hover:text-brand-700 transition flex items-center gap-2 bg-brand-50 px-4 py-2 rounded-lg border border-brand-100">
+          <i class="fa-solid fa-check-double"></i> Đánh dấu tất cả đã đọc
+        </button>
+      </div>
+
+    
+
+      <div class="space-y-3">
+
+        <div class="p-5 bg-brand-50 border border-brand-100 rounded-2xl flex gap-4 items-start relative hover:shadow-md transition-shadow cursor-pointer group">
+          <div class="absolute top-6 right-14 w-2 h-2 bg-brand-500 rounded-full hidden sm:block"></div>
+          
+          <button class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all opacity-100 sm:opacity-0 group-hover:opacity-100" title="Xóa thông báo này">
+            <i class="fa-regular fa-trash-can text-sm"></i>
+          </button>
+
+          <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center text-amber-500 shadow-sm shrink-0 text-xl border border-amber-100">
+            <i class="fa-regular fa-clock"></i>
+          </div>
+          
+          <div class="flex-1 pr-10">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Lịch sắp tới</span>
+              <span class="text-[10px] text-slate-400">• Vừa xong</span>
+            </div>
+            <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+              Sắp đến giờ sử dụng không gian!
+              <span class="w-2 h-2 bg-brand-500 rounded-full sm:hidden"></span> </h3>
+            <p class="text-sm text-slate-600 mt-1 leading-relaxed">
+              Lịch đặt <strong>#CL-88921</strong> của bạn tại Khu làm việc mở (Zone A) sẽ bắt đầu sau <span class="text-rose-500 font-semibold">30 phút nữa</span>. Nhớ chuẩn bị sẵn mã QR để Check-in nhé!
+            </p>
+            <div class="mt-3">
+              <button class="text-xs font-bold text-brand-600 bg-white border border-brand-200 px-3 py-1.5 rounded-md hover:bg-brand-600 hover:text-white transition-colors">
+                Xem chi tiết lịch
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-5 bg-brand-50 border border-brand-100 rounded-2xl flex gap-4 items-start relative hover:shadow-md transition-shadow cursor-pointer group">
+          <div class="absolute top-6 right-14 w-2 h-2 bg-brand-500 rounded-full hidden sm:block"></div>
+          
+          <button class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all opacity-100 sm:opacity-0 group-hover:opacity-100" title="Xóa thông báo này">
+            <i class="fa-regular fa-trash-can text-sm"></i>
+          </button>
+
+          <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center text-rose-500 shadow-sm shrink-0 text-xl border border-rose-100">
+            <i class="fa-solid fa-gift"></i>
+          </div>
+          
+          <div class="flex-1 pr-10">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Ưu đãi</span>
+              <span class="text-[10px] text-slate-400">• 2 giờ trước</span>
+            </div>
+            <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+              🎁 Giảm 20% cho phòng họp nhóm!
+              <span class="w-2 h-2 bg-brand-500 rounded-full sm:hidden"></span>
+            </h3>
+            <p class="text-sm text-slate-600 mt-1 leading-relaxed">
+              Bạn có kế hoạch teamwork tuần này? Đừng bỏ lỡ ưu đãi đặc quyền cho Thành viên Bạc. Số lượng có hạn!
+            </p>
+          </div>
+        </div>
+
+        <div class="p-5 bg-brand-50 border border-brand-100 rounded-2xl flex gap-4 items-start relative hover:shadow-md transition-shadow cursor-pointer group">
+          <div class="absolute top-6 right-14 w-2 h-2 bg-brand-500 rounded-full hidden sm:block"></div>
+          
+          <button class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all opacity-100 sm:opacity-0 group-hover:opacity-100" title="Xóa thông báo này">
+            <i class="fa-regular fa-trash-can text-sm"></i>
+          </button>
+
+          <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center text-emerald-500 shadow-sm shrink-0 text-xl border border-emerald-100">
+            <i class="fa-solid fa-file-invoice-dollar"></i>
+          </div>
+          
+          <div class="flex-1 pr-10">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Giao dịch</span>
+              <span class="text-[10px] text-slate-400">• Hôm qua, 14:05</span>
+            </div>
+            <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+              Thanh toán thành công qua VNPay
+              <span class="w-2 h-2 bg-brand-500 rounded-full sm:hidden"></span>
+            </h3>
+            <p class="text-sm text-slate-600 mt-1 leading-relaxed">
+              Co-lab đã nhận được khoản thanh toán <strong class="text-slate-800">120.000đ</strong> cho mã đặt chỗ #CL-88921. Cảm ơn bạn đã sử dụng dịch vụ.
+            </p>
+            <div class="mt-3">
+              <button class="text-xs font-bold text-slate-600 bg-white border border-slate-200 px-3 py-1.5 rounded-md hover:bg-slate-50 transition-colors">
+                Xem hóa đơn
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4 py-4">
+          <div class="h-px bg-slate-200 flex-1"></div>
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Cũ hơn</span>
+          <div class="h-px bg-slate-200 flex-1"></div>
+        </div>
+
+        <div class="p-5 bg-white border border-slate-200 rounded-2xl flex gap-4 items-start relative hover:shadow-sm transition-shadow cursor-pointer group">
+          
+          <button class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all opacity-100 sm:opacity-0 group-hover:opacity-100" title="Xóa thông báo này">
+            <i class="fa-regular fa-trash-can text-sm"></i>
+          </button>
+
+          <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-brand-500 text-xl border border-slate-100 shrink-0">
+            <i class="fa-solid fa-bullhorn"></i>
+          </div>
+          
+          <div class="flex-1 pr-10">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Hệ thống</span>
+              <span class="text-[10px] text-slate-400">• 15/06/2026</span>
+            </div>
+            <h3 class="text-base font-semibold text-slate-700">Nâng cấp chất lượng Wi-Fi toàn hệ thống</h3>
+            <p class="text-sm text-slate-500 mt-1 leading-relaxed">
+              Chúng tôi vừa hoàn tất nâng cấp đường truyền Internet tại tất cả các chi nhánh lên băng thông 1Gbps, giúp trải nghiệm làm việc của bạn mượt mà hơn bao giờ hết.
+            </p>
+          </div>
+        </div>
+
+        <div class="p-5 bg-white border border-slate-200 rounded-2xl flex gap-4 items-start relative hover:shadow-sm transition-shadow cursor-pointer opacity-75 group">
+          
+          <button class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all opacity-100 sm:opacity-0 group-hover:opacity-100" title="Xóa thông báo này">
+            <i class="fa-regular fa-trash-can text-sm"></i>
+          </button>
+
+          <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 text-xl border border-slate-100 shrink-0">
+            <i class="fa-solid fa-calendar-xmark"></i>
+          </div>
+          
+          <div class="flex-1 pr-10">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Giao dịch</span>
+              <span class="text-[10px] text-slate-400">• 12/06/2026</span>
+            </div>
+            <h3 class="text-base font-semibold text-slate-600 line-through">Lịch đặt đã bị hủy</h3>
+            <p class="text-sm text-slate-400 mt-1 leading-relaxed">
+              Lịch đặt #CL-88612 của bạn đã được hủy thành công theo yêu cầu.
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="pt-6 text-center">
+        <button class="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 text-sm font-bold rounded-xl hover:bg-slate-50 transition-colors shadow-sm inline-flex items-center gap-2">
+          <i class="fa-solid fa-spinner"></i> Tải thêm thông báo
+        </button>
+      </div>
+
+    </div>
+  </main>
+
+</body>
+</html>

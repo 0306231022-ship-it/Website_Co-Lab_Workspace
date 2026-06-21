@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giao diện Thêm Chi nhánh - Co-Lab Admin</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 font-sans antialiased text-gray-800 h-screen overflow-hidden flex flex-col">
+
+<div id="edit-rate-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-950/40 backdrop-blur-xs"></div>
+    
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-2xl w-full max-w-md overflow-hidden relative z-10 flex flex-col max-h-[90vh]">
+        
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div class="flex items-center space-x-2.5">
+                <div class="w-8 h-8 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center text-sm">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900">Chỉnh sửa đơn giá cấu hình</h3>
+                    <p class="text-[11px] text-slate-400 font-medium">Cập nhật hoặc điều chỉnh mức giá áp dụng hiện tại</p>
+                </div>
+            </div>
+            <button type="button" class="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer">
+                <i class="fa-solid fa-xmark text-base"></i>
+            </button>
+        </div>
+        
+        <form id="edit-rate-form" class="flex flex-col flex-1 overflow-y-auto">
+            <div class="p-6 space-y-4 flex-1">
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Mã đơn giá (ID)</label>
+                        <input type="text" readonly value="RATE_012"
+                               class="w-full text-xs font-mono font-bold px-3 py-2.5 bg-slate-100/80 border border-slate-200 text-slate-500 rounded-xl cursor-not-allowed tracking-wider">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Danh mục ghế</label>
+                        <input type="text" readonly value="Ghế Công thái học"
+                               class="w-full text-xs font-sans font-bold px-3 py-2.5 bg-slate-100/80 border border-slate-200 text-slate-500 rounded-xl cursor-not-allowed">
+                    </div>
+                </div>
+
+                <div class="bg-amber-50/60 border border-amber-100 rounded-xl p-3 flex items-center justify-between">
+                    <div class="space-y-0.5">
+                        <span class="text-[10px] font-bold text-amber-700 uppercase tracking-wide block">Đơn giá hiện tại</span>
+                        <span class="text-xs font-medium text-slate-600">Đang áp dụng cho hệ thống</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-base font-black text-slate-800 font-mono">30,000 đ</span>
+                        <span class="text-[10px] font-semibold text-slate-400 block">/ giờ</span>
+                    </div>
+                </div>
+                
+                <div class="space-y-1.5">
+                    <label for="edit-gia-theo-gio" class="text-xs font-bold text-slate-600 uppercase tracking-wide flex items-center gap-1">
+                        Mức giá mới điều chỉnh (VND / 1 Giờ) <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="relative flex items-center">
+                        <input type="number" id="edit-gia-theo-gio" required min="0" placeholder="Nhập số tiền mới..." 
+                               class="w-full text-sm pl-3.5 pr-16 py-2.5 bg-white border border-slate-200 rounded-xl shadow-3xs focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100 transition-all font-mono font-bold text-slate-800">
+                        <span class="absolute right-3.5 text-xs font-bold text-slate-400 pointer-events-none">đ / giờ</span>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-600 uppercase tracking-wide block">Phương thức áp dụng</label>
+                    
+                    <div class="space-y-2">
+                        <label class="flex items-start gap-3 p-3 bg-white border border-slate-200 hover:border-indigo-500 rounded-xl cursor-pointer transition-colors group">
+                            <input type="radio" name="update-method" value="history" checked
+                                   class="mt-0.5 text-indigo-600 focus:ring-indigo-500 border-slate-300 w-4 h-4">
+                            <div class="space-y-0.5">
+                                <span class="text-xs font-bold text-slate-800 block group-hover:text-indigo-600 transition-colors">Lưu lịch sử đổi giá (Khuyên dùng)</span>
+                                <span class="text-[11px] text-slate-400 font-medium block leading-normal">Hệ thống sẽ lưu trữ mức giá cũ 30k để đối chiếu hóa đơn quá khứ, và kích hoạt mức giá mới này từ bây giờ.</span>
+                            </div>
+                        </label>
+
+                        <label class="flex items-start gap-3 p-3 bg-white border border-slate-200 hover:border-rose-500 rounded-xl cursor-pointer transition-colors group">
+                            <input type="radio" name="update-method" value="overwrite"
+                                   class="mt-0.5 text-rose-600 focus:ring-rose-500 border-slate-300 w-4 h-4">
+                            <div class="space-y-0.5">
+                                <span class="text-xs font-bold text-slate-800 block group-hover:text-rose-600 transition-colors">Sửa/Ghi đè trực tiếp dòng cũ</span>
+                                <span class="text-[11px] text-slate-400 font-medium block leading-normal">Chỉ dùng khi bạn gõ sai số tiền lúc thêm mới. Không lưu lại dấu vết mức giá 30k cũ nữa.</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label for="edit-mo-ta" class="text-xs font-bold text-slate-600 uppercase tracking-wide">Lý do điều chỉnh / Ghi chú</label>
+                    <textarea id="edit-mo-ta" rows="2" placeholder="Ví dụ: Tăng giá nhẹ do đầu tư thêm màn hình phụ cho loại ghế này..." 
+                              class="w-full text-sm px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl shadow-3xs focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100 transition-all font-medium text-slate-700 placeholder:text-slate-400 resize-none leading-relaxed"></textarea>
+                </div>
+
+            </div>
+            
+            <div class="px-6 py-3.5 border-t border-slate-100 bg-slate-50/50 flex items-center justify-end space-x-2 shrink-0">
+                <button type="button" class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-600 text-xs font-bold rounded-xl border border-slate-200 transition-all cursor-pointer">
+                    Hủy bỏ
+                </button>
+                <button type="submit" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl border border-amber-500 transition-all shadow-md shadow-amber-100 cursor-pointer">
+                    <i class="fa-solid fa-check mr-1"></i> Xác nhận thay đổi
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+</body>
+</html>

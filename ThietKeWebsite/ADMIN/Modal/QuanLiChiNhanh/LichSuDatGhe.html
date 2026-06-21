@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch sử đặt ghế - Co-Lab Admin</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 font-sans antialiased text-gray-800 h-screen overflow-hidden flex flex-col">
+<div id="modal-lich-su-dat-ghe" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[70]  items-center justify-center p-4 transition-all animate-fade-in">
+    
+    <div class="bg-white w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden border border-gray-100 flex flex-col transform scale-100 transition-transform max-h-[90vh]">
+        
+        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-slate-100 text-slate-700 rounded-xl flex items-center justify-center text-lg border border-slate-200">
+                    <i class="fa-solid fa-history"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-extrabold text-gray-900 leading-tight">Nhật ký đặt vị trí</h2>
+                    <p class="text-xs text-gray-400 font-medium">Mã ghế: <span class="text-indigo-600 font-bold">A-02</span> &bull; Ghế Ergonomic Sihoo</p>
+                </div>
+            </div>
+            <button type="button" class="text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg w-8 h-8 flex items-center justify-center transition-all cursor-pointer">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <div class="px-6 py-3.5 bg-gray-50 border-b border-gray-100 shrink-0 space-y-3">
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400 pointer-events-none">
+                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                </span>
+                <input type="text" placeholder="Tìm theo tên khách hàng hoặc mã số ID..." 
+                       class="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium text-gray-800 shadow-2xs">
+            </div>
+
+            <div class="flex items-center space-x-1.5 overflow-x-auto whitespace-nowrap scrollbar-none text-xs">
+                <button class="px-3 py-1 bg-slate-900 text-white rounded-lg font-bold shadow-2xs cursor-pointer">Tất cả (42)</button>
+                <button class="px-3 py-1 bg-white hover:bg-gray-100 text-gray-600 rounded-lg font-semibold border border-gray-200 transition cursor-pointer">Sắp tới (2)</button>
+                <button class="px-3 py-1 bg-white hover:bg-gray-100 text-gray-600 rounded-lg font-semibold border border-gray-200 transition cursor-pointer">Đang ngồi (1)</button>
+                <button class="px-3 py-1 bg-white hover:bg-gray-100 text-gray-600 rounded-lg font-semibold border border-gray-200 transition cursor-pointer">Đã xong (35)</button>
+                <button class="px-3 py-1 bg-white hover:bg-gray-100 text-gray-600 rounded-lg font-semibold border border-gray-200 transition cursor-pointer">Đã hủy (4)</button>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-6 bg-white space-y-5">
+            <div class="relative border-l-2 border-slate-100 ml-3.5 space-y-5">
+
+                <div class="relative pl-6 group">
+                    <div class="absolute -left-[7px] top-1.5 w-3 h-3 rounded-full bg-blue-500 ring-4 ring-blue-50 transition-transform group-hover:scale-125"></div>
+                    <div class="bg-white border border-gray-100 rounded-xl p-3 shadow-2xs hover:border-blue-200 transition-all">
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 font-bold text-xs flex items-center justify-center">TL</div>
+                                <div>
+                                    <h4 class="text-xs font-black text-gray-900">Trần Long Vũ</h4>
+                                    <p class="text-[10px] text-gray-400 font-medium">ID: #USER-9921</p>
+                                </div>
+                            </div>
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100">Sắp tới</span>
+                        </div>
+                        <div class="mt-2.5 pt-2 border-t border-gray-50 flex items-center justify-between text-[11px] text-gray-600 font-medium">
+                            <div><i class="fa-regular fa-calendar mr-1.5 text-gray-400"></i>Ngày mai, 15/06</div>
+                            <div class="font-bold text-slate-800"><i class="fa-regular fa-clock mr-1.5 text-blue-500"></i>09:00 - 13:00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative pl-6 group">
+                    <div class="absolute -left-[7px] top-1.5 w-3 h-3 rounded-full bg-indigo-600 ring-4 ring-indigo-50 transition-transform group-hover:scale-125">
+                        <span class="absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75 animate-ping"></span>
+                    </div>
+                    <div class="bg-indigo-50/30 border border-indigo-100 rounded-xl p-3 shadow-2xs hover:border-indigo-200 transition-all">
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-7 h-7 rounded-lg bg-indigo-600 text-white font-bold text-xs flex items-center justify-center">NL</div>
+                                <div>
+                                    <h4 class="text-xs font-black text-gray-900">Nguyễn Lâm Hoàng</h4>
+                                    <p class="text-[10px] text-indigo-600 font-bold">Flexi Pass (Tháng)</p>
+                                </div>
+                            </div>
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-600 text-white">Đang ngồi</span>
+                        </div>
+                        <div class="mt-2.5 pt-2 border-t border-indigo-100/50 flex items-center justify-between text-[11px] font-medium">
+                            <div class="text-indigo-900"><i class="fa-solid fa-door-open mr-1.5 text-indigo-400"></i>Hôm nay, 14/06</div>
+                            <div class="font-black text-indigo-700"><i class="fa-regular fa-clock mr-1.5"></i>08:30 - 18:00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative pl-6 group">
+                    <div class="absolute -left-[7px] top-1.5 w-3 h-3 rounded-full bg-emerald-500 ring-4 ring-emerald-50"></div>
+                    <div class="bg-white border border-gray-100 rounded-xl p-3 shadow-2xs hover:border-emerald-200 transition-all">
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-7 h-7 rounded-lg bg-gray-100 text-gray-600 font-bold text-xs flex items-center justify-center">HP</div>
+                                <div>
+                                    <h4 class="text-xs font-black text-gray-900">Hoàng Phương Thảo</h4>
+                                    <p class="text-[10px] text-gray-400 font-medium">ID: #USER-4412</p>
+                                </div>
+                            </div>
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">Đã xong</span>
+                        </div>
+                        <div class="mt-2.5 pt-2 border-t border-gray-50 flex items-center justify-between text-[11px] text-gray-500 font-medium">
+                            <div><i class="fa-regular fa-calendar mr-1.5 text-gray-400"></i>Hôm qua, 13/06</div>
+                            <div class="font-bold text-gray-700"><i class="fa-regular fa-clock mr-1.5 text-gray-400"></i>08:00 - 12:00</div>
+                        </div>
+                    </div>
+                </div>
+
+                </div>
+        </div>
+
+        <div class="px-6 py-3.5 bg-gray-50 border-t border-gray-100 shrink-0 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <span class="text-gray-500 font-medium text-center sm:text-left">
+                Hiển thị <span class="font-bold text-gray-900">1 - 10</span> trong tổng số <span class="font-bold text-gray-900">42</span> nhật ký
+            </span>
+            
+            <div class="flex items-center space-x-1">
+                <button type="button" disabled class="w-7 h-7 bg-white border border-gray-200 rounded-lg flex items-center justify-center text-gray-300 cursor-not-allowed transition-all">
+                    <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                </button>
+                
+                <button type="button" class="w-7 h-7 bg-slate-900 text-white font-bold rounded-lg flex items-center justify-center cursor-pointer shadow-2xs">1</button>
+                <button type="button" class="w-7 h-7 bg-white hover:bg-gray-100 text-gray-600 font-semibold border border-gray-200 rounded-lg flex items-center justify-center transition-all cursor-pointer">2</button>
+                <button type="button" class="w-7 h-7 bg-white hover:bg-gray-100 text-gray-600 font-semibold border border-gray-200 rounded-lg flex items-center justify-center transition-all cursor-pointer">3</button>
+                <span class="px-1 text-gray-400">...</span>
+                <button type="button" class="w-7 h-7 bg-white hover:bg-gray-100 text-gray-600 font-semibold border border-gray-200 rounded-lg flex items-center justify-center transition-all cursor-pointer">5</button>
+                
+                <button type="button" class="w-7 h-7 bg-white hover:bg-gray-100 text-gray-600 border border-gray-200 rounded-lg flex items-center justify-center shadow-3xs transition-all cursor-pointer">
+                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

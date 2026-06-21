@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Co-lab Workspace - Xác Nhận Đặt Chỗ & Thanh Toán</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <script>
+    // Đồng bộ cấu hình Tailwind hệt như file trangchu.html của bạn
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Inter", "sans-serif"] },
+          colors: {
+            brand: {
+              50: "#f0f5ff",
+              100: "#e0e9fe",
+              500: "#2563eb",
+              600: "#1d4ed8",
+              700: "#1d4ed8",
+              900: "#1e3a8a"
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Thanh cuộn siêu mỏng cho nội dung bên trong, đảm bảo thẩm mỹ đồ án */
+    .custom-scroll::-webkit-scrollbar { width: 5px; }
+    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+  </style>
+</head>
+
+<body class="h-screen w-screen overflow-hidden font-sans antialiased flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+
+  <div class="w-full max-w-[440px] max-h-[90vh] bg-white rounded-3xl shadow-2xl border border-slate-100 flex flex-col overflow-hidden">
+    
+    <div class="bg-amber-50 border-b border-amber-100 px-6 py-3.5 flex items-center justify-between shrink-0">
+      <div class="flex items-center gap-2 text-amber-800">
+        <i class="fa-solid fa-clock-rotate-left text-sm animate-pulse"></i>
+        <span class="text-xs font-semibold">Thời gian giữ chỗ còn lại:</span>
+      </div>
+      <span class="font-mono text-base font-extrabold text-amber-700 bg-white px-2.5 py-0.5 rounded-lg border border-amber-200/60 shadow-sm tracking-wider">
+        14:59
+      </span>
+    </div>
+
+    <div class="px-6 pt-5 pb-3 shrink-0">
+      <h3 class="text-lg font-extrabold text-slate-950 tracking-tight">Xác nhận thông tin đặt chỗ</h3>
+      <p class="text-xs text-slate-500 mt-0.5">Vui lòng kiểm tra lại lịch đặt trước khi tiến hành thanh toán</p>
+    </div>
+
+    <div class="p-6 pt-2 overflow-y-auto custom-scroll flex-1 space-y-5">
+      
+      <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200/60 space-y-3.5">
+        
+        <div class="flex justify-between items-start">
+          <span class="text-xs font-medium text-slate-500 pt-0.5">Vị trí không gian</span>
+          <div class="text-right">
+            <span class="inline-block text-xs font-bold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-lg border border-brand-100">
+              Ghế đơn A-06
+            </span>
+            <span class="block text-[11px] text-slate-400 mt-1"><i class="fa-solid fa-map-pin mr-1"></i>Khu vực tập trung (Zone A)</span>
+          </div>
+        </div>
+
+        <div class="border-t border-slate-200/60 my-2"></div>
+
+        <div class="flex justify-between items-center">
+          <span class="text-xs font-medium text-slate-500">Ngày sử dụng</span>
+          <span class="text-xs font-bold text-slate-800">19 tháng 06, 2026</span>
+        </div>
+
+        <div class="flex justify-between items-center">
+          <span class="text-xs font-medium text-slate-500">Khung giờ đặt</span>
+          <span class="text-xs font-bold text-slate-800">08:00 - 10:00 <span class="text-slate-400 font-normal">(2 tiếng)</span></span>
+        </div>
+      </div>
+
+      <div class="space-y-2.5">
+        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+          Phương thức thanh toán tích hợp
+        </label>
+        
+        <div class="relative flex items-center p-4 bg-white border-2 border-brand-500 rounded-2xl shadow-sm shadow-brand-500/5 transition-all">
+          
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 flex flex-col items-center justify-center text-white font-black tracking-tighter leading-none shadow-sm mr-3.5 shrink-0">
+            <span class="text-[10px] uppercase opacity-90">vn</span>
+            <span class="text-xs uppercase -mt-0.5">pay</span>
+          </div>
+          
+          <div class="flex-1">
+            <span class="block text-sm font-bold text-slate-900 leading-tight">Cổng thanh toán VNPAY</span>
+            <span class="block text-[11px] text-slate-400 mt-0.5">Ứng dụng ngân hàng quét mã QR / Thẻ ATM</span>
+          </div>
+
+          <div class="w-5 h-5 rounded-full bg-brand-500 flex items-center justify-center text-white text-[10px]">
+            <i class="fa-solid fa-check"></i>
+          </div>
+        </div>
+
+        <p class="text-[11px] text-slate-400 leading-relaxed pl-1">
+          <i class="fa-solid fa-shield-halved text-emerald-500 mr-1"></i> 
+          Giao dịch được mã hóa an toàn qua cổng kiểm định VNPAY Sandbox.
+        </p>
+      </div>
+
+      <div class="bg-slate-50/60 rounded-xl p-3.5 border border-dashed border-slate-200 space-y-2">
+        <div class="flex justify-between items-center text-xs text-slate-500">
+          <span>Giá thuê ghế (15k/h)</span>
+          <span>30.000đ</span>
+        </div>
+        <div class="flex justify-between items-center text-xs text-slate-500">
+          <span>Phí tiện ích hệ thống</span>
+          <span class="text-emerald-600 font-medium">Miễn phí</span>
+        </div>
+        <div class="border-t border-slate-200 my-1.5"></div>
+        <div class="flex justify-between items-baseline">
+          <span class="text-xs font-bold text-slate-800">Tổng số tiền:</span>
+          <span class="text-xl font-black text-slate-950 tracking-tight">30.000đ</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="p-6 bg-white border-t border-slate-100 shrink-0 flex flex-col gap-2.5">
+      <a href="./ThanhToan.html" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-brand-500/20 active:scale-[0.99] flex items-center justify-center gap-2 text-sm">
+        <i class="fa-solid fa-wallet text-xs opacity-90"></i> Liên kết thanh toán VNPAY
+      </a>
+
+      <button class="w-full hover:bg-slate-50 text-slate-400 hover:text-slate-600 font-medium py-2 rounded-xl text-xs transition-colors">
+        Hủy bỏ giao dịch & Quay lại chọn ghế
+      </button>
+    </div>
+
+  </div>
+
+</body>
+</html>

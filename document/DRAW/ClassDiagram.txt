@@ -1,0 +1,186 @@
+classDiagram
+    %% --- CÁC LỚP THỰC THỂ (ENTITY CLASSES) ---
+    class NguoiDung {
+        +int IDND
+        +String TENND
+        +String EMAIL
+        +String MAT_KHAU
+        +String HINH_ANH
+        +DateTime NGAY_TAO
+        +int LOAIND
+        +int TRANG_THAI
+        - DangNhap(DuLieu) boolean
+        - DangKy(DuLieu) boolean
+        - DangXuat(DuLieu) boolean
+        - CapNhatThongTin(DuLieu) boolean
+        - DoiMatKhau(DuLieu) boolean
+        - ThongTin_NguoiDung(DuLieu) boolean
+        - CapNhat_TrangThai(DuLieu) boolean
+        - KiemTra_DangNhap(DuLieu) boolean 
+
+    }
+
+    class ChiNhanh {
+        +int ID_CHI_NHANH
+        +String TEN_CHI_NHANH
+        +String DIA_CHI
+        +DateTime NGAY_NHAP
+        +DateTime NGAY_CAP_NHAT
+        +int TRANG_THAI
+        +DateTime NGAY_BAO_TRI
+        +DateTime NGAY_XONG
+        - ThemChiNhanh(DuLieu) boolean
+        - ChinhSua_ChiNhanh(DuLieu) boolean
+        - ChinhSua_TrangThai(DuLieu) boolean
+        - ThongTin_ChiTiet(DuLieu) list
+        - DanhSach_ChiNhanh(DuLieu) list
+        - KiemTra_ChiNhanh( int ID ) boolean
+    }
+
+    class KhongGian {
+        +int ID_KHONG_GIAN
+        +String TEN_KHONG_GIAN
+        +int LOAI_KHONG_GIAN
+        +int TRANG_THAI
+        +int ID_GIA
+        +DateTime NGAY_TAO
+        +DateTime NGAY_CAP_NHAT
+        +DateTime NGAY_BAO_TRI
+        +DateTime NGAY_XONG
+        - ThemKhongGian(DuLieu) boolean
+        - ChinhSua_KhongGian(DuLieu) boolean
+        - ChinhSua_TrangThai(DuLieu) boolean
+        - ThongTin_ChiTiet(DuLieu) list
+        - DanhSach_ChiNhanh(DuLieu) list
+        - KiemTra_khongGian( int ID ) boolean
+
+    }
+
+    class ThietBi {
+        +int ID_THIET_BI
+        +String TEN_THIET_BI
+        +String HINH_ANH
+        - ThemThietBi(DuLieu) boolean
+        - ChinhSua(DuLieu) boolean
+        - ChiTiet_ThietBi(DuLieu) boolean
+    
+
+    }
+
+    class ChiTietThietBi {
+        +int ID_CT_TB
+        +int ID_THIET_BI
+        +int ID_KHONG_GIAN
+        +int TRANG_THAI
+        - ThemThietBi_KhongGian(DuLieu) boolean
+        - XoaThietBi_KhongGian(DuLieu) boolean
+        - ChinhSua_TrangThai(DuLieu) boolean
+        - DanhSach_ThietBi(DuLieu) boolean
+    }
+
+    class Ghe {
+        +int ID_GHE
+        +String TEN_GHE
+        +int TOA_X
+        +int TOA_Y
+        +int TRANG_THAI
+        +int ID_KHONG_GIAN
+        +int ID_DANH_MUC
+        - ThemGhe(DuLieu) boolean
+        - ChiTiet_ghe(DuLieu) list
+        - ChinhSua_ghe(DuLieu) list
+    }
+
+    class DanhMucGhe {
+        +int ID_DANHMUC
+        +String TEN_DANHMUC
+        +int TRANG_THAI
+        +int ID_GIA
+        - ThemDanhMuc(DuLieu) boolean
+        - ChinhSua_TrangThai(DuLieu) boolean
+        - DanhSach_danhmuc() list
+        - ChiTiet_danhmuc(DuLieu) list
+    }
+
+    class Gia {
+        +int ID_GIA
+        +String TEN_GIA
+        +String MOTA
+        +DateTime NGAY_TAO
+        +DateTime NGAY_CAP_NHAT
+        +decimal DON_GIA
+        - ThemGia(DuLieu) boolean
+        - DanhSach_gia() list
+        - ChinhSua_Gia(DuLieu) boolean
+        - ChiTiet_Gia(DuLieu) boolean
+    }
+
+    class DatLich {
+        +int ID_LICH_DAT
+        +DateTime KHUNG_BATDAU
+        +DateTime KHUNG_KETTHUC
+        +DateTime NGAY_TAO
+        +int TRANG_THAI
+        +DateTime THOIGIAN_VAO
+        +DateTime THOIGIAN_RA
+        +int ID_GHE
+        +int ID_KHONG_GIAN
+        +int IDND
+        - ThemLich(DuLieu) boolean
+        - DanhSach_Lich() list
+        - ChiTiet(DuLieu) list
+        - ChinhSua_TrangThai(DuLieu) boolean
+
+    }
+
+    class HoaDon {
+        +int ID_HOADON
+        +decimal GIA_TIEN
+        +DateTime NGAY_TAO
+        +int TRANG_THAI
+        +int ID_LICHDAT
+        - ThemHoaDon(DuLieu) boolean
+        - XemHoaDon(DuLieu) list
+        - DanhSach_HoaDon(DuLieu) list
+    }
+
+    class ThanhToan {
+        +int ID_THANHTOAN
+        +int MA_GIAO_DICH
+        +int MA_NGAN_HANG
+        +decimal SO_TIEN
+        +DateTime NGAY_TAO
+        +DateTime NGAY_THANH_TOAN
+        +int TRANG_THAI
+        - ThemThanhToan(DuLieu) boolean
+        - xemDanhSach(DuLieu) boolean
+    }
+
+    class ThongBao {
+        +int ID_THONGBAO
+        +String TIEU_DE
+        +String NOI_DUNG
+        +int TRANG_THAI
+        +int LOAI_THONGBAO
+        +int IDND
+        - ThemThongBao(DuLieu) boolean
+        - XemThongBao(DuLieu) list
+    }
+
+    %% --- MỐI QUAN HỆ KHÓA NGOẠI (FOREIGN KEYS) ---
+    ChiNhanh "1" -- "0..*" KhongGian : có
+    KhongGian "1" -- "0..*" Ghe : chứa
+    Gia "1" -- "0..*" KhongGian : quy_định_giá
+    Gia "1" -- "0..*" DanhMucGhe : quy_định_giá
+    DanhMucGhe "1" -- "0..*" Ghe : phân_loại
+    
+    ThietBi "1" -- "0..*" ChiTietThietBi : thuộc
+    KhongGian "1" -- "0..*" ChiTietThietBi : chứa
+    
+    NguoiDung "1" -- "0..*" DatLich : tạo
+    DatLich "0..*" -- "1" Ghe : đặt
+    DatLich "0..*" -- "1" KhongGian : đặt
+    
+    DatLich "1" -- "1" HoaDon : tạo_ra
+    HoaDon "1" -- "1" ThanhToan : thực_hiện
+    NguoiDung "1" -- "0..*" ThongBao : nhận

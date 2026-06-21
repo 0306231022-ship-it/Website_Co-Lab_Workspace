@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Chủ - Đồ án tốt nghiệp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<!-- Đổi nền thành màu trắng xám nhẹ để thân thiện với mắt -->
+<body class="bg-slate-50">
+
+    <!-- Container chính: Căn giữa toàn bộ nội dung -->
+    <div class="flex min-h-screen flex-col items-center justify-center">
+        
+        <!-- Logo hoặc Tên đồ án -->
+        <div class="mb-8 flex items-center gap-2">
+            <!-- Icon/Logo mô phỏng -->
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+            </div>
+            <!-- Tên dự án -->
+            <h1 class="text-2xl font-extrabold tracking-tight text-slate-800">MyThesis<span class="text-blue-600">.</span></h1>
+        </div>
+
+        <!-- Khối Loader đã được thu nhỏ lại cho tinh tế hơn -->
+        <div class="relative mb-6 h-14 w-14">
+            <!-- Lớp 1: Glow layer (Làm mờ nhẹ hơn để không bị gắt) -->
+            <div class="absolute inset-0 animate-spin rounded-full bg-gradient-to-tr from-blue-400 to-indigo-600 blur-md opacity-50"></div>
+            
+            <!-- Lớp 2: Main ring -->
+            <div class="absolute inset-0 animate-spin rounded-full bg-gradient-to-tr from-blue-400 to-indigo-600"></div>
+            
+            <!-- Lớp 3: Inner cutout (Màu nền trùng với bg-slate-50 của body) -->
+            <div class="absolute inset-[4px] rounded-full bg-slate-50"></div>
+        </div>
+
+        <!-- Dòng Text thông báo với hiệu ứng nhấp nháy nhẹ (Pulse) -->
+        <p class="animate-pulse text-sm font-medium text-slate-500">
+            Đang tải dữ liệu trang chủ...
+        </p>
+
+    </div>
+
+</body>
+</html>

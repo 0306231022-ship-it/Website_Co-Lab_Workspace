@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết Trạng thái Ghế - Co-Lab Admin</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 font-sans antialiased text-gray-800 h-screen overflow-hidden flex flex-col">
+
+    
+<div id="modal-chi-tiet-ghe" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 items-center justify-center p-4 transition-all animate-fade-in">
+    
+    <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-gray-100 flex flex-col md:flex-row transform scale-100 transition-transform">
+        
+        <div class="w-full md:w-2/5 bg-gray-50 p-6 flex flex-col justify-between border-b md:border-b-0 md:border-r border-gray-200">
+            <div class="space-y-5">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-black text-gray-400 uppercase tracking-widest">Mã vị trí</span>
+                        <h2 class="text-4xl font-black text-slate-900 tracking-tight mt-0.5">A-02</h2>
+                    </div>
+                    <div class="w-12 h-12 bg-white rounded-xl shadow-xs border border-gray-200 flex items-center justify-center text-gray-500 text-xl">
+                        <i class="fa-solid fa-chair"></i>
+                    </div>
+                </div>
+
+                <div class="border-t border-gray-200 pt-4 space-y-3.5">
+                    <div>
+                        <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Tên ghế (Tài sản)</span>
+                        <p class="text-sm font-extrabold text-indigo-900 mt-0.5">Ghế Ergonomic Sihoo M57</p>
+                    </div>
+                    
+                    <div>
+                        <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Thuộc khu vực</span>
+                        <p class="text-sm font-bold text-gray-800">Khu vực làm việc A (Tầng 1)</p>
+                    </div>
+                    
+                    <div>
+                        <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Loại chỗ ngồi</span>
+                        <p class="text-sm font-medium text-gray-600">Ghế đơn cố định (Standard)</p>
+                    </div>
+                    
+                    <div>
+                        <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider block mb-1">Trạng thái kỹ thuật</span>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2"></span> Thiết bị hoạt động tốt
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-4 border-t border-gray-200">
+                <button type="button" class="w-full px-4 py-2.5 bg-white border border-gray-200 hover:border-indigo-500 hover:text-indigo-600 text-gray-700 text-xs font-bold rounded-xl transition-all shadow-2xs flex items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-pen-to-square mr-2 text-[11px]"></i> Chỉnh sửa thông tin ghế
+                </button>
+            </div>
+        </div>
+
+        <div class="w-full md:w-3/5 p-6 flex flex-col justify-between relative">
+            
+            <div class="absolute top-4 right-4 hidden md:block">
+                <button type="button" class="text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg w-8 h-8 flex items-center justify-center transition-all cursor-pointer">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="space-y-5">
+                <span class="block text-xs font-black text-gray-400 uppercase tracking-widest">Tình trạng sử dụng hiện tại</span>
+
+                <div class="space-y-4">
+                    <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-3xs">
+                        <span class="w-1.5 h-1.5 bg-indigo-600 rounded-full mr-2 animate-pulse"></span> ĐANG CÓ NGƯỜI SỬ DỤNG
+                    </div>
+
+                    <div class="bg-indigo-950/5 border border-indigo-100 rounded-2xl p-4 space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white font-bold text-sm flex items-center justify-center shadow-md shadow-indigo-100">
+                                NL
+                            </div>
+                            <div>
+                                <p class="text-sm font-black text-gray-900">Nguyễn Lâm Hoàng</p>
+                                <p class="text-[11px] text-gray-400 font-medium">Gói hội viên: <span class="text-indigo-600 font-bold">Flexi Pass (Tháng)</span></p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 pt-3 border-t border-indigo-100/50 text-xs">
+                            <div>
+                                <span class="text-gray-400 block font-medium">Thời gian Check-in</span>
+                                <span class="font-bold text-gray-800"><i class="fa-regular fa-clock mr-1 text-indigo-500"></i>08:30 - Hôm nay</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-400 block font-medium">Thời gian kết thúc</span>
+                                <span class="font-bold text-gray-800"><i class="fa-regular fa-calendar-xmark mr-1 text-indigo-500"></i>18:00 - Hôm nay</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="mt-8 pt-4 border-t border-gray-100 flex items-center justify-end space-x-2">
+                <button type="button" class="px-4 py-2 text-xs font-bold text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition md:hidden cursor-pointer">
+                    Đóng
+                </button>
+                <button type="button" class="px-4 py-2.5 text-xs font-bold text-gray-600 hover:bg-gray-50 rounded-xl transition cursor-pointer">
+                    <i class="fa-solid fa-history mr-1.5 text-[11px]"></i> Lịch sử đặt ghế
+                </button>
+                <button type="button" class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition shadow-md cursor-pointer">
+                    Hoàn tất xem
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+</body>
+</html>
