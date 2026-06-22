@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th6 17, 2026 lúc 08:59 AM
+-- Thời gian đã tạo: Th6 21, 2026 lúc 03:31 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -24,6 +24,22 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Cấu trúc bảng cho bảng `banggia`
+--
+
+CREATE TABLE `banggia` (
+  `ID_GIA` int(11) NOT NULL,
+  `TEN_GIA` varchar(255) NOT NULL,
+  `MOTA` text DEFAULT NULL,
+  `NGAY_TAO` datetime NOT NULL DEFAULT current_timestamp(),
+  `NGAY_KET_THUC` datetime DEFAULT NULL,
+  `DON_GIA` decimal(13,2) NOT NULL DEFAULT 0.00,
+  `DANHMUC_GHE` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Cấu trúc bảng cho bảng `chinhanh`
 --
 
@@ -31,13 +47,13 @@ CREATE TABLE `chinhanh` (
   `ID_CHI_NHANH` int(11) NOT NULL,
   `TEN_CHI_NHANH` varchar(255) NOT NULL,
   `DIA_CHI` varchar(255) NOT NULL,
-  `NGAY_NHAP` datetime DEFAULT NULL,
+  `NGAY_NHAP` datetime DEFAULT current_timestamp(),
+  `NGAY_CAP_NHAT` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `TRANG_THAI` int(11) DEFAULT NULL,
   `NGAY_BAO_TRI` datetime DEFAULT NULL,
-  `TRANG_THAI` int(11) DEFAULT 1,
-  `NGAY_HOAN_THANH` datetime DEFAULT NULL,
-  `NGAY_TAO` datetime DEFAULT current_timestamp(),
-  `NGAY_CAP_NHAT` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `NGAY_XONG` datetime DEFAULT NULL,
+  `HINHANH` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -55,14 +71,13 @@ CREATE TABLE `chitiet_thietbi` (
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `danhmuc_ghe`
+-- Cấu trúc bảng cho bảng `danhmucghe`
 --
 
-CREATE TABLE `danhmuc_ghe` (
+CREATE TABLE `danhmucghe` (
   `ID_DANHMUC` int(11) NOT NULL,
   `TEN_DANHMUC` varchar(255) NOT NULL,
-  `TRANG_THAI` int(11) DEFAULT NULL,
-  `ID_GIA` int(11) NOT NULL
+  `TRANG_THAI` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -76,24 +91,9 @@ CREATE TABLE `ghe` (
   `TEN_GHE` varchar(255) NOT NULL,
   `TOA_X` int(11) NOT NULL,
   `TOA_Y` int(11) NOT NULL,
-  `TRANG_THAI` int(11) DEFAULT NULL,
+  `TRANG_THAI` int(11) DEFAULT 1,
   `ID_KHONG_GIAN` int(11) NOT NULL,
   `ID_DANH_MUC` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Cấu trúc bảng cho bảng `gia`
---
-
-CREATE TABLE `gia` (
-  `ID_GIA` int(11) NOT NULL,
-  `TEN_GIA` varchar(255) NOT NULL,
-  `MOTA` text DEFAULT NULL,
-  `NGAY_TAO` datetime DEFAULT NULL,
-  `NGAY_CAP_NHAT` datetime DEFAULT NULL,
-  `DON_GIA` decimal(13,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -104,9 +104,9 @@ CREATE TABLE `gia` (
 
 CREATE TABLE `hoadon` (
   `ID_HOADON` int(11) NOT NULL,
-  `GIA_TIEN` decimal(13,2) NOT NULL,
-  `NGAY_TAO` date NOT NULL,
-  `TRANG_THAI` int(11) NOT NULL DEFAULT 0,
+  `GIA_TIEN` decimal(13,2) NOT NULL DEFAULT 0.00,
+  `NGAY_TAO` date NOT NULL DEFAULT curdate(),
+  `TRANG_THAI` int(11) DEFAULT NULL,
   `ID_LICHDAT` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -119,11 +119,11 @@ CREATE TABLE `hoadon` (
 CREATE TABLE `khonggian` (
   `ID_KHONG_GIAN` int(11) NOT NULL,
   `TEN_KHONG_GIAN` varchar(255) NOT NULL,
-  `LOAI_KHONG_GIAN` int(11) DEFAULT NULL,
-  `TRANG_THAI` int(11) DEFAULT NULL,
+  `LOAI_KHONG_GIAN` int(11) NOT NULL,
+  `TRANG_THAI` int(11) NOT NULL,
   `ID_GIA` int(11) DEFAULT NULL,
-  `NGAY_TAO` datetime NOT NULL,
-  `NGAY_CAP_NHAT` datetime DEFAULT NULL,
+  `NGAY_TAO` datetime NOT NULL DEFAULT current_timestamp(),
+  `NGAY_CAP_NHAT` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `NGAY_BAO_TRI` datetime DEFAULT NULL,
   `NGAY_XONG` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -131,15 +131,15 @@ CREATE TABLE `khonggian` (
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `lich_dat`
+-- Cấu trúc bảng cho bảng `lichdat`
 --
 
-CREATE TABLE `lich_dat` (
+CREATE TABLE `lichdat` (
   `ID_LICH_DAT` int(11) NOT NULL,
   `KHUNG_BATDAU` datetime NOT NULL,
   `KHUNG_KETTHUC` datetime NOT NULL,
-  `NGAY_TAO` datetime DEFAULT current_timestamp(),
-  `TRANG_THAI` int(11) NOT NULL DEFAULT 0,
+  `NGAY_TAO` datetime NOT NULL DEFAULT current_timestamp(),
+  `TRANG_THAI` int(11) DEFAULT NULL,
   `THOIGIAN_VAO` datetime DEFAULT NULL,
   `THOIGIAN_RA` datetime DEFAULT NULL,
   `ID_GHE` int(11) DEFAULT NULL,
@@ -159,8 +159,8 @@ CREATE TABLE `nguoidung` (
   `EMAIL` varchar(100) NOT NULL,
   `MAT_KHAU` varchar(255) NOT NULL,
   `HINH_ANH` varchar(255) DEFAULT NULL,
-  `NGAY_TAO` date DEFAULT NULL,
-  `LOAIND` int(11) DEFAULT NULL,
+  `NGAY_TAO` date DEFAULT curdate(),
+  `LOAIND` int(11) DEFAULT 0,
   `TRANG_THAI` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -172,12 +172,12 @@ CREATE TABLE `nguoidung` (
 
 CREATE TABLE `thanhtoan` (
   `ID_THANHTOAN` int(11) NOT NULL,
-  `MA_GIAO_DICH` varchar(100) DEFAULT NULL,
-  `MA_NGAN_HANG` varchar(100) DEFAULT NULL,
-  `SO_TIEN` decimal(13,2) NOT NULL,
-  `NGAY_TAO` date NOT NULL,
+  `MA_GIAO_DICH` varchar(100) NOT NULL,
+  `MA_NGAN_HANG` varchar(50) DEFAULT NULL,
+  `SO_TIEN` decimal(13,2) NOT NULL DEFAULT 0.00,
+  `NGAY_TAO` date NOT NULL DEFAULT curdate(),
   `NGAY_THANH_TOAN` datetime DEFAULT NULL,
-  `TRANG_THAI` int(11) NOT NULL DEFAULT 0
+  `TRANG_THAI` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -202,14 +202,22 @@ CREATE TABLE `thongbao` (
   `ID_THONGBAO` int(11) NOT NULL,
   `TIEU_DE` varchar(255) NOT NULL,
   `NOI_DUNG` text NOT NULL,
-  `TRANG_THAI` int(11) NOT NULL DEFAULT 0,
+  `TRANG_THAI` int(11) DEFAULT NULL,
   `LOAI_THONGBAO` int(11) DEFAULT NULL,
-  `IDND` int(11) NOT NULL
+  `IDND` int(11) NOT NULL,
+  `NGAY_TAO` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Chỉ mục cho các bảng đã đổ
 --
+
+--
+-- Chỉ mục cho bảng `banggia`
+--
+ALTER TABLE `banggia`
+  ADD PRIMARY KEY (`ID_GIA`),
+  ADD KEY `FK_BangGia_DanhMucGhe` (`DANHMUC_GHE`);
 
 --
 -- Chỉ mục cho bảng `chinhanh`
@@ -222,35 +230,29 @@ ALTER TABLE `chinhanh`
 --
 ALTER TABLE `chitiet_thietbi`
   ADD PRIMARY KEY (`ID_CT_TB`),
-  ADD KEY `FK_CT_THIETBI_THIET_BI` (`ID_THIET_BI`),
-  ADD KEY `FK_CT_THIETBI_KHONG_GIAN` (`ID_KHONG_GIAN`);
+  ADD KEY `FK_CTTB_ThietBi` (`ID_THIET_BI`),
+  ADD KEY `FK_CTTB_KhongGian` (`ID_KHONG_GIAN`);
 
 --
--- Chỉ mục cho bảng `danhmuc_ghe`
+-- Chỉ mục cho bảng `danhmucghe`
 --
-ALTER TABLE `danhmuc_ghe`
-  ADD PRIMARY KEY (`ID_DANHMUC`),
-  ADD KEY `FK_DANHMUCGHE_GIA` (`ID_GIA`);
+ALTER TABLE `danhmucghe`
+  ADD PRIMARY KEY (`ID_DANHMUC`);
 
 --
 -- Chỉ mục cho bảng `ghe`
 --
 ALTER TABLE `ghe`
   ADD PRIMARY KEY (`ID_GHE`),
-  ADD KEY `FK_GHE_KHONG_GIAN` (`ID_KHONG_GIAN`);
-
---
--- Chỉ mục cho bảng `gia`
---
-ALTER TABLE `gia`
-  ADD PRIMARY KEY (`ID_GIA`);
+  ADD KEY `FK_Ghe_KhongGian` (`ID_KHONG_GIAN`),
+  ADD KEY `FK_Ghe_DanhMuc` (`ID_DANH_MUC`);
 
 --
 -- Chỉ mục cho bảng `hoadon`
 --
 ALTER TABLE `hoadon`
   ADD PRIMARY KEY (`ID_HOADON`),
-  ADD KEY `FK_HOADON_LICHDAT` (`ID_LICHDAT`);
+  ADD KEY `FK_HoaDon_LichDat` (`ID_LICHDAT`);
 
 --
 -- Chỉ mục cho bảng `khonggian`
@@ -259,20 +261,20 @@ ALTER TABLE `khonggian`
   ADD PRIMARY KEY (`ID_KHONG_GIAN`);
 
 --
--- Chỉ mục cho bảng `lich_dat`
+-- Chỉ mục cho bảng `lichdat`
 --
-ALTER TABLE `lich_dat`
+ALTER TABLE `lichdat`
   ADD PRIMARY KEY (`ID_LICH_DAT`),
-  ADD KEY `FK_LICHDAT_KHONG_GIAN` (`ID_KHONG_GIAN`),
-  ADD KEY `FK_LICHDAT_GHE` (`ID_GHE`),
-  ADD KEY `FK_LICHDAT_NGUOIDUNG` (`IDND`);
+  ADD KEY `FK_LichDat_Ghe` (`ID_GHE`),
+  ADD KEY `FK_LichDat_KhongGian` (`ID_KHONG_GIAN`),
+  ADD KEY `FK_LichDat_NguoiDung` (`IDND`);
 
 --
 -- Chỉ mục cho bảng `nguoidung`
 --
 ALTER TABLE `nguoidung`
   ADD PRIMARY KEY (`IDND`),
-  ADD UNIQUE KEY `UQ_EMAIL` (`EMAIL`);
+  ADD UNIQUE KEY `UQ_Email` (`EMAIL`);
 
 --
 -- Chỉ mục cho bảng `thanhtoan`
@@ -291,11 +293,17 @@ ALTER TABLE `thietbi`
 --
 ALTER TABLE `thongbao`
   ADD PRIMARY KEY (`ID_THONGBAO`),
-  ADD KEY `FK_THONGBAO_NGUOIDUNG` (`IDND`);
+  ADD KEY `FK_ThongBao_NguoiDung` (`IDND`);
 
 --
 -- AUTO_INCREMENT cho các bảng đã đổ
 --
+
+--
+-- AUTO_INCREMENT cho bảng `banggia`
+--
+ALTER TABLE `banggia`
+  MODIFY `ID_GIA` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT cho bảng `chinhanh`
@@ -310,9 +318,9 @@ ALTER TABLE `chitiet_thietbi`
   MODIFY `ID_CT_TB` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT cho bảng `danhmuc_ghe`
+-- AUTO_INCREMENT cho bảng `danhmucghe`
 --
-ALTER TABLE `danhmuc_ghe`
+ALTER TABLE `danhmucghe`
   MODIFY `ID_DANHMUC` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -320,12 +328,6 @@ ALTER TABLE `danhmuc_ghe`
 --
 ALTER TABLE `ghe`
   MODIFY `ID_GHE` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT cho bảng `gia`
---
-ALTER TABLE `gia`
-  MODIFY `ID_GIA` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT cho bảng `hoadon`
@@ -340,9 +342,9 @@ ALTER TABLE `khonggian`
   MODIFY `ID_KHONG_GIAN` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT cho bảng `lich_dat`
+-- AUTO_INCREMENT cho bảng `lichdat`
 --
-ALTER TABLE `lich_dat`
+ALTER TABLE `lichdat`
   MODIFY `ID_LICH_DAT` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -374,43 +376,44 @@ ALTER TABLE `thongbao`
 --
 
 --
+-- Các ràng buộc cho bảng `banggia`
+--
+ALTER TABLE `banggia`
+  ADD CONSTRAINT `FK_BangGia_DanhMucGhe` FOREIGN KEY (`DANHMUC_GHE`) REFERENCES `danhmucghe` (`ID_DANHMUC`);
+
+--
 -- Các ràng buộc cho bảng `chitiet_thietbi`
 --
 ALTER TABLE `chitiet_thietbi`
-  ADD CONSTRAINT `FK_CT_THIETBI_KHONG_GIAN` FOREIGN KEY (`ID_KHONG_GIAN`) REFERENCES `khonggian` (`ID_KHONG_GIAN`),
-  ADD CONSTRAINT `FK_CT_THIETBI_THIET_BI` FOREIGN KEY (`ID_THIET_BI`) REFERENCES `thietbi` (`ID_THIET_BI`);
-
---
--- Các ràng buộc cho bảng `danhmuc_ghe`
---
-ALTER TABLE `danhmuc_ghe`
-  ADD CONSTRAINT `FK_DANHMUCGHE_GIA` FOREIGN KEY (`ID_GIA`) REFERENCES `gia` (`ID_GIA`);
+  ADD CONSTRAINT `FK_CTTB_KhongGian` FOREIGN KEY (`ID_KHONG_GIAN`) REFERENCES `khonggian` (`ID_KHONG_GIAN`),
+  ADD CONSTRAINT `FK_CTTB_ThietBi` FOREIGN KEY (`ID_THIET_BI`) REFERENCES `thietbi` (`ID_THIET_BI`);
 
 --
 -- Các ràng buộc cho bảng `ghe`
 --
 ALTER TABLE `ghe`
-  ADD CONSTRAINT `FK_GHE_KHONG_GIAN` FOREIGN KEY (`ID_KHONG_GIAN`) REFERENCES `khonggian` (`ID_KHONG_GIAN`);
+  ADD CONSTRAINT `FK_Ghe_DanhMuc` FOREIGN KEY (`ID_DANH_MUC`) REFERENCES `danhmucghe` (`ID_DANHMUC`),
+  ADD CONSTRAINT `FK_Ghe_KhongGian` FOREIGN KEY (`ID_KHONG_GIAN`) REFERENCES `khonggian` (`ID_KHONG_GIAN`);
 
 --
 -- Các ràng buộc cho bảng `hoadon`
 --
 ALTER TABLE `hoadon`
-  ADD CONSTRAINT `FK_HOADON_LICHDAT` FOREIGN KEY (`ID_LICHDAT`) REFERENCES `lich_dat` (`ID_LICH_DAT`);
+  ADD CONSTRAINT `FK_HoaDon_LichDat` FOREIGN KEY (`ID_LICHDAT`) REFERENCES `lichdat` (`ID_LICH_DAT`);
 
 --
--- Các ràng buộc cho bảng `lich_dat`
+-- Các ràng buộc cho bảng `lichdat`
 --
-ALTER TABLE `lich_dat`
-  ADD CONSTRAINT `FK_LICHDAT_GHE` FOREIGN KEY (`ID_GHE`) REFERENCES `ghe` (`ID_GHE`),
-  ADD CONSTRAINT `FK_LICHDAT_KHONG_GIAN` FOREIGN KEY (`ID_KHONG_GIAN`) REFERENCES `khonggian` (`ID_KHONG_GIAN`),
-  ADD CONSTRAINT `FK_LICHDAT_NGUOIDUNG` FOREIGN KEY (`IDND`) REFERENCES `nguoidung` (`IDND`);
+ALTER TABLE `lichdat`
+  ADD CONSTRAINT `FK_LichDat_Ghe` FOREIGN KEY (`ID_GHE`) REFERENCES `ghe` (`ID_GHE`),
+  ADD CONSTRAINT `FK_LichDat_KhongGian` FOREIGN KEY (`ID_KHONG_GIAN`) REFERENCES `khonggian` (`ID_KHONG_GIAN`),
+  ADD CONSTRAINT `FK_LichDat_NguoiDung` FOREIGN KEY (`IDND`) REFERENCES `nguoidung` (`IDND`);
 
 --
 -- Các ràng buộc cho bảng `thongbao`
 --
 ALTER TABLE `thongbao`
-  ADD CONSTRAINT `FK_THONGBAO_NGUOIDUNG` FOREIGN KEY (`IDND`) REFERENCES `nguoidung` (`IDND`);
+  ADD CONSTRAINT `FK_ThongBao_NguoiDung` FOREIGN KEY (`IDND`) REFERENCES `nguoidung` (`IDND`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
