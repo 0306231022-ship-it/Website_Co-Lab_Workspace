@@ -1,22 +1,26 @@
 // server.js
-import 'dotenv/config.js';
-import express from 'express';
-import cors from 'cors';
-import cookieParser from 'cookie-parser';
-import http from 'http';
-import { Server } from 'socket.io';
+import "dotenv/config.js";
+import express from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import http from "http";
+import { Server } from "socket.io";
 
-import NguoiDungRoute from './routers/NguoiDungRouter.js';
-
+import NguoiDungRoute from "./routers/NguoiDungRouter.js";
+// import router from "./routers/khonggianRouter.js";
+// import router from "./routers/thietbiRouter.js";
+import adminRouter from "./routers/adminRouter.js";
 //import './CleanDB.js';
 
 const app = express();
 
 // Cấu hình CORS cho React frontend
-app.use(cors({
-  origin: 'http://localhost:3000',
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  }),
+);
 
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -26,15 +30,15 @@ app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
 // Routes
-app.get('/', (req, res) => res.json({ message: 'Server API running' }));
-app.use('/api/NguoiDung', NguoiDungRoute);
-
+app.get("/", (req, res) => res.json({ message: "Server API running" }));
+app.use("/api/NguoiDung", NguoiDungRoute);
+app.use("/api/admin", adminRouter);
 // Middleware xử lý lỗi
 app.use((req, res) =>
   res.json({
     Status: true,
-    message: 'Không thể kết nối đến hệ thống, Vui lòng thử lại sau!'
-  })
+    message: "Không thể kết nối đến hệ thống, Vui lòng thử lại sau!",
+  }),
 );
 
 app.use((err, req, res, next) => {
@@ -43,7 +47,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({
     message: err.message,
     url: req.originalUrl,
-    body: req.body
+    body: req.body,
   });
 });
 
@@ -55,8 +59,8 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: "http://localhost:3000",
-    credentials: true
-  }
+    credentials: true,
+  },
 });
 
 // Lắng nghe kết nối socket
@@ -74,3 +78,5 @@ io.on("connection", (socket) => {
 export { io };
 
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+
