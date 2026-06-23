@@ -2,7 +2,7 @@
 import { execute } from '../config/db.js';
 
 const ThietBi = {
-    // 1. Lấy tất cả thiết bị (Có tích hợp phân trang LIMIT và OFFSET)
+    
     // Mặc định nếu không truyền page thì là trang 1, không truyền limit thì lấy 10 cái
     getAll: async (page = 1, limit = 10) => {
         try {
@@ -75,16 +75,7 @@ const ThietBi = {
         }
     },
 
-    // 5. Xóa thiết bị
-    // delete: async (id) => {
-    //     try {
-    //         const [result] = await execute("DELETE FROM thietbi WHERE ID_THIET_BI = ?", [id]);
-    //         return result.affectedRows > 0;
-    //     } catch (error) {
-    //         console.error(` Lỗi Database trong delete (${id}):`, error.message);
-    //         throw new Error("Không thể xóa thiết bị khỏi cơ sở dữ liệu!");
-    //     }
-    // }
+    
 };
 
 export default ThietBi;

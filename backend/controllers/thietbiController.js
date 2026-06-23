@@ -96,22 +96,3 @@ export const updateThietBi = async (req, res) => {
     }
 };
 
-// [DELETE] /api/admin/thietbi/:id
-// export const deleteThietBi = async (req, res) => {
-//     try {
-//         const { id } = req.params;
-
-//         // --- VALIDATION ID ---
-//         if (!id || isNaN(id) || parseInt(id) <= 0) {
-//             return res.status(400).json({ success: false, message: "ID thiết bị không hợp lệ!" });
-//         }
-
-//         const deleted = await ThietBi.delete(id);
-//         if (!deleted) {
-//             return res.status(404).json({ success: false, message: "Thiết bị không tồn tại hoặc đã bị xóa từ trước!" });
-//         }
-//         res.status(200).json({ success: true, message: "Xóa thiết bị thành công!" });
-//     } catch (error) {
-//         res.status(500).json({ success: false, message: error.message });
-//     }
-// };
