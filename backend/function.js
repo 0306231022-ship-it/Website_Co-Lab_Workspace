@@ -1,14 +1,11 @@
-import { randomUUID, randomBytes } from 'crypto';
+
 import { hash, compare } from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import NodeGeocoder from 'node-geocoder';
 import nodemailer from 'nodemailer';
+import fs from 'fs';
+import path from 'path';
 
-const options = {
-  provider: 'openstreetmap',
-};
 
-const geocoder = NodeGeocoder(options);
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
@@ -69,6 +66,27 @@ export const guiEmailOTP = async (emailNguoiNhan, maOTP) => {
     console.error("Gửi mail thất bại lỗi là:", error.message);
     return { success: false, error: error.message };
   }
+};
+export const xoaFileCu = (duongDanTuDatabase) => {
+    if (!duongDanTuDatabase) return false;
+
+    const duongDanTuyetDoi = path.resolve(duongDanTuDatabase);
+
+    // 1. Kiểm tra xem file có tồn tại không
+    if (fs.existsSync(duongDanTuyetDoi)) {
+        try {
+            // 2. Tiến hành xóa đồng bộ
+            fs.unlinkSync(duongDanTuyetDoi);
+            console.log(`🗑️ Đã xóa file thành công: ${duongDanTuDatabase}`);
+            return true; // Trả về true nếu xóa thành công thành công
+        } catch (err) {
+            console.error(`❌ Lỗi khi xóa file: ${err.message}`);
+            return false; // Trả về false nếu có lỗi hệ thống (ví dụ file bị khóa)
+        }
+    } else {
+        console.log(`⚠️ File không tồn tại trên ổ cứng: ${duongDanTuDatabase}`);
+        return false; // Trả về false vì không có file để xóa
+    }
 };
 
 

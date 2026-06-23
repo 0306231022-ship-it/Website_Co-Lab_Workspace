@@ -257,7 +257,7 @@ export default class NguoiDungController{
       }
       static async CapNhat_anhDaiDien(req,res){
         try {
-           const userId = req.user.id;
+         const userId = req.user.id;
          const files = req.files;
          let pathFile = files[0].filename;
          let DuongDan = 'uploads/DaiDien/' + pathFile;

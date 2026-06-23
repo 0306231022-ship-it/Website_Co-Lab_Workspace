@@ -7,6 +7,7 @@ import http from 'http';
 import { Server } from 'socket.io';
 
 import NguoiDungRoute from './routers/NguoiDungRouter.js';
+import adminRouter from './routers/adminRouter.js';
 
 //import './CleanDB.js';
 
@@ -28,6 +29,7 @@ app.use("/uploads", express.static("uploads"));
 // Routes
 app.get('/', (req, res) => res.json({ message: 'Server API running' }));
 app.use('/api/NguoiDung', NguoiDungRoute);
+app.use('/api/admin' , adminRouter);
 
 // Middleware xử lý lỗi
 app.use((req, res) =>
