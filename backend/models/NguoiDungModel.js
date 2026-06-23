@@ -60,5 +60,56 @@ static async findByEmail(Email) {
       return false;
     }
    }
+   static async ChinhSua_TrangThai(IDND,TrangThai){
+    try {
+      const [CapNhat] = await execute(`
+        UPDATE nguoidung
+        SET TRANG_THAI=?
+        WHERE IDND=?
+        `,[TrangThai,IDND]);
+      return CapNhat.affectedRows>0 ? true : false;
+    } catch (error) {
+       throw new Error('Database query failed: ' + error.message);
+       return false;
+    }
+   }
+   static async CapNhat_thongtin(userId,TENND){
+      try {
+        const [CapNhat] = await execute(`
+          UPDATE nguoidung
+          SET TENND = ?
+          WHERE IDND =?
+          `, [TENND,userId]);
+        return CapNhat.affectedRows>0 ? true :false;
+      } catch (error) {
+        throw new Error('Database query failed: ' + error.message);
+        return false;
+      }
+   }
+   static async CapNhat_Anh(userId,DuongDan){
+      try {
+        const [ketqua] = await execute(`
+          UPDATE nguoidung
+          SET HINH_ANH = ?
+          WHERE IDND = ?
+          `,[DuongDan,userId]);
+        return ketqua.affectedRows>0 ? true : false;
+      } catch (error) {
+         throw new Error('Database query failed: ' + error.message);
+         return false;
+      }
+   }
+   static async DSND(limit, offset){
+      try {
+        const [ketqua] = await execute(`
+          SELECT*FROM nguoidung
+          ORDER BY NGAY_TAO DESC 
+          LIMIT ? OFFSET ?
+          `,[limit,offset]);
+        return ketqua;
+      } catch (error) {
+         throw new Error('Database query failed: ' + error.message);
+      }
+   }
 }
  

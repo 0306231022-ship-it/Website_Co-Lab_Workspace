@@ -194,17 +194,148 @@ export default class NguoiDungController{
             });
         }
       }
-      static async DangXuat(req, res) {
-
-      }
       static async ThongTin_NguoiDung(req, res) {
-
+          const userId = req.user.id;
+          try {
+            const ketqua= await NguoiDungModel.findByid(userId);
+            if(!ketqua){
+               return res.status(500).json({
+                  success:false,
+                  message:'Không thể lấy thông tin người dùng, Vui lòng kiểm tra lại!'
+               })
+            }
+            return res.status(200).json({
+               success:true,
+               dulieu: ketqua
+            })
+          } catch (error) {
+             return res.status(500).json({
+                success: false,
+                message: 'Đăng ký thất bại: ' + error.message
+            });
+          }
       }
       static async ChinhSua_NguoiDung(req, res) {
+         //Cập nhật tên
+         /*{
+            TENND
+         }*/
+        const dulieu = req.body;
+        const userId = req.user.id;
+        try {
+            await Promise.all([
+               body('TENND')
+                  .notEmpty().withMessage('Tên người dùng không được để trống')
+                  .isLength({ max: 50 }).withMessage('Tối đa 50 ký tự!')
+                  .run(req),
+            ])
+             const errors = validationResult(req);
+             if (!errors.isEmpty()) {
+                return res.status(400).json({
+                  success: false,
+                  message: 'Dữ liệu không hợp lệ!',
+                  errors: errors.array().map(err => err.msg)
+               });
+            };
+            const CapNhat = await NguoiDungModel.CapNhat_thongtin(userId,dulieu.TENND);
+            if(!CapNhat){
+               return res.status(500).json({
+                  success:false,
+                  message:'Cập nhật dữ liệu thất bại!'
+               })
+            }
+            return res.status(200).json({
+               success:true,
+               message:'Cập nhật dữ liệu thành công!'
+            })
+        } catch (error) {
+             return res.status(500).json({
+                success: false,
+                message: 'Chỉnh sửa thông tin người dùng thất bại: ' + error.message
+            });
+        }
+      }
+      static async CapNhat_anhDaiDien(req,res){
+        try {
+           const userId = req.user.id;
+         const files = req.files;
+         let pathFile = files[0].filename;
+         let DuongDan = 'uploads/DaiDien/' + pathFile;
+            if(!pathFile){
+               return res.json({
+                  status:true,
+                  message:'Lỗi tải ảnh!'
+               })
+            };
+            const ketqua = await NguoiDungModel.CapNhat_Anh(userId,DuongDan);
+            if(!ketqua){
+               return res.status(500).json({
+                  success:false,
+                  message:'Cập nhật ảnh đại diện thất bại!'
+               })
+            }
+            return res.status(200).json({
+               success:true,
+               message:'Cập nhật thành công ảnh đại diện!'
+            })
 
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                message: 'Chỉnh sửa thông tin ảnh đại diện thất bại: ' + error.message
+            });
+        }
       }
       static async ChinhSua_TrangThai_NguoiDung(req, res) {
-         
+         /*{
+            IDND,
+            TrangThai
+         }*/
+        const DuLieu = req.body;
+        try {
+            await Promise.all([
+               body('IDND')
+               .notEmpty()
+               .withMessage('IDND không được bỏ trống')
+               .isInt().withMessage('Giá trị nhập vào phải là một số nguyên!')
+               .custom(async (value) => {
+                  const kiemtra = await NguoiDungModel.findByid(value);
+                  if(!kiemtra) throw new Error('Người dùng không tồn tại!');
+                  return true
+               })
+               .run(req),
+               body('TrangThai')
+                  .notEmpty()
+                  .withMessage('IDND không được bỏ trống')
+                  .isIn([0, 1, '0', '1']).withMessage('Giá trị nhập vào chỉ được phép là số 0 hoặc 1!')
+                  .isInt().withMessage('Giá trị nhập vào phải là một số nguyên!')
+                  .run(req),
+            ])
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+               return res.status(400).json({
+                  success: false,
+                  message: 'Dữ liệu không hợp lệ!',
+                  errors: errors.array().map(err => err.msg)
+               });
+            };
+            const chinhsua = await NguoiDungModel.ChinhSua_TrangThai(DuLieu.IDND,DuLieu.TrangThai);
+            if(!chinhsua){
+               return res.status(500).json({
+                  success:false,
+                  message:'Cập nhật trạng thái thất bại!'
+               })
+            }
+            return res.status(200).json({
+               success:true,
+               message:'Cập nhật trạng thái người dùng thành công!'
+            })
+        } catch (error) {
+          return res.status(500).json({
+                success: false,
+                message: 'Chỉnh sửa trạng thái thất bại: ' + error.message
+            });
+        }
       }
       static async QuenMatKhau(req, res) {
          /*{
@@ -339,6 +470,23 @@ export default class NguoiDungController{
         }
       }
       static async DanhSach_NguoiDung(req, res) {
-
+          const page = parseInt(req.query.page) || 1;
+          const limit = parseInt(req.query.limit) || 10;
+         const offset = (page - 1) * limit;
+         try {
+            const ketqua = await NguoiDungModel.DSND(limit,offset);
+            return res.status(200).json({
+               success:true,
+               dulieu:ketqua
+            })
+         } catch (error) {
+             return res.status(500).json({
+                success: false,
+                message: 'Tảidanh sách thất bại: ' + error.message
+            });
+         }
+      }
+      static async TimKiem_Ten(req,res){
+         
       }
 }
