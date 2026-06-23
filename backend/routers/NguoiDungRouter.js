@@ -16,4 +16,6 @@ nguoidungRouter.post('/CapNhat_TrangThai', upload.none(), NguoiDungController.Ch
 nguoidungRouter.post('/ChinhSua_thongTin' , upload.none(), verifyToken , NguoiDungController.ChinhSua_NguoiDung);
 nguoidungRouter.post('/ChinhSua_Anh', createUpload('DaiDien').any(),verifyToken, NguoiDungController.CapNhat_anhDaiDien);
 
+nguoidungRouter.get('/LayDanhSach', NguoiDungController.DanhSach_NguoiDung);
+nguoidungRouter.get('/TimKiem', NguoiDungController.TimKiem_Ten);
 export default nguoidungRouter;

@@ -2,7 +2,7 @@ import { hash, compare } from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import NguoiDungModel from '../models/NguoiDungModel.js';
 import XacThucOTPModel from '../models/XacThucOTPModel.js';
-import { body, validationResult } from 'express-validator';
+import { body, query, validationResult } from 'express-validator';
 import { taoMaOTP , guiEmailOTP , generateToken } from '../function.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -477,16 +477,45 @@ export default class NguoiDungController{
             const ketqua = await NguoiDungModel.DSND(limit,offset);
             return res.status(200).json({
                success:true,
-               dulieu:ketqua
+               DanhSach:ketqua.DanhSach,
+               TongDanhSach:ketqua.TongDanhSach[0].total
             })
          } catch (error) {
              return res.status(500).json({
                 success: false,
-                message: 'Tảidanh sách thất bại: ' + error.message
+                message: 'Tải danh sách thất bại: ' + error.message
             });
          }
       }
       static async TimKiem_Ten(req,res){
-         
+         try {
+            const DuLieu= req.query.Ten;
+            await Promise.all([
+               query('Ten').notEmpty().withMessage('Không đủ dữ liệu để tìm kiếm!').run(req),
+            ])
+             const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+               return res.status(400).json({
+                  success: false,
+                  errors: errors.array().map(err => err.msg)
+               });
+            };
+            const TimKiemdl = await NguoiDungModel.TimKiem(DuLieu);
+            if(!TimKiemdl){
+               return res.status(500).json({
+                  success:false,
+                  message:'Không tìm thấy người dùng!'
+               })
+            }
+            return res.status(200).json({
+               success:true,
+               dulieu:TimKiemdl
+            })
+         } catch (error) {
+            return res.status(500).json({
+                success: false,
+                message: 'Tìm kiếm người dùng thất bại: ' + error.message
+            });
+         }
       }
 }

@@ -106,10 +106,28 @@ static async findByEmail(Email) {
           ORDER BY NGAY_TAO DESC 
           LIMIT ? OFFSET ?
           `,[limit,offset]);
-        return ketqua;
+        const [tong] = await execute(`
+           SELECT COUNT(*) AS total FROM nguoidung
+        `);
+        return {
+          DanhSach: ketqua,
+          TongDanhSach: tong
+        };
       } catch (error) {
          throw new Error('Database query failed: ' + error.message);
       }
    }
+   static async TimKiem(DuLieu){
+      try {
+        const [TimKiem] = await execute(`
+          SELECT*FROM nguoidung
+          WHERE IDND = ?
+          `,[DuLieu]);
+        return TimKiem.length>0? TimKiem : null
+      } catch (error) {
+         throw new Error('Database query failed: ' + error.message);
+      }
+   }
+
 }
  
