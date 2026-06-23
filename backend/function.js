@@ -41,7 +41,7 @@ export const taoMaOTP = () => {
 export const guiEmailOTP = async (emailNguoiNhan, maOTP) => {
   const mailOptions = {
     // Đảm bảo phần email trong dấu <> khớp 100% với user đăng nhập ở trên
-    from: `"Hệ Thống Xác Thực" <${EMAIL_HE_THONG}>`,
+    from: `"Hệ Thống Xác Thực Co_lab workspace" <${EMAIL_HE_THONG}>`,
     to: emailNguoiNhan,                                     
     subject: 'Mã xác thực OTP của bạn',
     html: `

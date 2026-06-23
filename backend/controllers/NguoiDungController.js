@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import NguoiDungModel from '../models/NguoiDungModel.js';
 import XacThucOTPModel from '../models/XacThucOTPModel.js';
 import { body, validationResult } from 'express-validator';
-import { taoMaOTP , guiEmailOTP } from '../function.js';
+import { taoMaOTP , guiEmailOTP , generateToken } from '../function.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
@@ -12,16 +12,28 @@ const PASSWORD_HASH_ROUNDS = parseInt(process.env.PASSWORD_HASH_ROUNDS) || 10;
 export default class NguoiDungController{
       static async XacThucOTP(req, res) {
          /*{
-            Email: ""
+            Email: "",
+            TrangThai:
+            1: kiểm tra tồn tại
+            2: kiểm tra không tonnf tại
          }*/
          try {
-            const { Email } = req.body;
+            const { Email ,TrangThai } = req.body;
             const user = await NguoiDungModel.findByEmail(Email);
-            if (user) {
-               return res.status(404).json({
-                  success: false,
-                  message: 'Người dùng đã không tồn tại!'
-               });
+            if(TrangThai===1){
+               if (user) {
+                  return res.status(404).json({
+                     success: false,
+                     message: 'Người dùng đã tồn tại!'
+                });
+               }
+            }else{
+               if (!user) {
+                  return res.status(404).json({
+                     success: false,
+                     message: 'Người dùng không tồn tại!'
+                  });
+               }
             }
              const maOTP = taoMaOTP();
              const otpResult = await XacThucOTPModel.ThemOTP(Email, maOTP);
@@ -50,7 +62,55 @@ export default class NguoiDungController{
          }
       }
       static async DangNhap(req, res) {
-
+         /*{
+            Email: "",
+            MatKhau: ""
+         }*/
+        try {
+         const { Email, MatKhau } = req.body;
+         await Promise.all([
+            body('Email').isEmail().withMessage('Email không hợp lệ').run(req),
+            body('MatKhau').notEmpty().withMessage('Mật khẩu không được để trống').run(req),
+         ]);
+         const errors = validationResult(req);
+         if (!errors.isEmpty()) {
+            return res.status(400).json({
+               success: false,
+               message: 'Dữ liệu không hợp lệ!',
+               errors: errors.array().map(err => err.msg)
+            });
+         }
+         const user = await NguoiDungModel.findByEmail(Email);
+         if (!user) {
+            return res.status(404).json({
+               success: false,
+               message: 'Người dùng không tồn tại!'
+            });
+         }
+         const isPasswordValid = await compare(MatKhau, user.MAT_KHAU);
+         if (!isPasswordValid) {
+            return res.status(401).json({
+               success: false,
+               message: 'Mật khẩu không chính xác!'
+            });
+         }
+         const token = generateToken(user);
+         return res.status(200).json({
+            success: true,
+            message: 'Đăng nhập thành công!',
+            ThongTin_NguoiDung: {
+               IDND: user.IDND,
+               TENND: user.TENND,
+               LOAIND: user.LOAIND
+            },
+            token
+         });
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                message: 'Đăng nhập thất bại: ' + error.message
+            });
+        }
       }
       static async DangKy(req, res) {
          /*{
@@ -116,6 +176,13 @@ export default class NguoiDungController{
                message: 'Đăng ký thất bại, vui lòng thử lại sau!'
             });
          }
+         const xoa = await XacThucOTPModel.XoaOTP(Email);
+         if(!xoa){
+            return res.status(500).json({
+               success:false,
+               message:'Lỗi hệ thống khi xóa dữ liệu OTP!'
+            })
+         }
          return res.status(200).json({
                success: true,
                message: 'Đăng ký thành công! Vui đăng nhâp để tiếp tục trải nghiệm',
@@ -137,13 +204,139 @@ export default class NguoiDungController{
 
       }
       static async ChinhSua_TrangThai_NguoiDung(req, res) {
-
+         
       }
       static async QuenMatKhau(req, res) {
-
+         /*{
+            Email:'',
+            MatKhauMoi:'',
+            XacNhanMatKhau: '',
+            OTP:
+         }*/
+         const dulieu = req.body;
+         try {
+            await Promise.all([
+               body('Email').isEmail().withMessage('Email không được bỏ trống').run(req),
+               body('MatKhauMoi').isLength({ min: 6 }).withMessage('Mật khẩu phải có ít nhất 6 ký tự').run(req),
+               body('XacNhanMatKhau').notEmpty().withMessage('Xác nhận mật khẩu không được để trống').run(req),
+               body('XacNhanMatKhau').custom((value, { req }) => {
+                  if (value !== dulieu.MatKhauMoi) {
+                     throw new Error('Xác nhận mật khẩu không khớp');
+                  }
+                  return true;
+               }).run(req),
+               body('OTP').notEmpty().withMessage('Mã OTP không được để trống').run(req),
+               body('OTP').custom(async (value, { req }) => {
+               const otpRecord = await XacThucOTPModel.findByEmail(dulieu.Email);
+                  if (!otpRecord) {
+                     throw new Error('Yêu cầu xác thực không tồn tại hoặc đã bị hủy.');
+                  }
+                  if (otpRecord.SO_LAN_SAI >= 5) {
+                     throw new Error('Bạn đã nhập sai OTP quá nhiều lần. Vui lòng yêu cầu mã mới.');
+                  }
+                  const kiemtra_thoigian_het_han = new Date(otpRecord.NGAY_HET_HAN) < new Date();
+                  if (kiemtra_thoigian_het_han) {
+                     throw new Error('Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới.');
+                  }
+                  if (otpRecord.MA_OTP !== value) {
+                     await XacThucOTPModel.TangSoLanSai(dulieu.Email);
+                     throw new Error('Mã OTP không chính xác. Vui lòng thử lại.');
+                  }  
+                  return true;
+               }).run(req),
+            ]);
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+               return res.status(400).json({
+                  success: false,
+                  message: 'Dữ liệu không hợp lệ!',
+                  errors: errors.array().map(err => err.msg)
+               });
+            };
+            const matKhauHash = await hash(dulieu.MatKhauMoi, PASSWORD_HASH_ROUNDS);
+            const ketqua= await NguoiDungModel.CapNhatMatKhau(dulieu.Email,matKhauHash);
+            if(!ketqua){
+               return res.status(500).json({
+                  success:false,
+                  message:'Đổi mật khẩu thất bại!'
+               })
+            }
+            const xoa = await XacThucOTPModel.XoaOTP(dulieu.Email);
+            if(!xoa){
+               return res.status(500).json({
+                  success:false,
+                  message:'Lỗi hệ thống khi xóa dữ liệu OTP!'
+               })
+            }
+            return res.status(200).json({
+               success: true,
+               message: 'Đổi mật khẩu thành công! Vui đăng nhâp để tiếp tục trải nghiệm',
+            });
+         } catch (error) {
+             return res.status(500).json({
+                success: false,
+                message: 'Đổi mật khẩu thất bại: ' + error.message
+            });
+         }
       }
       static async DoiMatKhau(req, res) {
-
+         /*{
+            MatKhauCu,
+            MatKhauMoi,
+            XacNhanMatKhau
+         }*/
+        try {
+             const userId = req.user.id;
+             const dulieu = req.body;
+             await Promise.all([
+               body('MatKhauCu').notEmpty().withMessage('Mật khẩu không được bỏ trống!').run(req),
+               body('MatKhauCu').custom(async (value, { req }) => {
+                   const user = await NguoiDungModel.findByid(userId);
+                   if (!user) {
+                    throw new Error('Người dùng không tồn tại!');
+                  }
+                  const isPasswordValid = await compare(dulieu.MatKhauCu, user.MAT_KHAU);
+                  if (!isPasswordValid) {
+                    throw new Error('Mật khẩu không chính xác!');
+                  }
+                  return true;
+               }).run(req),
+                body('MatKhauMoi').isLength({ min: 6 }).withMessage('Mật khẩu phải có ít nhất 6 ký tự').run(req),
+                body('MatKhauMoi').notEmpty().withMessage('Mật khẩu mới không được bỏ trống!').run(req),
+                body('XacNhanMatKhau').notEmpty().withMessage('Xác nhận mật khẩu không được bỏ trống').run(req),
+                body('XacNhanMatKhau').custom(async ( value , {req})=>{
+                   if (value !== dulieu.MatKhauMoi) {
+                     throw new Error('Xác nhận mật khẩu không khớp');
+                  }
+                  return true;
+                }).run(req),
+             ]);
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+               return res.status(400).json({
+                  success: false,
+                  message: 'Dữ liệu không hợp lệ!',
+                  errors: errors.array().map(err => err.msg)
+               });
+            };
+            const matKhauHash = await hash(dulieu.MatKhauMoi, PASSWORD_HASH_ROUNDS);
+            const CapNhat = await NguoiDungModel.CapNhatMatKhau_id(userId,matKhauHash);
+            if(!CapNhat){
+               return res.status(500).json({
+                  success:true,
+                  message: 'Đổi mật khẩu thất bại!'
+               })
+            }
+            return res.status(200).json({
+               success:true,
+               message:'Đổi mật khẩu thành công!'
+            })
+        } catch (error) {
+              return res.status(500).json({
+                success: false,
+                message: 'Đổi mật khẩu thất bại: ' + error.message
+            });
+        }
       }
       static async DanhSach_NguoiDung(req, res) {
 

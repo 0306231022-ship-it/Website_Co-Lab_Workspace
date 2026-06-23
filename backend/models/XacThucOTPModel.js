@@ -1,6 +1,4 @@
 import { execute, beginTransaction, rollbackTransaction, commitTransaction } from '../config/db.js';
-
-
 export default class XacThucOTPModel {
     static async ThemOTP(Email, MaOTP) {
         let connection;
@@ -45,6 +43,22 @@ export default class XacThucOTPModel {
                 await rollbackTransaction(connection);
             }
             throw new Error('Database query failed: ' + error.message);
+        }
+    }
+    static async XoaOTP(email){
+        let connection
+        try {
+            connection = await beginTransaction();
+            const [ketqua]= await connection.execute(`
+                DELETE FROM xacthucotp WHERE EMAIL = ?
+                `,[email]);
+            await commitTransaction(connection);
+            return ketqua.affectedRows>0? true : false;
+        } catch (error) {
+            if (connection) {
+                await rollbackTransaction(connection);
+            }
+             throw new Error('Database query failed: ' + error.message);
         }
     }
 
