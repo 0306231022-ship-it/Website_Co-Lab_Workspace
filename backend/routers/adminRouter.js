@@ -1,17 +1,7 @@
-// import { Router } from "express";
-// import adminController from "../controllers/adminController.js";
-// import khonggiancontroller from "../controllers/khonggianController.js";
-// import createUpload from "../middleware/upload.js";
-// import multer from "multer";
-// const adminRouter = Router();
-// adminRouter.post("/themkhonggian", khonggiancontroller.createSpace);
-// //
-// //=========================================
-// console.log("✅ adminRouter loaded");
-// export default adminRouter;
+
 
 import { Router } from "express";
-// import adminController from "../controllers/adminController.js"; // 👈 COMMENT HOẶC XÓA DÒNG NÀY ĐI
+
 
 import { 
     getAllThietBi, 
