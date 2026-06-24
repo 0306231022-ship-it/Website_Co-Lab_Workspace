@@ -11,8 +11,10 @@ const upload = multer();
 adminRouter.post('/ThemChiNhanh', createUpload('ChiNhanh').any(), ChiNhanhController.Them_ChiNhanh);
 adminRouter.post('/CapNhat_thongTinMem', upload.none(), ChiNhanhController.ChinhSua_Ten_DiaChi);
 adminRouter.post('/ChinhSua_HinhAnh' , createUpload('ChiNhanh').any(), ChiNhanhController.ChinhSua_HinhAnh )
-
-
+adminRouter.post('/CapNhat_TrangThai' , upload.none(), ChiNhanhController.ChinhSua_TrangThai_ChiNhanh);
+adminRouter.get('/laydanhsach' , ChiNhanhController.DanhSach_ChiNhanh);
+adminRouter.get('/laychitiet',ChiNhanhController.ChiTiet_ChiNhanh);
+adminRouter.get('/TimKiem', ChiNhanhController.TimKiem_ChiNhanh);
 //
 //=========================================
 console.log("✅ adminRouter loaded");

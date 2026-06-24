@@ -71,4 +71,69 @@ export default class ChiNhanhModel{
            throw new Error('Database query failed: ' + error.message);
         }
     }
+    static async CapNhatTrangThai(IDCN,NgayBatDau,NgayHoanThanh){
+        try {
+            const [update] = await execute(`
+                UPDATE chinhanh
+                SET NGAY_CAP_NHAT = NOW() , NGAY_BAO_TRI=?, NGAY_XONG=?
+                WHERE ID_CHI_NHANH = ?
+                `,[NgayBatDau,NgayHoanThanh,IDCN]);
+            return update.affectedRows>0?true:false;
+        } catch (error) {
+            throw new Error('Database query failed: ' + error.message);
+        }
+    }
+    static async LayDanhSach(limit,offset){
+        try {
+            const [DanhSach] = await execute(`
+                SELECT*FROM chinhanh
+                 LIMIT ? OFFSET ?
+                `,[limit,offset]);
+            const [TongSo] = await execute(`
+                 SELECT COUNT(*) AS total FROM chinhanh
+                `);
+            return {
+                DanhSach: DanhSach,
+                TongDanhSach: TongSo[0].total
+            };
+            
+        } catch (error) {
+             throw new Error('Database query failed: ' + error.message);
+        }
+    }
+    static async TimKiem(DiaChi,TrangThai){
+        try {
+            const [danhsach] = await execute(`
+                SELECT*FROM chinhanh
+                WHERE TRANG_THAI=? AND DIA_CHI LIKE ?
+                `,[TrangThai,`%${DiaChi}%`]);
+            return danhsach;
+        } catch (error) {
+            throw new Error('Database query failed: ' + error.message);
+        }
+    }
+    static async khoa_chinhanh(){
+        try {
+            const [update] = await execute(`
+                UPDATE chinhanh
+                SET TRANG_THAI = 2
+                WHERE TRANG_THAI = 1 AND NGAY_BAO_TRI <= NOW();
+                `);
+            return update.affectedRows? true : false;
+        } catch (error) {
+             throw new Error('Database query failed: ' + error.message);
+        }
+    }
+    static async MoChiNhanh(){
+        try {
+            const [update] = await execute(`
+                UPDATE chinhanh
+                SET TRANG_THAI = 1, NGAY_BAO_TRI = NULL, NGAY_XONG = NULL
+                WHERE TRANG_THAI = 2 AND NGAY_XONG <= NOW();
+                `);
+            return update.affectedRows>0 ? true : false;
+        } catch (error) {
+             throw new Error('Database query failed: ' + error.message);
+        }
+    }
 }

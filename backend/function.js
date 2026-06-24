@@ -71,8 +71,9 @@ export const xoaFileCu = (duongDanTuDatabase) => {
     if (!duongDanTuDatabase) return false;
 
     const duongDanTuyetDoi = path.resolve(duongDanTuDatabase);
+    console.log(duongDanTuyetDoi)
 
-    // 1. Kiểm tra xem file có tồn tại không
+  
     if (fs.existsSync(duongDanTuyetDoi)) {
         try {
             // 2. Tiến hành xóa đồng bộ

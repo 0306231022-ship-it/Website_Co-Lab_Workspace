@@ -6,6 +6,44 @@ import { body, query, validationResult } from 'express-validator';
 
 export default class ChiNhanhController{
    static async DanhSach_ChiNhanh(req, res) {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 3;
+        const offset = (page - 1) * limit;
+        try {
+            await Promise.all([
+                query('page')
+                     .notEmpty()
+                     .withMessage('Số lượng không được bỏ trống')
+                     .isInt({ min: 0 })
+                     .withMessage('Số trang phải là số nguyên và không được âm!')
+                    .run(req),
+            ]);
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Dữ liệu không hợp lệ!',
+                    errors: errors.array().map(err => err.msg)
+                });
+            }
+            const danhsach = await ChiNhanhModel.LayDanhSach(limit,offset);
+            if(!danhsach){
+                return res.status(500).json({
+                    success:false,
+                    message:'Lỗi khi tải danh sách chi nhánh!'
+                })
+            }
+            return res.status(200).json({
+                success:true,
+                DanhSach: danhsach.DanhSach,
+                TongDS: danhsach.TongDanhSach
+            })
+        } catch (error) {
+             return res.status(500).json({
+                success: false,
+                message: 'Lấy danh sách thất bại: ' + error.message
+            });
+        }
 
    }
     static async Them_ChiNhanh(req, res) {
@@ -174,13 +212,134 @@ if (!errors.isEmpty()) {
         }
     }
     static async ChinhSua_TrangThai_ChiNhanh(req, res) {
+        /*{
+            IDCN,
+            TrangThai,
+            NgayBatDau,
+            NgayKetThuc
+        }*/
+        const dulieu = req.body;
+        try {
+            await Promise.all([
+                body('NgayBatDau')
+                  .notEmpty()
+                  .withMessage('ngày bắt đầu không được bỏ trống')
+                  .custom(async (value, { req }) => {
+                    //Trường hợp 1: phải lớn hơn hoặc bằng ngày hiện tại
+                    const now = new Date();
+                    const startDate = new Date(value);
+                    if (startDate < now) {
+                         throw new Error('Ngày chỉnh sửa chi nhánh phải lớn hơn hoặc bằng ngày hiện tại!');
+                    }
+                    //Trường hợp 2: lớn hơn thời gian cuối cùng mà khách thuê
 
+                    return true;
+                  }).run(req),
+                  body('NgayHoanThanh')
+                     .notEmpty()
+                  .withMessage('ngày hoàn thành không được bỏ trống')
+                  .custom(async (value, { req }) => {
+                    //Trường hợp 1: phải lớn hơn hoặc bằng ngày bắt đầu
+
+                    const endDate = new Date(value);
+                    const startDate = new Date(dulieu.NgayBatDau)
+                    if (endDate < startDate ) {
+                         throw new Error('Ngày hoàn thành chi nhánh phải lớn hơn hoặc bằng ngày bắt đầu!');
+                    }
+                    return true;
+                  }).run(req),
+                  body('IDCN')
+        .notEmpty().withMessage('ID chi nhánh là thông tin bắt buộc')
+        .isInt().withMessage('Giá trị nhập vào phải là một số nguyên!')
+        .custom(async (value) => {
+            const kiemtra = await ChiNhanhModel.kiemtraid(value);
+            if (!kiemtra) throw new Error('ID chi nhánh không tồn tại!');
+            return true;
+        })
+        .run(req)
+
+            ]);
+            const errors = validationResult(req);
+if (!errors.isEmpty()) {
+    return res.status(400).json({
+        success: false,
+        message: 'Dữ liệu không hợp lệ!',
+        errors: errors.array().map(err => err.msg)
+    });
+}
+        const update = await ChiNhanhModel.CapNhatTrangThai(dulieu.IDCN,dulieu.NgayBatDau,dulieu.NgayHoanThanh);
+        if(!update){
+            return res.status(500).json({
+                success:false,
+                message:'Cập nhật trạng thái chi nhánh thất bại!'
+            })
+        }
+        return res.status(200).json({
+            success:true,
+            message:'Cập nhật trạng thái chi nhánh thành công!'
+        })
+        } catch (error) {
+             return res.status(500).json({
+                success: false,
+                message: 'Cập nhật hình ảnh chi nhánh thất bại: ' + error.message
+            });
+        }
     }
     static async ChiTiet_ChiNhanh(req, res) {
-
+        const IDCN = req.query.IDCN;
+        try {
+            await Promise.all([
+                body('IDCN')
+                  .notEmpty().withMessage('ID chi nhánh là thông tin bắt buộc')
+        .isInt().withMessage('Giá trị nhập vào phải là một số nguyên!')
+        .custom(async (value) => {
+            const kiemtra = await ChiNhanhModel.kiemtraid(value);
+            if (!kiemtra) throw new Error('ID chi nhánh không tồn tại!');
+            return true;
+        })
+        .run(req)   
+            ]);
+            const errors = validationResult(req);
+if (!errors.isEmpty()) {
+    return res.status(400).json({
+        success: false,
+        message: 'Dữ liệu không hợp lệ!',
+        errors: errors.array().map(err => err.msg)
+    });
+}       
+        const chitiet = await ChiNhanhModel.LayChiTiet(IDCN);
+        if(!chitiet){
+            return res.status(500).json({
+                success:false,
+                message:'Lỗi khi tải chi tiết chi nhánh!'
+            })
+        }
+        return res.status(200).json({
+            success:true,
+            chitiet:chitiet
+        })
+        } catch (error) {
+             return res.status(500).json({
+                success: false,
+                message: 'Lấy chi tiết chi nhánh thất bại: ' + error.message
+            })
+        }
     }
     static async TimKiem_ChiNhanh(req, res) {
-
+        const DiaChi = req.query.DiaChi;
+        const TrangThai = req.query.TrangThai;
+        try {
+            const danhsach = await ChiNhanhModel.TimKiem(DiaChi,TrangThai);
+            return res.status(200).json({
+                success:true,
+                danhsach:danhsach
+            })
+        } catch (error) {
+             return res.status(500).json({
+                success: false,
+                message: 'Tìm kiếm chi nhánh thất bại: ' + error.message
+            })
+        }
     }
 
 }
