@@ -290,14 +290,14 @@ if (!errors.isEmpty()) {
         const IDCN = req.query.IDCN;
         try {
             await Promise.all([
-                body('IDCN')
+                query('IDCN')
                   .notEmpty().withMessage('ID chi nhánh là thông tin bắt buộc')
-        .isInt().withMessage('Giá trị nhập vào phải là một số nguyên!')
-        .custom(async (value) => {
-            const kiemtra = await ChiNhanhModel.kiemtraid(value);
-            if (!kiemtra) throw new Error('ID chi nhánh không tồn tại!');
-            return true;
-        })
+                  .isInt().withMessage('Giá trị nhập vào phải là một số nguyên!')
+                  .custom(async (value) => {
+                    const kiemtra = await ChiNhanhModel.kiemtraid(value);
+                    if (!kiemtra) throw new Error('ID chi nhánh không tồn tại!');
+                    return true;
+                })
         .run(req)   
             ]);
             const errors = validationResult(req);

@@ -4,6 +4,7 @@ import KhongGianController from "../controllers/KhongGianController.js";
 const adminRouter = Router();
 import createUpload from '../middleware/upload.js';
 import multer from "multer";
+import ChiTietThietBiController from "../controllers/ChiTiet_ThietBiController.js";
 const upload = multer();
 //==========================================
 // xử lí thông tin website
@@ -23,6 +24,8 @@ adminRouter.post('/ChinhSuaAnh', createUpload('KhongGian').any(), KhongGianContr
 adminRouter.post('/ChinhSua_TrangThai_KhongGian' , upload.none(), KhongGianController.ChinhSua_TrangThai_KhongGian);
 adminRouter.get('/DanhSach_khonggian' , KhongGianController.DanhSach_KhongGian);
 adminRouter.get('/TimKiem_khonggian', KhongGianController.TimKiem_KhongGian);
+
+adminRouter.post('/CapThietBi' , upload.none(), ChiTietThietBiController.CapThietBi);
 //CHƯA VIẾT API LẤY CHI TIẾT
 //ADMIN
 //=========================================

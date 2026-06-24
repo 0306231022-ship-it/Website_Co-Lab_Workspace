@@ -78,7 +78,7 @@ export default class KhongGianModel {
                 SELECT*FROM khonggian
                 WHERE ID_CHI_NHANH = ?
                  LIMIT ? OFFSET ?
-                `,[limit,offset, ID]);
+                `,[ID,limit,offset]);
             const [TongSo] = await execute(`
                  SELECT COUNT(*) AS total FROM khonggian
                 `);
