@@ -1,6 +1,7 @@
 import { hash, compare } from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import ChiNhanhModel from '../models/ChiNhanhModel.js';
+import KhongGianModel from '../models/KhongGianModel.js';
 import { xoaFileCu } from '../function.js';
 import { body, query, validationResult } from 'express-validator';
 
@@ -306,17 +307,28 @@ if (!errors.isEmpty()) {
         message: 'Dữ liệu không hợp lệ!',
         errors: errors.array().map(err => err.msg)
     });
-}       
-        const chitiet = await ChiNhanhModel.LayChiTiet(IDCN);
-        if(!chitiet){
+}       const limit = 5;
+        const offset = 0;
+        const [chitiet1,chitiet2] = await Promise.all([
+             ChiNhanhModel.LayChiTiet(IDCN),
+            KhongGianModel.LayDanhSach(limit,offset, IDCN)
+        ]);
+        if(!chitiet1){
             return res.status(500).json({
                 success:false,
                 message:'Lỗi khi tải chi tiết chi nhánh!'
             })
         }
+          if(!chitiet2){
+            return res.status(500).json({
+                success:false,
+                message:'Lỗi khi tải danh sách không gian!'
+            })
+        }
         return res.status(200).json({
             success:true,
-            chitiet:chitiet
+            chitiet1:chitiet1,
+            chitiet2:chitiet2
         })
         } catch (error) {
              return res.status(500).json({

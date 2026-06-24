@@ -18,8 +18,13 @@ adminRouter.get('/laychitiet',ChiNhanhController.ChiTiet_ChiNhanh);
 adminRouter.get('/TimKiem', ChiNhanhController.TimKiem_ChiNhanh);
 
 adminRouter.post('/ThemKhongGian' , createUpload('KhongGian').any(), KhongGianController.Them_KhongGian);
-adminRouter.post('/ChinhSuaTen_kg', upload.none , )
-//
+adminRouter.post('/ChinhSuaTen_kg', upload.none() , KhongGianController.ChinhSua_TenKhongGian );
+adminRouter.post('/ChinhSuaAnh', createUpload('KhongGian').any(), KhongGianController.ChinhAnh);
+adminRouter.post('/ChinhSua_TrangThai_KhongGian' , upload.none(), KhongGianController.ChinhSua_TrangThai_KhongGian);
+adminRouter.get('/DanhSach_khonggian' , KhongGianController.DanhSach_KhongGian);
+adminRouter.get('/TimKiem_khonggian', KhongGianController.TimKiem_KhongGian);
+//CHƯA VIẾT API LẤY CHI TIẾT
+//ADMIN
 //=========================================
 console.log("✅ adminRouter loaded");
 export default adminRouter;

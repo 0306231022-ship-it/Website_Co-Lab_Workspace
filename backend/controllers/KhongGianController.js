@@ -4,7 +4,54 @@ import KhongGianModel from '../models/KhongGianModel.js';
 import { body, query, validationResult } from 'express-validator';
 export default class KhongGianController{
     static async DanhSach_KhongGian(req, res) {
-
+          const page = parseInt(req.query.page) || 1;
+                const limit = parseInt(req.query.limit) || 5;
+                const offset = (page - 1) * limit;
+                try {
+                    await Promise.all([
+                        query('page')
+                             .notEmpty()
+                             .withMessage('Số lượng không được bỏ trống')
+                             .isInt({ min: 0 })
+                             .withMessage('Số trang phải là số nguyên và không được âm!')
+                            .run(req),
+                        query('IDCN')
+                                              .notEmpty().withMessage('ID chi nhánh là thông tin bắt buộc')
+                                    .isInt().withMessage('Giá trị nhập vào phải là một số nguyên!')
+                                    .custom(async (value) => {
+                                        const kiemtra = await ChiNhanhModel.kiemtraid(value);
+                                        if (!kiemtra) throw new Error('ID chi nhánh không tồn tại!');
+                                        return true;
+                                    })
+                                    .run(req)   
+                    ]);
+                    const errors = validationResult(req);
+                    if (!errors.isEmpty()) {
+                        return res.status(400).json({
+                            success: false,
+                            message: 'Dữ liệu không hợp lệ!',
+                            errors: errors.array().map(err => err.msg)
+                        });
+                    }
+                    const danhsach = await KhongGianModel.LayDanhSach(limit,offset);
+                    if(!danhsach){
+                        return res.status(500).json({
+                            success:false,
+                            message:'Lỗi khi tải danh sách không gian!'
+                        })
+                    }
+                    return res.status(200).json({
+                        success:true,
+                        DanhSach: danhsach.DanhSach,
+                        TongDS: danhsach.TongDanhSach
+                    })
+                } catch (error) {
+                     return res.status(500).json({
+                        success: false,
+                        message: 'Lấy danh sách thất bại: ' + error.message
+                    });
+                }
+        
     }
     static async Them_KhongGian(req, res) {
        const dulieu = req.body;
@@ -69,19 +116,172 @@ export default class KhongGianController{
     static async ChinhSua_TenKhongGian(req, res) {
         const dulieu = req.body;
         try {
-            
+            await Promise.all([
+                body('IDKG')
+                    .notEmpty().withMessage('ID không gian là thông tin bắt buộc')
+                    .isInt().withMessage('Giá trị nhập vào phải là một số nguyên!')
+                    .custom(async (value, { req }) => {
+                        const checkid = await KhongGianModel.kiemtraid(value);
+                        if(! checkid){
+                            throw new Error('ID không gian không tồn tại!');
+                        }
+                    })
+                    .run(req),
+                body('TenKG')
+                     .notEmpty().withMessage('tên không gian là thông tin bắt buộc')
+                     .run(req),
+            ])
+             const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Dữ liệu không hợp lệ!',
+                    errors: errors.array().map(err => err.msg)
+                });
+            }
+            const update = await KhongGianModel.CapNhatTen(dulieu.TenKG,dulieu.IDKG);
+            if(!update){
+                return res.status(500).json({
+                    success:false,
+                    message:'Cập nhật tên không gian thất bại!'
+                })
+            }
+            return res.status(200).json({
+                success:true,
+                message:'Cập nhật thông tin thành công!'
+            })
         } catch (error) {
-            
+            return res.status(500).json({
+                success: false,
+                message: 'Thêm không gian thất bại: ' + error.message
+            });
+        }
+    }
+    static async ChinhAnh(req,res){
+        try {
+            const dulieu = req.body;
+       const files = req.files;
+       let pathFile = files[0].filename;
+       let DuongDan = 'uploads/KhongGian/' + pathFile;
+        if(!pathFile){
+            return res.json({
+                status:true,
+                message:'Lỗi tải ảnh!'
+            })
+        };
+            const dd_db = await KhongGianModel.LayChiTiet(dulieu.IDKG);
+            const dd = dd_db[0].HINHANH;
+            const xoa = xoaFileCu(dd);
+            if(!xoa){
+                return res.status(500).json({
+                    success:false,
+                    message:'lỗi khi thao tác hệ thống!'
+                })
+            }
+            const update = await KhongGianModel.CapNhatAnh(dulieu.IDKG,DuongDan);
+            if(!update){
+                return res.status(500).json({
+                    success:false,
+                    message:'Không thể cập nhật hình ảnh không gian!'
+                })
+            }
+            return res.status(200).json({
+                success:true,
+                message:'Cập nhật ảnh không gian thành công!'
+            }) 
+        } catch (error) {
+             return res.status(500).json({
+                success: false,
+                message: 'Cập nhật ảnh không gian thất bại: ' + error.message
+            });
         }
     }
     static async ChinhSua_TrangThai_KhongGian(req, res) {
-
+          const dulieu = req.body;
+                try {
+                    await Promise.all([
+                        body('NgayBatDau')
+                          .notEmpty()
+                          .withMessage('ngày bắt đầu không được bỏ trống')
+                          .custom(async (value, { req }) => {
+                            //Trường hợp 1: phải lớn hơn hoặc bằng ngày hiện tại
+                            const now = new Date();
+                            const startDate = new Date(value);
+                            if (startDate < now) {
+                                 throw new Error('Ngày chỉnh sửa không gian phải lớn hơn hoặc bằng ngày hiện tại!');
+                            }
+                            //Trường hợp 2: lớn hơn thời gian cuối cùng mà khách thuê
+        
+                            return true;
+                          }).run(req),
+                          body('NgayHoanThanh')
+                             .notEmpty()
+                          .withMessage('ngày hoàn thành không được bỏ trống')
+                          .custom(async (value, { req }) => {
+                            //Trường hợp 1: phải lớn hơn hoặc bằng ngày bắt đầu
+        
+                            const endDate = new Date(value);
+                            const startDate = new Date(dulieu.NgayBatDau)
+                            if (endDate < startDate ) {
+                                 throw new Error('Ngày hoàn thành không gian phải lớn hơn hoặc bằng ngày bắt đầu!');
+                            }
+                            return true;
+                          }).run(req),
+                          body('IDKG')
+                .notEmpty().withMessage('ID không gian là thông tin bắt buộc')
+                .isInt().withMessage('Giá trị nhập vào phải là một số nguyên!')
+                .custom(async (value) => {
+                    const kiemtra = await KhongGianModel.kiemtraid(value);
+                    if (!kiemtra) throw new Error('ID không gian không tồn tại!');
+                    return true;
+                })
+                .run(req)
+        
+                    ]);
+                    const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                success: false,
+                message: 'Dữ liệu không hợp lệ!',
+                errors: errors.array().map(err => err.msg)
+            });
+        }
+                const update = await KhongGianModel.CapNhatTrangThai(dulieu.IDKG,dulieu.NgayBatDau,dulieu.NgayHoanThanh);
+                if(!update){
+                    return res.status(500).json({
+                        success:false,
+                        message:'Cập nhật trạng thái không gian thất bại!'
+                    })
+                }
+                return res.status(200).json({
+                    success:true,
+                    message:'Cập nhật trạng thái không gian thành công!'
+                })
+                } catch (error) {
+                     return res.status(500).json({
+                        success: false,
+                        message: 'Cập nhật trang thái không gian thất bại: ' + error.message
+                    });
+                }
     }
     static async ChiTiet_KhongGian(req, res) {
-
+        //dỰA VÀO LOẠI KHÔNG GIAN MÀ LOAD DỮ LIỆU KHÁC NHAU
     }
     static async TimKiem_KhongGian(req, res) {
-
+        const ten = req.query.ten;
+        const trangthai = req.query.trangthai;
+        try {
+            const timkiem = await KhongGianModel.TimKiem_KhongGian(ten,trangthai);
+            return res.status(200).json({
+                success:true,
+                danhsach:timkiem
+            })
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                message: 'Tìm kiếm không gian thất bại: ' + error.message
+            })
+        }
     }
 
 }
