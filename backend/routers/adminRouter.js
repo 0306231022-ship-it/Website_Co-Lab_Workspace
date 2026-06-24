@@ -1,5 +1,6 @@
 import { Router } from "express";
 import ChiNhanhController from "../controllers/ChiNhanhController.js";
+import KhongGianController from "../controllers/KhongGianController.js";
 const adminRouter = Router();
 import createUpload from '../middleware/upload.js';
 import multer from "multer";
@@ -15,6 +16,9 @@ adminRouter.post('/CapNhat_TrangThai' , upload.none(), ChiNhanhController.ChinhS
 adminRouter.get('/laydanhsach' , ChiNhanhController.DanhSach_ChiNhanh);
 adminRouter.get('/laychitiet',ChiNhanhController.ChiTiet_ChiNhanh);
 adminRouter.get('/TimKiem', ChiNhanhController.TimKiem_ChiNhanh);
+
+adminRouter.post('/ThemKhongGian' , createUpload('KhongGian').any(), KhongGianController.Them_KhongGian);
+adminRouter.post('/ChinhSuaTen_kg', upload.none , )
 //
 //=========================================
 console.log("✅ adminRouter loaded");
