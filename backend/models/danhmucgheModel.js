@@ -33,7 +33,7 @@ const dmGhe={
     //         return rows[0];
     //     } catch (error) {
     //         console.error(` Lỗi Database trong getById (${id}):`, error.message);
-    //         throw new Error("Không thể kết nối đến cơ sở dữ liệu để lấy chi tiết thiết bị!");
+    //         throw new Error("Không thể kết nối đến cơ sở dữ liệu để lấy chi tiết danh mục ghế!");
     //     }
     // },
     create: async (tenDanhMuc) => {
@@ -45,7 +45,7 @@ const dmGhe={
             return result.affectedRows>0? true:false; 
         } catch (error) {
             console.error(" Lỗi Database trong create trangthai:", error.message);
-            throw new Error("Không thể thêm thiết bị mới vào cơ sở dữ liệu!");
+            throw new Error("Không thể thêm danh mục ghế mới vào cơ sở dữ liệu!");
         }
     },
 // 4. Cập nhật thiết bị 
@@ -68,7 +68,7 @@ const dmGhe={
              return rows.length>0 ? true : false;
         } catch (error) {
              console.error(` Lỗi Database (${id}):`, error.message);
-            throw new Error("Không thể truy vấn thông tin thiết bị!");
+            throw new Error("Không thể truy vấn thông tin danh mục ghế!");
         }
     }
 
