@@ -17,7 +17,7 @@ export default class ChiNhanhController{
                      .withMessage('Số lượng không được bỏ trống')
                      .isInt({ min: 0 })
                      .withMessage('Số trang phải là số nguyên và không được âm!')
-                    .run(req),
+                     .run(req),
             ]);
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
@@ -44,6 +44,8 @@ export default class ChiNhanhController{
                 success: false,
                 message: 'Lấy danh sách thất bại: ' + error.message
             });
+
+            
         }
 
    }
@@ -259,7 +261,7 @@ if (!errors.isEmpty()) {
         })
         .run(req)
 
-            ]);
+            ]);  
             const errors = validationResult(req);
 if (!errors.isEmpty()) {
     return res.status(400).json({
@@ -299,7 +301,7 @@ if (!errors.isEmpty()) {
                     return true;
                 })
         .run(req)   
-            ]);
+            ]); 
             const errors = validationResult(req);
 if (!errors.isEmpty()) {
     return res.status(400).json({

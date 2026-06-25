@@ -5,7 +5,7 @@ const adminRouter = Router();
 import createUpload from '../middleware/upload.js';
 import multer from "multer";
 import ChiTietThietBiController from "../controllers/ChiTiet_ThietBiController.js";
-const upload = multer();
+const upload = multer();  
 //==========================================
 // xử lí thông tin website
 //adminRouter.post('/DangKy', upload.none(), NguoiDungController.DangKy);

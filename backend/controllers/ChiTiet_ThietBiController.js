@@ -6,6 +6,7 @@ import { xoaFileCu } from '../function.js';
 import { body, query, validationResult } from 'express-validator';
 import ChiTietThietBiModel from '../models/ChiTiet_ThietBiModel.js';
 
+
 export default class ChiTietThietBiController{
     static async CapThietBi(req,res){
         const DuLieu = req.body;
@@ -52,6 +53,44 @@ export default class ChiTietThietBiController{
              return res.status(500).json({
                 success: false,
                 message: 'Cấp thiết bị thất bại: ' + error.message
+            });
+        }
+    }
+    static async XoaThietBi(req,res){
+        const id = req.body.ID_THIET_BI;
+        try {
+            //validate id thiết bị
+            await Promise.all([
+                   body('ID_THIET_BI')
+                    .notEmpty().withMessage('ID thiết bị là thông tin bắt buộc')
+                    .isInt().withMessage('Giá trị nhập vào phải là một số nguyên!')
+                    .isInt({ min: 1 }).withMessage('ID thiết bị không được nhỏ hơn 1!')
+                    //Kiểm tra id có tồn tại không?
+                    .run(req),
+            ]);
+             const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+               return res.status(400).json({
+                  success: false,
+                  message: 'Dữ liệu không hợp lệ!',
+                  errors: errors.array().map(err => err.msg)
+               });
+            };
+            const xoa = await ChiTietThietBiModel.Xoa(id);
+            if(!xoa){
+                return res.status(500).json({
+                    success:false,
+                    message:'Không thể xóa thiết bị khỏi không gian!'
+                })
+            }
+            return res.status(200).json({
+                success:true,
+                message:'Xóa thiết bị thành công!'
+            })
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                message: 'Xóa thiết bị thất bại: ' + error.message
             });
         }
     }
