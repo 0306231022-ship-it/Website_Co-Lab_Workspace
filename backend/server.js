@@ -7,8 +7,6 @@ import http from "http";
 import { Server } from "socket.io";
 
 import NguoiDungRoute from "./routers/NguoiDungRouter.js";
-// import router from "./routers/khonggianRouter.js";
-// import router from "./routers/thietbiRouter.js";
 import adminRouter from "./routers/adminRouter.js";
 //import './CleanDB.js';
 

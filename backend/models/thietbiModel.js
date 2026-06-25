@@ -54,7 +54,7 @@ const ThietBi = {
                 "INSERT INTO thietbi (TEN_THIET_BI, HINH_ANH) VALUES (?, ?)",
                 [tenThietBi, hinhAnh]
             );
-            return result.insertId; 
+            return result.affectedRows>0? true:false; 
         } catch (error) {
             console.error(" Lỗi Database trong create ThietBi:", error.message);
             throw new Error("Không thể thêm thiết bị mới vào cơ sở dữ liệu!");
@@ -74,6 +74,16 @@ const ThietBi = {
             throw new Error("Không thể cập nhật thông tin thiết bị!");
         }
     },
+    //kiểm tra id 
+    testid: async (id) =>{
+        try {
+             const [rows] = await execute("SELECT * FROM thietbi WHERE ID_THIET_BI = ?", [id]);
+             return rows.length>0 ? true : false;
+        } catch (error) {
+             console.error(` Lỗi Database (${id}):`, error.message);
+            throw new Error("Không thể truy vấn thông tin thiết bị!");
+        }
+    }
 
     
 };

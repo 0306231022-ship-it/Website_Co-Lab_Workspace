@@ -1,13 +1,35 @@
 import ThietBi from "../models/thietbiModel.js";
+import { body, query, validationResult } from 'express-validator';
 
+// ========================================================
+// MIDDLEWARE KIỂM TRA VÀ TRẢ VỀ LỖI VALIDATION
+// ========================================================
+const validateResult = (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({
+            success: false,
+            message: 'Dữ liệu không hợp lệ!',
+            errors: errors.array().map(err => err.msg)
+        });
+    }
+    next();
+};
 // [GET] /api/admin/thietbi
-// Trích xuất page, limit từ query params để phù hợp với Model phân trang
 export const getAllThietBi = async (req, res) => {
     try {
-        // Lấy page và limit từ URL (ví dụ: /api/admin/thietbi?page=1&limit=10)
-        const { page, limit } = req.query;
+        // Tự động validate query params (nếu có truyền)
+        await Promise.all([
+            query('page').optional().isInt({ min: 1 }).withMessage('Số trang phải là số nguyên dương lớn hơn 0').run(req),
+            query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Số lượng hiển thị phải từ 1 đến 100').run(req)
+        ]);
 
-        // Gọi model xử lý (hàm getAll trong model đã có giá trị mặc định nếu page, limit trống)
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ success: false, errors: errors.array().map(err => err.msg) });
+        }
+
+        const { page, limit } = req.query;
         const result = await ThietBi.getAll(page, limit);
         
         res.status(200).json({ 
@@ -23,13 +45,30 @@ export const getAllThietBi = async (req, res) => {
 // [GET] /api/admin/thietbi/:id
 export const getThietBiById = async (req, res) => {
     try {
-        const { id } = req.params;
+        // Tự động kiểm tra ID bằng param()
+        await Promise.all([
+            body('ID_THIET_BI')
+                .notEmpty().withMessage('id thiết bị không được bỏ trống!')
+              .isInt().withMessage('ID thiết bị phải là số nguyên')
+              .custom(async (value)=>{
+                const check = await ThietBi.testid(value);
+                if(!check) throw new Error('ID không tồn tại!')
+                return true;
+              })
+            .run(req),
+          
+        ]);
 
-        // Validate: ID truyền vào bắt buộc phải là số nguyên dương
-        if (!id || isNaN(id) || parseInt(id) <= 0) {
-            return res.status(400).json({ success: false, message: "ID thiết bị không hợp lệ!" });
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                success: false,
+                message: 'Dữ liệu không hợp lệ!',
+                errors: errors.array().map(err => err.msg)
+            });
         }
-
+    
+        const { id } = req.params;
         const item = await ThietBi.getById(id);
         if (!item) {
             return res.status(404).json({ success: false, message: "Không tìm thấy thiết bị!" });
@@ -44,21 +83,35 @@ export const getThietBiById = async (req, res) => {
 export const createThietBi = async (req, res) => {
     try {
         const { TEN_THIET_BI, HINH_ANH } = req.body;
-        
-        // --- VALIDATION ĐẦU VÀO ---
-        if (!TEN_THIET_BI || typeof TEN_THIET_BI !== 'string' || TEN_THIET_BI.trim() === '') {
-            return res.status(400).json({ success: false, message: "Tên thiết bị không được để trống!" });
-        }
-        if (TEN_THIET_BI.length > 255) {
-            return res.status(400).json({ success: false, message: "Tên thiết bị không được vượt quá 255 ký tự!" });
-        }
-        if (HINH_ANH && HINH_ANH.length > 255) {
-            return res.status(400).json({ success: false, message: "Đường dẫn hình ảnh quá dài (tối đa 255 ký tự)!" });
-        }
+        await Promise.all([
+            body('TEN_THIET_BI')
+                .notEmpty()
+                .withMessage('tên thiết bị không được bỏ trống')
+                .isLength({max:255}).withMessage('Tên thiết bị tối đa 255 lý tự')
+                .run(req),
+                body('HINH_ANH')
+                .notEmpty()
+                .withMessage('hình ảnh thiết bị không được bỏ trống')
+                .run(req)
+        ]);
+        const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+               return res.status(400).json({
+                  success: false,
+                  message: 'Dữ liệu không hợp lệ!',
+                  errors: errors.array().map(err => err.msg)
+               });
+            };
 
         // Thực hiện thêm mới (Loại bỏ khoảng trắng thừa bằng .trim())
         const insertId = await ThietBi.create(TEN_THIET_BI.trim(), HINH_ANH ? HINH_ANH.trim() : null);
-        res.status(201).json({ success: true, message: "Thêm thiết bị thành công!", id: insertId });
+        if(!insertId){
+            return res.status(500).json({
+                success:false,
+                message:'Thêm thiết bị thất bại!'
+            })
+        }
+        res.status(200).json({ success: true, message: "Thêm thiết bị thành công!" });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -67,26 +120,38 @@ export const createThietBi = async (req, res) => {
 // [PUT] /api/admin/thietbi/:id
 export const updateThietBi = async (req, res) => {
     try {
-        const { TEN_THIET_BI, HINH_ANH } = req.body;
-        const { id } = req.params;
+        await Promise.all([
+            body('ID_THIET_BI')
+                .notEmpty().withMessage('id thiết bị không được bỏ trống!')
+              .isInt().withMessage('ID thiết bị phải là số nguyên')
+              .custom(async (value)=>{
+                const check = await ThietBi.testid(value);
+                if(!check) throw new Error('ID không tồn tại!')
+                return true;
+              })
+            .run(req),
+            body('TEN_THIET_BI')
+                .notEmpty().withMessage('Tên thiết bị không được để trống!')
+                .isString().withMessage('id thiết bi')
+                .isLength({ max: 255 }).withMessage('Tên thiết bị không được vượt quá 255 ký tự!')
+                .run(req),
+            body('HINH_ANH')
+                .notEmpty().withMessage('Hình ảnh thiết bị không được để trống!')
+                .run(req)
+        ]);
 
-        // --- VALIDATION ID ---
-        if (!id || isNaN(id) || parseInt(id) <= 0) {
-            return res.status(400).json({ success: false, message: "ID thiết bị không hợp lệ!" });
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                success: false,
+                message: 'Dữ liệu không hợp lệ!',
+                errors: errors.array().map(err => err.msg)
+            });
         }
 
-        // --- VALIDATION DỮ LIỆU SỬA ---
-        if (!TEN_THIET_BI || typeof TEN_THIET_BI !== 'string' || TEN_THIET_BI.trim() === '') {
-            return res.status(400).json({ success: false, message: "Tên thiết bị không được để trống!" });
-        }
-        if (TEN_THIET_BI.length > 255) {
-            return res.status(400).json({ success: false, message: "Tên thiết bị không được vượt quá 255 ký tự!" });
-        }
-        if (HINH_ANH && HINH_ANH.length > 255) {
-            return res.status(400).json({ success: false, message: "Đường dẫn hình ảnh quá dài (tối đa 255 ký tự)!" });
-        }
+        const { TEN_THIET_BI, HINH_ANH , ID_THIET_BI } = req.body;
 
-        const updated = await ThietBi.update(id, TEN_THIET_BI.trim(), HINH_ANH ? HINH_ANH.trim() : null);
+        const updated = await ThietBi.update(ID_THIET_BI, TEN_THIET_BI.trim(), HINH_ANH ? HINH_ANH.trim() : null);
         if (!updated) {
             return res.status(404).json({ success: false, message: "Thiết bị không tồn tại hoặc dữ liệu không có thay đổi!" });
         }
@@ -95,4 +160,3 @@ export const updateThietBi = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
-
