@@ -52,7 +52,7 @@ const dmGhe={
     update: async (id, tenDanhMuc) => {
         try {
             const [result] = await execute(
-                "UPDATE thietbi SET TEN_DANHMUC = ? WHERE ID_DANHMUC = ?",
+                "UPDATE danhmucghe SET TEN_DANHMUC = ? WHERE ID_DANHMUC = ?",
                 [tenDanhMuc, id]
             );
             return result.affectedRows > 0;

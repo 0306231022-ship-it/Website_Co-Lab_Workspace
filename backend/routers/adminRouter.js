@@ -11,7 +11,8 @@ import {
     
 } from "../controllers/thietbiController.js";
 import{
-    createDanhMucGhe
+    createDanhMucGhe,
+    updateDanhMucGhe
 }
 from"../controllers/danhmucgheController.js";
 // import createUpload from "../middleware/upload.js";
@@ -27,5 +28,6 @@ adminRouter.post("/thietbi",  upload.none(),createThietBi);
 adminRouter.post("/CapNhatThietBi", upload.none(), updateThietBi);
 //Danh Mục ghế
 adminRouter.post("/danhmucghe",  upload.none(),createDanhMucGhe);
+adminRouter.post("/capnhatdanhmucghe",upload.none(),updateDanhMucGhe);
 console.log("✅ adminRouter loaded");
 export default adminRouter;

@@ -42,7 +42,7 @@ export const getAllDanhMucGhe = async (req, res) => {
     }
 };
 // [GET] /api/admin/danh mục ghế/:id
-export const getThietBiById = async (req, res) => {
+export const getDanhMucGheById = async (req, res) => {
     try {
         await Promise.all([
             body('ID_DANHMUC')
@@ -68,7 +68,7 @@ export const getThietBiById = async (req, res) => {
     
         const { id } = req.params;
         const item = await dmGhe.getById(id);
-        //trả về danh sách các thiết bị đc cấp phát
+        //trả về danh sách các danh mục ghế đc cấp phát
         if (!item) {
             return res.status(404).json({ success: false, message: "Không tìm thấy danh mục ghế!" });
         }
@@ -78,7 +78,7 @@ export const getThietBiById = async (req, res) => {
     }
 };
 
-// [POST] /api/admin/thietbi
+// [POST] /api/admin/danh mục ghế
 export const createDanhMucGhe = async (req, res) => {
     try {
         const { TEN_DANHMUC } = req.body;
@@ -114,21 +114,21 @@ export const createDanhMucGhe = async (req, res) => {
 };
 
 
-export const updateThietBi = async (req, res) => {
+export const updateDanhMucGhe = async (req, res) => {
     try {
         await Promise.all([
             body('ID_DANHMUC')
                 .notEmpty().withMessage('id danh mục ghế không được bỏ trống!')
               .isInt().withMessage('ID danh mục ghế phải là số nguyên')
               .custom(async (value)=>{
-                const check = await ThietBi.testid(value);
+                const check = await dmGhe.testid(value);
                 if(!check) throw new Error('ID không tồn tại!')
                 return true;
               })
             .run(req),
             body('TEN_DANHMUC')
                 .notEmpty().withMessage('Tên danh mục ghế không được để trống!')
-                .isString().withMessage('id thiết bi')
+                .isString().withMessage('id danh mục ghế')
                 .isLength({ max: 255 }).withMessage('Tên danh mục ghế không được vượt quá 255 ký tự!')
                 .run(req),
            
@@ -145,7 +145,7 @@ export const updateThietBi = async (req, res) => {
 
         const { TEN_DANHMUC, ID_DANHMUC } = req.body;
 
-        const updated = await ThietBi.update(ID_DANHMUC, TEN_DANHMUC.trim());
+        const updated = await dmGhe.update(ID_DANHMUC, TEN_DANHMUC.trim());
         if (!updated) {
             return res.status(404).json({ success: false, message: "danh mục không tồn tại hoặc dữ liệu không có thay đổi!" });
         }
