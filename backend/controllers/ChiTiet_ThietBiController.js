@@ -5,7 +5,7 @@ import KhongGianModel from '../models/KhongGianModel.js';
 import { xoaFileCu } from '../function.js';
 import { body, query, validationResult } from 'express-validator';
 import ChiTietThietBiModel from '../models/ChiTiet_ThietBiModel.js';
-
+import ThietBi from "../models/thietbiModel.js";
 
 export default class ChiTietThietBiController{
     static async CapThietBi(req,res){
@@ -26,7 +26,10 @@ export default class ChiTietThietBiController{
                     .notEmpty().withMessage('ID thiết bị là thông tin bắt buộc')
                     .isInt().withMessage('Giá trị nhập vào phải là một số nguyên!')
                     .isInt({ min: 1 }).withMessage('ID thiết bị không được nhỏ hơn 1!')
-                    //Kiểm tra id có tồn tại không?
+                    .custom(async (value) => {
+                        const kiemtra = await ThietBi.testid(value);
+                        if(!kiemtra) throw new Error('ID thiết bị không tồn tại!');
+                    })
                     .run(req),
             ]);
             const errors = validationResult(req);
@@ -59,13 +62,15 @@ export default class ChiTietThietBiController{
     static async XoaThietBi(req,res){
         const id = req.body.ID_THIET_BI;
         try {
-            //validate id thiết bị
             await Promise.all([
                    body('ID_THIET_BI')
                     .notEmpty().withMessage('ID thiết bị là thông tin bắt buộc')
                     .isInt().withMessage('Giá trị nhập vào phải là một số nguyên!')
                     .isInt({ min: 1 }).withMessage('ID thiết bị không được nhỏ hơn 1!')
-                    //Kiểm tra id có tồn tại không?
+                    .custom(async (value) => {
+                        const kiemtra = await ThietBi.testid(value);
+                        if(!kiemtra) throw new Error('ID thiết bị không tồn tại!');
+                    })
                     .run(req),
             ]);
              const errors = validationResult(req);
@@ -94,5 +99,55 @@ export default class ChiTietThietBiController{
             });
         }
     }
+    static async DanhSach_ThietBi(req,res){
+         const page = parseInt(req.query.page) || 1;
+         const limit = parseInt(req.query.limit) || 10;
+         const offset = (page - 1) * limit;
+         const IDKG = req.query.IDKG;
+        try {
+            await Promise.all([
+                query('page')
+                     .notEmpty()
+                     .withMessage('Số lượng không được bỏ trống')
+                     .isInt({ min: 0 })
+                     .withMessage('Số trang phải là số nguyên và không được âm!')
+                     .run(req),
+                  query('IDKG')
+                                    .notEmpty().withMessage('ID không gian là thông tin bắt buộc')
+                                    .isInt({ min: 0 }).withMessage('Giá trị nhập vào phải là một số nguyên!')
+                                    .custom(async (value) => {
+                                         const kiemtra = await KhongGianModel.kiemtraid(value);
+                                         if (!kiemtra) throw new Error('ID không gian không tồn tại!');
+                                        return true;
+                                    })
+                                    .run(req) 
+                
+            ]);
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Dữ liệu không hợp lệ!',
+                    errors: errors.array().map(err => err.msg)
+                });
+            }
+            const DanhSach = await ChiTietThietBiModel.DanhSachThietBi_Khonggian(IDKG, limit, offset);
+            return res.status(200).json({
+                success:true,
+                ThietBi: {
+                    DanhSach: DanhSach.DanhSach,
+                    TongDanhSach:DanhSach.TongDanhSach
+                }
+            })
+
+        } catch (error) {
+             return res.status(500).json({
+                success: false,
+                message: 'Danh sách thiết bị thất bại: ' + error.message
+            });
+        }
+    }
+
+
 
 }

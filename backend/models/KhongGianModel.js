@@ -126,4 +126,26 @@ export default class KhongGianModel {
             throw new Error('Database query failed: ' + error.message);
         }
     }
+    static async TruyVan_ChiNhanh(IDKG){
+        try {
+            const [danhsach] = await execute(`
+                SELECT 
+                kg.ID_KHONG_GIAN,
+                cn.ID_CHI_NHANH,
+                cn.TEN_CHI_NHANH,
+                cn.DIA_CHI,
+                cn.TRANG_THAI
+            FROM 
+                khonggian kg
+            INNER JOIN 
+                chinhanh cn ON kg.ID_CHI_NHANH = cn.ID_CHI_NHANH
+            WHERE 
+                kg.ID_KHONG_GIAN = ?
+            LIMIT 1
+                `,[IDKG]);
+            return danhsach.length > 0 ? danhsach[0] : null;
+        } catch (error) {
+              throw new Error('Database query failed: ' + error.message);
+        }
+    }
 }

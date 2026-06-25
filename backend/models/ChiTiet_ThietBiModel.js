@@ -12,5 +12,41 @@ export default class ChiTietThietBiModel {
             throw new Error('Database query failed: ' + error.message);
         }
     }
+    static async DanhSachThietBi_Khonggian(IDKG, limit, offset){
+        try {
+            const [DanhSach, TongDanhSach] = await Promise.all([
+                execute(`
+                SELECT 
+                    cttb.ID_THIET_BI,
+                    tb.TEN_THIET_BI,
+                    tb.HINH_ANH,
+                    COUNT(*) AS SO_LUONG
+                FROM 
+                    chitiet_thietbi cttb
+                INNER JOIN 
+                    thietbi tb ON cttb.ID_THIET_BI = tb.ID_THIET_BI
+                WHERE 
+                    cttb.ID_KHONG_GIAN = ?
+                GROUP BY 
+                    cttb.ID_THIET_BI, 
+                    tb.TEN_THIET_BI, 
+                    tb.HINH_ANH
+                LIMIT ? OFFSET ?
+                `,[IDKG,limit,offset]),
+                execute(`
+                SELECT COUNT(DISTINCT ID_THIET_BI) AS total 
+                FROM chitiet_thietbi
+                WHERE ID_KHONG_GIAN = ?
+            `, [IDKG])
+                ]);
+            return {
+                DanhSach: DanhSach[0],
+                TongDanhSach: TongDanhSach[0][0].total
+            };
+            
+        } catch (error) {
+             throw new Error('Database query failed: ' + error.message);
+        }
+    }
     
 }

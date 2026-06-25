@@ -43,11 +43,8 @@ export default class ChiNhanhController{
              return res.status(500).json({
                 success: false,
                 message: 'Lấy danh sách thất bại: ' + error.message
-            });
-
-            
+            });           
         }
-
    }
     static async Them_ChiNhanh(req, res) {
         /*{
