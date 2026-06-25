@@ -4,17 +4,13 @@ import { execute } from '../config/db.js';
 const ThietBi = {
     
     // Mặc định nếu không truyền page thì là trang 1, không truyền limit thì lấy 10 cái
-    getAll: async (page = 1, limit = 10) => {
+    getAll: async (offset , limit) => {
         try {
-            // Ép kiểu về số nguyên để tránh lỗi cú pháp SQL
-            const p = parseInt(page) || 1;
-            const l = parseInt(limit) || 10;
-            const offset = (p - 1) * l;
-
+    
             // Truy vấn lấy dữ liệu phân trang
             const [rows] = await execute(
                 "SELECT * FROM thietbi LIMIT ? OFFSET ?", 
-                [l, offset]
+                [limit, offset]
             );
 
             // Tính tổng số bản ghi để Frontend biết đường chia trang (Rất quan trọng cho đồ án)

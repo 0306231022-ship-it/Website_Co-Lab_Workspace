@@ -1,9 +1,5 @@
-import ThietBi from "../models/thietbiModel.js";
-import { body, query, validationResult } from 'express-validator';
-
-// ========================================================
-// MIDDLEWARE KIỂM TRA VÀ TRẢ VỀ LỖI VALIDATION
-// ========================================================
+import dmGhe from "../models/danhmucgheModel.js";
+import { body, query, validationResult } from "express-validator";
 const validateResult = (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -15,10 +11,8 @@ const validateResult = (req, res, next) => {
     }
     next();
 };
-// [GET] /api/admin/thietbi
 
-
-export const getAllThietBi = async (req, res) => {
+export const getAllDanhMucGhe = async (req, res) => {
     try {
         // Tự động validate query params (nếu có truyền)
         await Promise.all([
@@ -36,7 +30,7 @@ export const getAllThietBi = async (req, res) => {
        const page= parseInt(req.query.page);
        const limit = parseInt(req.query.limit|| 10);
        const ofset = (page-1) * limit;
-        const result = await ThietBi.getAll(ofset, limit);
+       const result = await dmGhe.getAll(ofset, limit);
         
         res.status(200).json({ 
             success: true, 
@@ -47,14 +41,13 @@ export const getAllThietBi = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
-
-// [GET] /api/admin/thietbi/:id
+// [GET] /api/admin/danh mục ghế/:id
 export const getThietBiById = async (req, res) => {
     try {
         await Promise.all([
-            body('ID_THIET_BI')
-              .notEmpty().withMessage('id thiết bị không được bỏ trống!')
-              .isInt().withMessage('ID thiết bị phải là số nguyên')
+            body('ID_DANHMUC')
+              .notEmpty().withMessage('id danh mục ghế không được bỏ trống!')
+              .isInt().withMessage('ID danh mục ghế phải là số nguyên')
               .custom(async (value)=>{
                 const check = await ThietBi.testid(value);
                 if(!check) throw new Error('ID không tồn tại!')
@@ -74,10 +67,10 @@ export const getThietBiById = async (req, res) => {
         }
     
         const { id } = req.params;
-        const item = await ThietBi.getById(id);
+        const item = await dmGhe.getById(id);
         //trả về danh sách các thiết bị đc cấp phát
         if (!item) {
-            return res.status(404).json({ success: false, message: "Không tìm thấy thiết bị!" });
+            return res.status(404).json({ success: false, message: "Không tìm thấy danh mục ghế!" });
         }
         res.status(200).json({ success: true, data: item });
     } catch (error) {
@@ -86,19 +79,16 @@ export const getThietBiById = async (req, res) => {
 };
 
 // [POST] /api/admin/thietbi
-export const createThietBi = async (req, res) => {
+export const createDanhMucGhe = async (req, res) => {
     try {
-        const { TEN_THIET_BI, HINH_ANH } = req.body;
+        const { TEN_DANHMUC } = req.body;
         await Promise.all([
-            body('TEN_THIET_BI')
+            body('TEN_DANHMUC')
                 .notEmpty()
-                .withMessage('tên thiết bị không được bỏ trống')
-                .isLength({max:255}).withMessage('Tên thiết bị tối đa 255 lý tự')
+                .withMessage('tên danh mục ghế không được bỏ trống')
+                .isLength({max:255}).withMessage('Tên danh mục ghế tối đa 255 lý tự')
                 .run(req),
-                body('HINH_ANH')
-                .notEmpty()
-                .withMessage('hình ảnh thiết bị không được bỏ trống')
-                .run(req)
+                
         ]);
         const errors = validationResult(req);
             if (!errors.isEmpty()) {
@@ -110,14 +100,14 @@ export const createThietBi = async (req, res) => {
             };
 
         // Thực hiện thêm mới (Loại bỏ khoảng trắng thừa bằng .trim())
-        const insertId = await ThietBi.create(TEN_THIET_BI.trim(), HINH_ANH ? HINH_ANH.trim() : null);
+        const insertId = await dmGhe.create(TEN_DANHMUC.trim());
         if(!insertId){
             return res.status(500).json({
                 success:false,
-                message:'Thêm thiết bị thất bại!'
+                message:'Thêm danh mục ghế thất bại!'
             })
         }
-        res.status(200).json({ success: true, message: "Thêm thiết bị thành công!" });
+        res.status(200).json({ success: true, message: "Thêm danh mục ghế thành công!" });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -127,23 +117,21 @@ export const createThietBi = async (req, res) => {
 export const updateThietBi = async (req, res) => {
     try {
         await Promise.all([
-            body('ID_THIET_BI')
-                .notEmpty().withMessage('id thiết bị không được bỏ trống!')
-              .isInt().withMessage('ID thiết bị phải là số nguyên')
+            body('ID_DANHMUC')
+                .notEmpty().withMessage('id danh mục ghế không được bỏ trống!')
+              .isInt().withMessage('ID danh mục ghế phải là số nguyên')
               .custom(async (value)=>{
                 const check = await ThietBi.testid(value);
                 if(!check) throw new Error('ID không tồn tại!')
                 return true;
               })
             .run(req),
-            body('TEN_THIET_BI')
-                .notEmpty().withMessage('Tên thiết bị không được để trống!')
+            body('TEN_DANHMUC')
+                .notEmpty().withMessage('Tên danh mục ghế không được để trống!')
                 .isString().withMessage('id thiết bi')
-                .isLength({ max: 255 }).withMessage('Tên thiết bị không được vượt quá 255 ký tự!')
+                .isLength({ max: 255 }).withMessage('Tên danh mục ghế không được vượt quá 255 ký tự!')
                 .run(req),
-            body('HINH_ANH')
-                .notEmpty().withMessage('Hình ảnh thiết bị không được để trống!')
-                .run(req)
+           
         ]);
 
         const errors = validationResult(req);
@@ -155,13 +143,13 @@ export const updateThietBi = async (req, res) => {
             });
         }
 
-        const { TEN_THIET_BI, HINH_ANH , ID_THIET_BI } = req.body;
+        const { TEN_DANHMUC, ID_DANHMUC } = req.body;
 
-        const updated = await ThietBi.update(ID_THIET_BI, TEN_THIET_BI.trim(), HINH_ANH ? HINH_ANH.trim() : null);
+        const updated = await ThietBi.update(ID_DANHMUC, TEN_DANHMUC.trim());
         if (!updated) {
-            return res.status(404).json({ success: false, message: "Thiết bị không tồn tại hoặc dữ liệu không có thay đổi!" });
+            return res.status(404).json({ success: false, message: "danh mục không tồn tại hoặc dữ liệu không có thay đổi!" });
         }
-        res.status(200).json({ success: true, message: "Cập nhật thiết bị thành công!" });
+        res.status(200).json({ success: true, message: "Cập nhật danh muc ghế thành công!" });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
