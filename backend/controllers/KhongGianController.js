@@ -296,6 +296,8 @@ export default class KhongGianController{
             const LoaiKG= thongTin_KhongGian.LOAI_KHONG_GIAN
             if(LoaiKG===1){
                 //truy vấn real-time lấy danh sách ghế hiện tại
+                
+
             }
             if(DanhSachGhe===null){
                 return res.status(200).json({

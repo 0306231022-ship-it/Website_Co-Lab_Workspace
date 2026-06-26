@@ -78,4 +78,39 @@ export default class LichDatController{
         });
         }
     }
+    static async DanhSachDatLich(req,res){
+        try {
+          const page = parseInt(req.query.page) || 1;
+          const limit = parseInt(req.query.limit) || 10;
+          const offset = (page - 1) * limit;
+           await Promise.all([
+                query('page')
+                    .notEmpty()
+                    .withMessage('Số lượng không được bỏ trống')
+                    .isInt({ min: 0 })
+                    .withMessage('Số trang phải là số nguyên và không được âm!')
+                    .run(req),
+           ]);
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Dữ liệu không hợp lệ!',
+                    errors: errors.array().map(err => err.msg)
+                });
+            }
+            const DanhSach = await DatLichModel.DanhSach(limit,offset);
+            return res.status(200).json({
+                success:true,
+                danhsach:DanhSach.DanhSach,
+                TongDanhSach:DanhSach.TongDanhSach
+            })
+        } catch (error) {
+             return res.status(500).json({
+                success: false,
+                message: 'Lấy danh sách thất bại: ' + error.message
+            });
+        }
+    }
+    
 }

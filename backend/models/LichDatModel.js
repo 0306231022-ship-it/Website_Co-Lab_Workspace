@@ -12,4 +12,21 @@ export default class DatLichModel{
             throw error;
         }
     }
+    static async DanhSach(limit,offset){
+        try {
+            const [danhsach] = await execute(`
+                SELECT * FROM lichdat
+                 LIMIT ? OFFSET ?
+                `,[limit,offset]);
+             const [tong] = await execute(`
+                SELECT COUNT(*) AS total FROM lichdat
+            `);
+            return {
+                DanhSach: danhsach,
+                TongDanhSach: tong
+            };
+        } catch (error) {
+             throw new Error('Database query failed: ' + error.message);
+        }
+    }
 }

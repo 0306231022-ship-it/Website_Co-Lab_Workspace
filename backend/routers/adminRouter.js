@@ -56,5 +56,6 @@ adminRouter.post("/capnhatdanhmucghe",upload.none(),updateDanhMucGhe);
 //============================================
 //QUẢN LÝ LỊCH ĐẶT
 adminRouter.post('/LichDat', upload.none(), LichDatController.DatLich);
+adminRouter.get('/danhsach_lichdat', LichDatController.DanhSachDatLich);
 console.log("✅ adminRouter loaded");
 export default adminRouter;
