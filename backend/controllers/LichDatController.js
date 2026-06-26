@@ -2,6 +2,7 @@ import { body, query, validationResult } from 'express-validator';
 import NguoiDungModel from '../models/NguoiDungModel.js';
 import KhongGianModel from '../models/KhongGianModel.js';
 import DatLichModel from '../models/LichDatModel.js';
+import GheModel from '../models/gheModel.js';
 import moment from 'moment'
 export default class LichDatController{
     static async DatLich(req,res){
@@ -47,7 +48,10 @@ export default class LichDatController{
                         const kiemtra = await KhongGianModel.kiemtraid(ID_KHONG_GIAN);
                         if(!kiemtra) throw new Error('Phòng họp không tồn tại!');
                     }
-                    //kiểm tra tồn tại của ghế
+                    if(ID_GHE){
+                        const kiemtra2= await GheModel.testId(ID_GHE)
+                        if(!kiemtra2) throw new Error('Ghế không tồn tại!');
+                    }
                     return true;
                 }).run(req)
             ])
@@ -109,6 +113,52 @@ export default class LichDatController{
              return res.status(500).json({
                 success: false,
                 message: 'Lấy danh sách thất bại: ' + error.message
+            });
+        }
+    }
+    static async LichSuDat_theoID_ghe(req,res){
+        try {
+           const page = parseInt(req.query.page) || 1;
+           const IDGHE = parseInt(req.query.IDGHE)
+          const limit = parseInt(req.query.limit) || 10;
+          const offset = (page - 1) * limit;
+          
+           await Promise.all([
+                query('page')
+                    .notEmpty()
+                    .withMessage('Số lượng không được bỏ trống')
+                    .isInt({ min: 0 })
+                    .withMessage('Số trang phải là số nguyên và không được âm!')
+                    .run(req),
+                 query('IDGHE')
+                    .notEmpty().withMessage('id ghế không được bỏ trống!')
+                    .isInt().withMessage('ID ghế phải là số nguyên')
+                    .custom(async (value) => {
+                        const check = await GheModel.testId(value);
+                        if (!check) throw new Error('ID không tồn tại!');
+                            return true;
+                        })
+                    .run(req),
+           ]);
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Dữ liệu không hợp lệ!',
+                    errors: errors.array().map(err => err.msg)
+                });
+            }
+            const danhsach = await DatLichModel.DanhSach_theoIDGHE(limit, offset, IDGHE);
+            return res.status(200).json({
+                success:true,
+                DanhSach:danhsach.DanhSach,
+                TongSo:danhsach.TongSo
+            })
+
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                message: 'Lấy danh sách lịch sử đặt ghế thất bại: ' + error.message
             });
         }
     }

@@ -29,4 +29,57 @@ export default class DatLichModel{
              throw new Error('Database query failed: ' + error.message);
         }
     }
+    static async NguoiDat_ghe_HienTai(IDGHE){
+        try {
+            const [layttt] = await execute(`
+                SELECT 
+        ld.KHUNG_BATDAU,
+        ld.KHUNG_KETTHUC,
+        nd.TENND,
+        nd.HINH_ANH,
+        nd.EMAIL
+    FROM 
+        lichdat AS ld
+    INNER JOIN 
+        nguoidung AS nd ON ld.IDND = nd.IDND
+    WHERE 
+        ld.ID_GHE = ? 
+        AND NOW() BETWEEN ld.KHUNG_BATDAU AND ld.KHUNG_KETTHUC
+    LIMIT 1
+                `,[IDGHE]);
+            return layttt.length> 0 ? layttt :null
+        } catch (error) {
+             throw new Error('Database query failed: ' + error.message);
+        }
+    }
+    static async DanhSach_theoIDGHE(limit, offset, IDGHE){
+        try {
+            const [DanhSach] = await execute(`
+                SELECT 
+        ld.KHUNG_BATDAU,
+        ld.KHUNG_KETTHUC,
+        nd.TENND,
+        nd.HINH_ANH,
+        nd.EMAIL
+    FROM 
+        lichdat AS ld
+    INNER JOIN 
+        nguoidung AS nd ON ld.IDND = nd.IDND
+    WHERE 
+        ld.ID_GHE = ?
+    LIMIT ? OFFSET ?
+                `,[IDGHE,limit,offset]);
+            const [TongSo] = await execute(`
+                 SELECT COUNT(*) AS total FROM lichdat
+                 WHERE ID_GHE=?
+                `,[IDGHE]);
+
+            return {
+                DanhSach:DanhSach,
+                TongSo:TongSo[0].total
+            }
+        } catch (error) {
+            throw new Error('Database query failed: ' + error.message);
+        }
+    }
 }

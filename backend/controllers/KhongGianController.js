@@ -123,9 +123,9 @@ export default class KhongGianController{
                     .isInt().withMessage('Giá trị nhập vào phải là một số nguyên!')
                     .custom(async (value, { req }) => {
                         const checkid = await KhongGianModel.kiemtraid(value);
-                        if(! checkid){
-                            throw new Error('ID không gian không tồn tại!');
-                        }
+                        if(! checkid) throw new Error('ID không gian không tồn tại!');
+                        return true;
+                        
                     })
                     .run(req),
                 body('TenKG')
@@ -296,8 +296,6 @@ export default class KhongGianController{
             const LoaiKG= thongTin_KhongGian.LOAI_KHONG_GIAN
             if(LoaiKG===1){
                 //truy vấn real-time lấy danh sách ghế hiện tại
-                
-
             }
             if(DanhSachGhe===null){
                 return res.status(200).json({
@@ -317,6 +315,7 @@ export default class KhongGianController{
                 })
             }
             //return thêm trạng thái ghế
+
         } catch (error) {
              return res.status(500).json({
                         success: false,

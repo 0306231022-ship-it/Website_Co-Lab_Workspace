@@ -48,5 +48,28 @@ export default class ChiTietThietBiModel {
              throw new Error('Database query failed: ' + error.message);
         }
     }
+    static async DanhSach_thietbi_cap_khonggian(IDTB){
+        try {
+            const [truyvan] = await execute(`
+               SELECT
+    chitiet_thietbi.ID_CT_TB,
+    chitiet_thietbi.ID_KHONG_GIAN,
+    chitiet_thietbi.TRANG_THAI,
+    khonggian.TEN_KHONG_GIAN,
+    chinhanh.TEN_CHI_NHANH
+FROM 
+    chitiet_thietbi
+INNER JOIN 
+    khonggian ON chitiet_thietbi.ID_KHONG_GIAN = khonggian.ID_KHONG_GIAN
+INNER JOIN 
+    chinhanh ON khonggian.ID_CHI_NHANH = chinhanh.ID_CHI_NHANH
+WHERE 
+    chitiet_thietbi.ID_THIET_BI = ?;
+                `,[IDTB]);
+                return truyvan;
+        } catch (error) {
+             throw new Error('Database query failed: ' + error.message);
+        }
+    }
     
 }

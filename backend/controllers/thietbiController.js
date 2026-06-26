@@ -1,26 +1,13 @@
+import { hash, compare } from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import ThietBi from "../models/thietbiModel.js";
 import { body, query, validationResult } from 'express-validator';
-
-// ========================================================
-// MIDDLEWARE KIỂM TRA VÀ TRẢ VỀ LỖI VALIDATION
-// ========================================================
-const validateResult = (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({
-            success: false,
-            message: 'Dữ liệu không hợp lệ!',
-            errors: errors.array().map(err => err.msg)
-        });
-    }
-    next();
-};
-// [GET] /api/admin/thietbi
+import ChiTietThietBiModel from '../models/ChiTiet_ThietBiModel.js';
 
 
-export const getAllThietBi = async (req, res) => {
+export default class thietbiController{
+static async  getAllThietBi (req, res)  {
     try {
-        // Tự động validate query params (nếu có truyền)
         await Promise.all([
             query('page')
                 .notEmpty()
@@ -32,12 +19,10 @@ export const getAllThietBi = async (req, res) => {
         if (!errors.isEmpty()) {
             return res.status(400).json({ success: false, errors: errors.array().map(err => err.msg) });
         }
-
        const page= parseInt(req.query.page);
        const limit = parseInt(req.query.limit|| 10);
        const ofset = (page-1) * limit;
-        const result = await ThietBi.getAll(ofset, limit);
-        
+       const result = await ThietBi.getAll(ofset, limit);
         res.status(200).json({ 
             success: true, 
             data: result.data,
@@ -48,11 +33,11 @@ export const getAllThietBi = async (req, res) => {
     }
 };
 
-// [GET] /api/admin/thietbi/:id
-export const getThietBiById = async (req, res) => {
+// [GET] /api/admin/thietbi
+static async getThietBiById (req, res) {
     try {
         await Promise.all([
-            body('ID_THIET_BI')
+            query('ID_THIET_BI')
               .notEmpty().withMessage('id thiết bị không được bỏ trống!')
               .isInt().withMessage('ID thiết bị phải là số nguyên')
               .custom(async (value)=>{
@@ -73,20 +58,29 @@ export const getThietBiById = async (req, res) => {
             });
         }
     
-        const { id } = req.params;
-        const item = await ThietBi.getById(id);
+        const id = req.query.ID_THIET_BI;
+        const [item1,item2] = await Promise.all([
+            ThietBi.getById(id),
+            ChiTietThietBiModel.DanhSach_thietbi_cap_khonggian(id)
+        ]) 
         //trả về danh sách các thiết bị đc cấp phát
-        if (!item) {
+        if (!item1) {
             return res.status(404).json({ success: false, message: "Không tìm thấy thiết bị!" });
         }
-        res.status(200).json({ success: true, data: item });
+        res.status(200).json({ 
+            success: true, 
+            data:{
+                ChiTiet : item1,
+                DanhSach:item2
+            } 
+        });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
 // [POST] /api/admin/thietbi
-export const createThietBi = async (req, res) => {
+static async  createThietBi (req, res)  {
     try {
         const { TEN_THIET_BI, HINH_ANH } = req.body;
         await Promise.all([
@@ -124,7 +118,7 @@ export const createThietBi = async (req, res) => {
 };
 
 
-export const updateThietBi = async (req, res) => {
+static async  updateThietBi  (req, res) {
     try {
         await Promise.all([
             body('ID_THIET_BI')
@@ -166,3 +160,4 @@ export const updateThietBi = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+}
