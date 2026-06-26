@@ -1,0 +1,81 @@
+import { body, query, validationResult } from 'express-validator';
+import NguoiDungModel from '../models/NguoiDungModel.js';
+import KhongGianModel from '../models/KhongGianModel.js';
+import DatLichModel from '../models/LichDatModel.js';
+import moment from 'moment'
+export default class LichDatController{
+    static async DatLich(req,res){
+        const dulieu = req.body;
+        try {
+            await Promise.all([
+                body('KHUNG_BATDAU')
+                    .notEmpty().withMessage('Thời gian bắt đầu không được để trống.')
+                    .isISO8601().withMessage('Thời gian bắt đầu không đúng định dạng ngày tháng.')
+                    .custom((value) => {
+                        if (new Date(value) < new Date()) throw new Error('Không thể đặt lịch cho thời gian trong quá khứ.');
+                        const formats = ['YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DDTHH:mm:ss', 'YYYY-MM-DD'];
+                        const dateCheck = moment(value, formats, true);
+                        if (!dateCheck.isValid()) throw new Error('thời gian bắt đầu không hợp lệ!');
+                        return true;
+                    })
+                    .run(req),
+                body('KHUNG_KETTHUC')
+                    .notEmpty().withMessage('Thời gian kết thúc không được để trống.')
+                    .isISO8601().withMessage('Thời gian kết thúc không đúng định dạng ngày tháng.')
+                    .custom((value, { req }) => {
+                        if (new Date(value) <= new Date(req.body.KHUNG_BATDAU)) throw new Error('Thời gian kết thúc phải lớn hơn thời gian bắt đầu.');
+                         const formats = ['YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DDTHH:mm:ss', 'YYYY-MM-DD'];
+                        const dateCheck = moment(value, formats, true);
+                        if (!dateCheck.isValid()) throw new Error('thời gian kết thúc không hợp lệ!');
+                        return true;
+                    })
+                    .run(req),
+                body('IDND')
+                    .notEmpty().withMessage('Mã người dùng không được để trống.')
+                    .isInt({ min: 1 }).withMessage('Mã người dùng phải là một số nguyên hợp lệ.')
+                    .custom(async (value, { req }) => {
+                        const kiemtra = await NguoiDungModel.findByid(value);
+                        if(!kiemtra) throw new Error('Người dùng không tồn tại!');
+                        return true;
+                    })
+                    .run(req),
+                body().custom(async (body) => {
+                    const { ID_KHONG_GIAN, ID_GHE } = body;
+                    if (!ID_KHONG_GIAN && !ID_GHE) throw new Error('Vui lòng chọn Phòng họp hoặc Ghế ngồi.');
+                    if( ID_KHONG_GIAN && ID_GHE)  throw new Error('Không thể vừa đặt Phòng họp vừa đặt Ghế ngồi cùng lúc.');
+                    if(ID_KHONG_GIAN){
+                        const kiemtra = await KhongGianModel.kiemtraid(ID_KHONG_GIAN);
+                        if(!kiemtra) throw new Error('Phòng họp không tồn tại!');
+                    }
+                    //kiểm tra tồn tại của ghế
+                    return true;
+                }).run(req)
+            ])
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Dữ liệu không hợp lệ!',
+                    errors: errors.array().map(err => err.msg)
+                });
+            }
+            const DatLich = await DatLichModel.DatLich(dulieu);
+            if(!DatLich){
+                return res.status(500).json({
+                    success:false,
+                    message:'Đặt lịch thất bại!'
+                })
+            }
+            return res.status(200).json({
+                success:true,
+                message:'Đặt lịch thành công!'
+            })
+
+        } catch (error) {
+            return res.status(500).json({
+            success: false,
+            message: error.message || 'Đã xảy ra lỗi hệ thống!'
+        });
+        }
+    }
+}

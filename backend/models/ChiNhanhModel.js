@@ -7,7 +7,7 @@ export default class ChiNhanhModel{
                 INSERT INTO chinhanh(TEN_CHI_NHANH,DIA_CHI,TRANG_THAI,HINHANH)
                 VALUES(?,?,1,?)
                 `,[ten,diachi,hinh]);
-            return them.affectedRows>0 ? true : false;
+            return them.affectedRows>0;
         } catch (error) {
             throw new Error('Database query failed: ' + error.message);
         }
