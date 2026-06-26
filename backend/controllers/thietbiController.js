@@ -1,24 +1,11 @@
+import { hash, compare } from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import ThietBi from "../models/thietbiModel.js";
 import { body, query, validationResult } from 'express-validator';
 
-// ========================================================
-// MIDDLEWARE KIỂM TRA VÀ TRẢ VỀ LỖI VALIDATION
-// ========================================================
-const validateResult = (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({
-            success: false,
-            message: 'Dữ liệu không hợp lệ!',
-            errors: errors.array().map(err => err.msg)
-        });
-    }
-    next();
-};
-// [GET] /api/admin/thietbi
 
-
-export const getAllThietBi = async (req, res) => {
+export default class thietbiController{
+static async  getAllThietBi (req, res)  {
     try {
         // Tự động validate query params (nếu có truyền)
         await Promise.all([
@@ -49,7 +36,7 @@ export const getAllThietBi = async (req, res) => {
 };
 
 // [GET] /api/admin/thietbi/:id
-export const getThietBiById = async (req, res) => {
+static async getThietBiById (req, res) {
     try {
         await Promise.all([
             body('ID_THIET_BI')
@@ -86,7 +73,7 @@ export const getThietBiById = async (req, res) => {
 };
 
 // [POST] /api/admin/thietbi
-export const createThietBi = async (req, res) => {
+static async  createThietBi (req, res)  {
     try {
         const { TEN_THIET_BI, HINH_ANH } = req.body;
         await Promise.all([
@@ -124,7 +111,7 @@ export const createThietBi = async (req, res) => {
 };
 
 
-export const updateThietBi = async (req, res) => {
+static async  updateThietBi  (req, res) {
     try {
         await Promise.all([
             body('ID_THIET_BI')
@@ -166,3 +153,4 @@ export const updateThietBi = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+}

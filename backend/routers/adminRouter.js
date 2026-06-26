@@ -1,16 +1,7 @@
 import { Router } from "express";
-import { 
-    getAllThietBi, 
-    getThietBiById, 
-    createThietBi, 
-    updateThietBi, 
-    
-} from "../controllers/thietbiController.js";
-import{
-    createDanhMucGhe,
-    updateDanhMucGhe
-}
-from"../controllers/danhmucgheController.js";
+import thietbiController from "../controllers/thietbiController.js"; 
+import danhmucgheController from "../controllers/danhmucgheController.js";
+import gheController from "../controllers/gheController.js";
 import ChiNhanhController from "../controllers/ChiNhanhController.js";
 import KhongGianController from "../controllers/KhongGianController.js";
 const adminRouter = Router();
@@ -23,6 +14,7 @@ const upload = multer();
 //adminRouter.post('/DangKy', upload.none(), NguoiDungController.DangKy);
 //adminRouter.post('/XacThucOTP', upload.none(), NguoiDungController.XacThucOTP);
 //===========================================
+
 //QUẢN LÝ CHI NHÁNH
 adminRouter.post('/ThemChiNhanh', createUpload('ChiNhanh').any(), ChiNhanhController.Them_ChiNhanh);
 adminRouter.post('/CapNhat_thongTinMem', upload.none(), ChiNhanhController.ChinhSua_Ten_DiaChi);
@@ -44,13 +36,15 @@ adminRouter.get('/ChiTiet_KhongGian', KhongGianController.ChiTiet_KhongGian);
 // =========================================
 // QUẢN LÝ THIẾT BỊ
 adminRouter.post('/CapThietBi' , upload.none(), ChiTietThietBiController.CapThietBi);
-adminRouter.get("/thietbi", getAllThietBi);
-adminRouter.get("/layid/:id", getThietBiById);
+adminRouter.get("/thietbi", thietbiController.getAllThietBi);
+adminRouter.get("/layid/:id", thietbiController.getThietBiById);
 adminRouter.get('/DanhSachThietBi_theoKhongGian', ChiTietThietBiController.DanhSach_ThietBi);
-adminRouter.post("/thietbi",  upload.none(),createThietBi);
-adminRouter.post("/CapNhatThietBi", upload.none(), updateThietBi);
+adminRouter.post("/thietbi",  upload.none(),thietbiController.createThietBi);
+adminRouter.post("/CapNhatThietBi", upload.none(), thietbiController.updateThietBi);
 //Danh Mục ghế
-adminRouter.post("/danhmucghe",  upload.none(),createDanhMucGhe);
-adminRouter.post("/capnhatdanhmucghe",upload.none(),updateDanhMucGhe);
+adminRouter.post("/danhmucghe",  upload.none(),danhmucgheController.createDanhMucGhe);
+adminRouter.post("/capnhatdanhmucghe",upload.none(),danhmucgheController.updateDanhMucGhe);
+//ghế
+adminRouter.post("/themghe",upload.none(),gheController.createGhe)
 console.log("✅ adminRouter loaded");
 export default adminRouter;

@@ -1,8 +1,10 @@
+import { hash, compare } from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import dmGhe from "../models/danhmucgheModel.js";
 import { body, query, validationResult } from "express-validator";
 
-
-export const getAllDanhMucGhe = async (req, res) => {
+export default class danhmucgheController{
+static async getAllDanhMucGhe(req, res) {
     try {
         // Tự động validate query params (nếu có truyền)
         await Promise.all([
@@ -32,7 +34,7 @@ export const getAllDanhMucGhe = async (req, res) => {
     }
 };
 // [GET] /api/admin/danh mục ghế/:id
-export const getDanhMucGheById = async (req, res) => {
+static async getDanhMucGheById (req, res) {
     try {
         await Promise.all([
             body('ID_DANHMUC')
@@ -69,7 +71,7 @@ export const getDanhMucGheById = async (req, res) => {
 };
 
 // [POST] /api/admin/danh mục ghế
-export const createDanhMucGhe = async (req, res) => {
+static async createDanhMucGhe (req, res){
     try {
         const { TEN_DANHMUC } = req.body;
         await Promise.all([
@@ -104,7 +106,7 @@ export const createDanhMucGhe = async (req, res) => {
 };
 
 
-export const updateDanhMucGhe = async (req, res) => {
+static async updateDanhMucGhe (req, res)  {
     try {
         await Promise.all([
             body('ID_DANHMUC')
@@ -144,3 +146,4 @@ export const updateDanhMucGhe = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+}

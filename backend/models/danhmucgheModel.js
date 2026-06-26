@@ -1,6 +1,6 @@
-import { execute } from "../config/db.js";
-const dmGhe={
-    getAll: async (offset , limit) => {
+import { execute,beginTransaction, rollbackTransaction, commitTransaction } from "../config/db.js";
+ export default class dmGhe{
+    static async getAll(offset , limit)  {
         try {
     
             // Truy vấn lấy dữ liệu phân trang
@@ -26,8 +26,8 @@ const dmGhe={
             console.error(" Lỗi Database trong getAll ghế:", error.message);
             throw new Error("Không thể kết nối đến cơ sở dữ liệu để lấy danh sách!");
         }
-    },
-    //  getById: async (id) => {
+    }
+    //  static async getById (id) => {
     //     try {
     //         const [rows] = await execute("SELECT * FROM danhmucghe WHERE ID_DANHMUC = ?", [id]);
     //         return rows[0];
@@ -35,8 +35,8 @@ const dmGhe={
     //         console.error(` Lỗi Database trong getById (${id}):`, error.message);
     //         throw new Error("Không thể kết nối đến cơ sở dữ liệu để lấy chi tiết danh mục ghế!");
     //     }
-    // },
-    create: async (tenDanhMuc) => {
+    // }
+    static async create(tenDanhMuc) {
         try {
             const [result] = await execute(
                 "INSERT INTO danhmucghe (TEN_DANHMUC,TRANG_THAI) VALUES (?, ?)",
@@ -47,9 +47,9 @@ const dmGhe={
             console.error(" Lỗi Database trong create trangthai:", error.message);
             throw new Error("Không thể thêm danh mục ghế mới vào cơ sở dữ liệu!");
         }
-    },
+    }
 // 4. Cập nhật thiết bị 
-    update: async (id, tenDanhMuc) => {
+    static async update(id, tenDanhMuc){
         try {
             const [result] = await execute(
                 "UPDATE danhmucghe SET TEN_DANHMUC = ? WHERE ID_DANHMUC = ?",
@@ -60,9 +60,9 @@ const dmGhe={
             console.error(` Lỗi Database trong update (${id}):`, error.message);
             throw new Error("Không thể cập nhật thông tin danh mục ghế!");
         }
-    },
+    }
     //kiểm tra id 
-    testid: async (id) =>{
+    static async testid(id) {
         try {
              const [rows] = await execute("SELECT * FROM danhmucghe WHERE ID_DANHMUC = ?", [id]);
              return rows.length>0 ? true : false;
@@ -75,5 +75,5 @@ const dmGhe={
 
 
 };
-export default dmGhe;
+
      

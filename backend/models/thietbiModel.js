@@ -1,10 +1,10 @@
 // backend/models/thietBiModel.js
-import { execute } from '../config/db.js';
+import { execute,beginTransaction, rollbackTransaction, commitTransaction } from '../config/db.js';
 
-const ThietBi = {
+export default class ThietBi {
     
     // Mặc định nếu không truyền page thì là trang 1, không truyền limit thì lấy 10 cái
-    getAll: async (offset , limit) => {
+    static async getAll(offset , limit) {
         try {
     
             // Truy vấn lấy dữ liệu phân trang
@@ -30,10 +30,10 @@ const ThietBi = {
             console.error(" Lỗi Database trong getAll ThietBi:", error.message);
             throw new Error("Không thể kết nối đến cơ sở dữ liệu để lấy danh sách!");
         }
-    },
+    }
 
     // 2. Lấy thiết bị theo ID (Không cần LIMIT/OFFSET vì ID là duy nhất)
-    getById: async (id) => {
+     static async getById(id) {
         try {
             const [rows] = await execute("SELECT * FROM thietbi WHERE ID_THIET_BI = ?", [id]);
             return rows[0];
@@ -41,10 +41,10 @@ const ThietBi = {
             console.error(` Lỗi Database trong getById (${id}):`, error.message);
             throw new Error("Không thể kết nối đến cơ sở dữ liệu để lấy chi tiết thiết bị!");
         }
-    },
+    }
 
     // 3. Thêm thiết bị mới
-    create: async (tenThietBi, hinhAnh) => {
+     static async create(tenThietBi, hinhAnh) {
         try {
             const [result] = await execute(
                 "INSERT INTO thietbi (TEN_THIET_BI, HINH_ANH) VALUES (?, ?)",
@@ -55,10 +55,10 @@ const ThietBi = {
             console.error(" Lỗi Database trong create ThietBi:", error.message);
             throw new Error("Không thể thêm thiết bị mới vào cơ sở dữ liệu!");
         }
-    },
+    }
 
     // 4. Cập nhật thiết bị 
-    update: async (id, tenThietBi, hinhAnh) => {
+     static async update(id, tenThietBi, hinhAnh) {
         try {
             const [result] = await execute(
                 "UPDATE thietbi SET TEN_THIET_BI = ?, HINH_ANH = ? WHERE ID_THIET_BI = ?",
@@ -69,9 +69,9 @@ const ThietBi = {
             console.error(` Lỗi Database trong update (${id}):`, error.message);
             throw new Error("Không thể cập nhật thông tin thiết bị!");
         }
-    },
+    }
     //kiểm tra id 
-    testid: async (id) =>{
+    static async testid (id) {
         try {
              const [rows] = await execute("SELECT * FROM thietbi WHERE ID_THIET_BI = ?", [id]);
              return rows.length>0 ? true : false;
@@ -84,4 +84,3 @@ const ThietBi = {
     
 };
 
-export default ThietBi;

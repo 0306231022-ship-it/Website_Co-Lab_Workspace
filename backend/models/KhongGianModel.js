@@ -7,7 +7,7 @@ export default class KhongGianModel {
                  INSERT INTO khonggian(TEN_KHONG_GIAN,LOAI_KHONG_GIAN,ID_CHI_NHANH,HINHANH,TRANG_THAI)
                  VALUE(?,?,?,?,1)
                 `,[dulieu.TenKhongGian,dulieu.LoaiKG,dulieu.IDCN,hinhanh]);
-            return them.affectedRows>0 ? true : falsel
+            return them.affectedRows>0 ? true : false
         } catch (error) {
             throw new Error('Database query failed: ' + error.message);
         }
