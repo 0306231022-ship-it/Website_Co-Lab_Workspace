@@ -1,51 +1,18 @@
-import { hash, compare } from 'bcrypt';
-import jwt from 'jsonwebtoken';
+
 import GheModel from "../models/gheModel.js";
+import KhongGianModel from '../models/KhongGianModel.js';
+import dmGhe from "../models/danhmucgheModel.js";
 import { body, param, query, validationResult } from "express-validator";
 
 export default class gheController {
     
-    // [GET] /api/admin/ghe
-    static async getAllGhe(req, res) {
-        try {
-            // Tự động validate query params (nếu có truyền) dựa theo cách viết của danh mục ghế
-            await Promise.all([
-                query('page')
-                    .notEmpty()
-                    .withMessage('Trang không được bỏ trống!')
-                    .isInt({ min: 1 }).withMessage('Số trang phải là số nguyên dương lớn hơn 0')
-                    .run(req),
-            ]);
 
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                return res.status(400).json({ success: false, errors: errors.array().map(err => err.msg) });
-            }
-
-            // Tính toán offset/limit giống hệt bên danh mục ghế (nếu sau này em cần bật lại phân trang ở model)
-            // Hiện tại model không phân trang thì lấy toàn bộ, nhưng logic tính toán này giữ nguyên để giống cách code mẫu
-            const page = parseInt(req.query.page);
-            const limit = parseInt(req.query.limit || 10);
-            const ofset = (page - 1) * limit;
-            
-            const result = await GheModel.getAll(); // Gọi hàm lấy toàn bộ của Ghế Model
-            
-            res.status(200).json({ 
-                success: true, 
-                data: result
-            });
-        } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
-        }
-    }
-
-    // [GET] /api/admin/ghe/:id
     static async getGheById(req, res) {
         try {
             // Validate ID ghế nằm trên URL params thông qua param() thay vì body() để khớp RESTful API 
             // Sử dụng custom validator gọi hàm testId của GheModel tương tự cách viết mẫu
             await Promise.all([
-                param('id')
+                query('ghe')
                     .notEmpty().withMessage('id ghế không được bỏ trống!')
                     .isInt().withMessage('ID ghế phải là số nguyên')
                     .custom(async (value) => {
@@ -65,9 +32,10 @@ export default class gheController {
                 });
             }
         
-            const { id } = req.params;
+            const id  = req.query.ghe;
+
             const item = await GheModel.getById(id);
-            
+            // lấy lịch sử đặt lịch tại ghế đó
             if (!item) {
                 return res.status(404).json({ success: false, message: "Không tìm thấy thông tin ghế!" });
             }
@@ -91,19 +59,29 @@ export default class gheController {
                     .run(req),
                 body('TOA_X')
                     .notEmpty().withMessage('tọa độ X không được bỏ trống')
-                    .isFloat().withMessage('tọa độ X phải là số số thập phân hoặc số nguyên')
+                     .isInt().withMessage('tọa độ X phải là số số thập phân hoặc số nguyên')
                     .run(req),
                 body('TOA_Y')
                     .notEmpty().withMessage('tọa độ Y không được bỏ trống')
-                    .isFloat().withMessage('tọa độ Y phải là số số thập phân hoặc số nguyên')
+                    .isInt().withMessage('tọa độ Y phải là số số thập phân hoặc số nguyên')
                     .run(req),
                 body('ID_KHONG_GIAN')
                     .notEmpty().withMessage('id không gian không được bỏ trống')
                     .isInt().withMessage('id không gian phải là số nguyên')
+                    .custom(async (value, { req }) => {
+                        const testid = await KhongGianModel.kiemtraid(value);
+                        if(!testid)  throw new Error('ID không tồn tại!');
+                        return true;
+                    })
                     .run(req),
                 body('ID_DANH_MUC')
                     .notEmpty().withMessage('id danh mục không được bỏ trống')
                     .isInt().withMessage('id danh mục phải là số nguyên')
+                     .custom(async (value, { req }) => {
+                        const testid = await dmGhe.testid(value);
+                        if(!testid)  throw new Error('ID không tồn tại!');
+                        return true;
+                    })
                     .run(req)
             ]);
 
@@ -157,11 +135,11 @@ export default class gheController {
                     .run(req),
                 body('TOA_X')
                     .notEmpty().withMessage('Tọa độ X không được để trống!')
-                    .isFloat().withMessage('Tọa độ X phải là dạng số')
+                    .isInt().withMessage('Tọa độ X phải là dạng số')
                     .run(req),
                 body('TOA_Y')
                     .notEmpty().withMessage('Tọa độ Y không được để trống!')
-                    .isFloat().withMessage('Tọa độ Y phải là dạng số')
+                    .isInt().withMessage('Tọa độ Y phải là dạng số')
                     .run(req),
                 body('TRANG_THAI')
                     .notEmpty().withMessage('Trạng thái không được để trống!')
@@ -170,10 +148,20 @@ export default class gheController {
                 body('ID_KHONG_GIAN')
                     .notEmpty().withMessage('ID không gian không được để trống!')
                     .isInt().withMessage('ID không gian phải là số nguyên')
+                    .custom(async (value, { req }) => {
+                        const checkid = await KhongGianModel.kiemtraid(value);
+                        if(!checkid) throw new Error('ID không gian không tồn tại!');
+                        return true;
+                    })
                     .run(req),
                 body('ID_DANH_MUC')
                     .notEmpty().withMessage('ID danh mục không được để trống!')
                     .isInt().withMessage('ID danh mục phải là số nguyên')
+                    .custom(async (value, { req }) => {
+                        const testid = await dmGhe.testid(value);
+                        if(!testid)  throw new Error('ID không tồn tại!');
+                        return true;
+                    })
                     .run(req)
             ]);
 

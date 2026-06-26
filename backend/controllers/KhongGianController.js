@@ -123,9 +123,9 @@ export default class KhongGianController{
                     .isInt().withMessage('Giá trị nhập vào phải là một số nguyên!')
                     .custom(async (value, { req }) => {
                         const checkid = await KhongGianModel.kiemtraid(value);
-                        if(! checkid){
-                            throw new Error('ID không gian không tồn tại!');
-                        }
+                        if(! checkid) throw new Error('ID không gian không tồn tại!');
+                        return true;
+                        
                     })
                     .run(req),
                 body('TenKG')

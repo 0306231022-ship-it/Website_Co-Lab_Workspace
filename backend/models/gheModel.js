@@ -48,8 +48,10 @@ export default class GheModel {
     // 4. Cập nhật thông tin ghế
     static async update(id, data) {
         try {
-            const[update]=await execute(`UPDATE ghe SET TEN_GHE=?, TOA_X=?, TOA_Y=?, TRANG_THAI=?, ID_KHONG_GIAN=?, ID_DANH_MUC WHERE ID_GHE=?`,
-                [id,data.TEN_GHE,data.TOA_X,data.TOA_Y,data.TRANG_THAI||1,data.ID_KHONG_GIAN,data.ID_DANH_MUC]
+            const[update]=await execute(`
+                UPDATE ghe 
+                SET TEN_GHE=?, TOA_X=?, TOA_Y=?, TRANG_THAI=?, ID_KHONG_GIAN=?, ID_DANH_MUC=? WHERE ID_GHE=?`,
+                [data.TEN_GHE,data.TOA_X,data.TOA_Y,data.TRANG_THAI,data.ID_KHONG_GIAN,data.ID_DANH_MUC,id]
             );
              return update.affectedRows>0 ? true : false;
         } catch (error) {

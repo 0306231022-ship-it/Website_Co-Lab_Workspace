@@ -45,6 +45,8 @@ adminRouter.post("/CapNhatThietBi", upload.none(), thietbiController.updateThiet
 adminRouter.post("/danhmucghe",  upload.none(),danhmucgheController.createDanhMucGhe);
 adminRouter.post("/capnhatdanhmucghe",upload.none(),danhmucgheController.updateDanhMucGhe);
 //ghế
-adminRouter.post("/themghe",upload.none(),gheController.createGhe)
+adminRouter.post("/themghe",upload.none(),gheController.createGhe);
+adminRouter.get('/ChiTiet_ghe', gheController.getGheById);
+adminRouter.post("/capnhatghe",upload.none(),gheController.updateGhe);
 console.log("✅ adminRouter loaded");
 export default adminRouter;
