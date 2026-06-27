@@ -27,13 +27,6 @@ export default class NguoiDungController{
                      message: 'Người dùng đã tồn tại!'
                 });
                }
-            }else{
-               if (!user) {
-                  return res.status(404).json({
-                     success: false,
-                     message: 'Người dùng không tồn tại!'
-                  });
-               }
             }
              const maOTP = taoMaOTP();
              const otpResult = await XacThucOTPModel.ThemOTP(Email, maOTP);

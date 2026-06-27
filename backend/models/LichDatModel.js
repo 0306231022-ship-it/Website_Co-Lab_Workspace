@@ -82,4 +82,15 @@ export default class DatLichModel{
             throw new Error('Database query failed: ' + error.message);
         }
     }
+    static async kiemtraid(id){
+        try {
+            const [kiemtra] = await execute(`
+                SELECT*FROM lichdat
+                WHERE ID_LICH_DAT = ?
+                `,[id]);
+            return kiemtra.length>0? true : false;
+        } catch (error) {
+            throw new Error('Database query failed: ' + error.message);
+        }
+    }
 }

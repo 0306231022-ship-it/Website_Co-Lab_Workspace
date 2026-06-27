@@ -162,5 +162,15 @@ export default class LichDatController{
             });
         }
     }
+    static async LichDat_HoatDong(req,res){
+        try {
+            
+        } catch (error) {
+              return res.status(500).json({
+                success: false,
+                message: 'Lấy danh sách thất bại: ' + error.message
+            });
+        }
+    }
     
 }
