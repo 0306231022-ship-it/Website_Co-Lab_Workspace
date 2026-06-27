@@ -10,6 +10,7 @@ import multer from "multer";
 import ChiTietThietBiController from "../controllers/ChiTiet_ThietBiController.js";
 import LichDatController from "../controllers/LichDatController.js";
 import DatLichModel from "../models/LichDatModel.js";
+import hoadonController from "../controllers/hoadonController.js";
 const upload = multer();  
 //==========================================
 //QUẢN LÝ CHI NHÁNH
@@ -46,12 +47,14 @@ adminRouter.post("/capnhatdanhmucghe",upload.none(),danhmucgheController.updateD
 adminRouter.get('/danhsach_lichdat', LichDatController.DanhSachDatLich);
 adminRouter.get('/lichsu_ghe', LichDatController.LichSuDat_theoID_ghe);
 adminRouter.get('/lichdat_hoatdong' , LichDatController.LichDat_HoatDong);
-
 //==========================================
 //QUẢN LÝ GHẾ
 adminRouter.post("/themghe",upload.none(),gheController.createGhe);
 adminRouter.get('/ChiTiet_ghe', gheController.getGheById);
 adminRouter.post("/capnhatghe",upload.none(),gheController.updateGhe);
-
+//=========================================
+//QUẢN LÝ HÓA DƠN
+adminRouter.post("/themhoadon",upload.none(),hoadonController.createHoaDon);
+adminRouter.get("/chitiethoadon",hoadonController.getHoaDonById);
 console.log("✅ adminRouter loaded");
 export default adminRouter;
