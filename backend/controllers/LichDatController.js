@@ -65,7 +65,7 @@ export default class LichDatController{
             }
             const DatLich = await DatLichModel.DatLich(dulieu);
             if(!DatLich){
-                return res.status(500).json({
+                return res.status(409).json({
                     success:false,
                     message:'Đặt lịch thất bại!'
                 })
@@ -76,7 +76,7 @@ export default class LichDatController{
             })
 
         } catch (error) {
-            return res.status(500).json({
+            return res.status(409).json({
             success: false,
             message: error.message || 'Đã xảy ra lỗi hệ thống!'
         });
