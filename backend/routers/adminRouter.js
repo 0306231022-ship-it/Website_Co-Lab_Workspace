@@ -45,6 +45,8 @@ adminRouter.post("/capnhatdanhmucghe",upload.none(),danhmucgheController.updateD
 //QUẢN LÝ LỊCH ĐẶT
 adminRouter.get('/danhsach_lichdat', LichDatController.DanhSachDatLich);
 adminRouter.get('/lichsu_ghe', LichDatController.LichSuDat_theoID_ghe);
+adminRouter.get('/lichdat_hoatdong' , LichDatController.LichDat_HoatDong);
+
 //==========================================
 //QUẢN LÝ GHẾ
 adminRouter.post("/themghe",upload.none(),gheController.createGhe);

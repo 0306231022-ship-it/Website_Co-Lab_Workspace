@@ -164,7 +164,11 @@ export default class LichDatController{
     }
     static async LichDat_HoatDong(req,res){
         try {
-            
+            const lichdat = await DatLichModel.DanhSachDang_HoatDong();
+            return res.status(200).json({
+                success:true,
+                DanhSach: lichdat
+            })
         } catch (error) {
               return res.status(500).json({
                 success: false,

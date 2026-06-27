@@ -93,4 +93,16 @@ export default class DatLichModel{
             throw new Error('Database query failed: ' + error.message);
         }
     }
+    static async DanhSachDang_HoatDong(){
+        try {
+            const thoiGianHienTai = new Date();
+            const [DanhSach] = await execute(`
+                SELECT*FROM lichdat ld
+                WHERE ? BETWEEN ld.KHUNG_BATDAU AND ld.KHUNG_KETTHUC;
+                `,[thoiGianHienTai]);
+            return DanhSach;
+        } catch (error) {
+            throw new Error('Database query failed: ' + error.message);
+        }
+    }
 }
