@@ -10,6 +10,7 @@ import multer from "multer";
 import ChiTietThietBiController from "../controllers/ChiTiet_ThietBiController.js";
 import LichDatController from "../controllers/LichDatController.js";
 import DatLichModel from "../models/LichDatModel.js";
+import hoadonController from "../controllers/hoadonController.js";
 const upload = multer();  
 //==========================================
 //QUẢN LÝ CHI NHÁNH
@@ -51,5 +52,8 @@ adminRouter.post("/themghe",upload.none(),gheController.createGhe);
 adminRouter.get('/ChiTiet_ghe', gheController.getGheById);
 adminRouter.post("/capnhatghe",upload.none(),gheController.updateGhe);
 
+//Hóa đơn
+adminRouter.post("/themhoadon",upload.none(),hoadonController.createHoaDon);
+adminRouter.get("/chitiethoadon",hoadonController.getHoaDonById);
 console.log("✅ adminRouter loaded");
 export default adminRouter;
