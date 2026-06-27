@@ -11,6 +11,7 @@ import ChiTietThietBiController from "../controllers/ChiTiet_ThietBiController.j
 import LichDatController from "../controllers/LichDatController.js";
 import DatLichModel from "../models/LichDatModel.js";
 import hoadonController from "../controllers/hoadonController.js";
+import giaController from "../controllers/QLGiaController.js";
 const upload = multer();  
 //==========================================
 //QUẢN LÝ CHI NHÁNH
@@ -55,5 +56,7 @@ adminRouter.post("/capnhatghe",upload.none(),gheController.updateGhe);
 //Hóa đơn
 adminRouter.post("/themhoadon",upload.none(),hoadonController.createHoaDon);
 adminRouter.get("/chitiethoadon",hoadonController.getHoaDonById);
+//Quản lý giá
+adminRouter.post("/themgiamoi",upload.none(),giaController.createGia);
 console.log("✅ adminRouter loaded");
 export default adminRouter;

@@ -12,7 +12,7 @@ export default class gheController {
     static async getGheById(req, res) {
         try {
             await Promise.all([
-                query('ghe')
+                query('ID_GHE')
                     .notEmpty().withMessage('id ghế không được bỏ trống!')
                     .isInt().withMessage('ID ghế phải là số nguyên')
                     .custom(async (value) => {
@@ -30,7 +30,7 @@ export default class gheController {
                     errors: errors.array().map(err => err.msg)
                 });
             }
-            const id  = req.query.ghe;
+            const id  = req.query.ID_GHE;
             const [item, ds] = await Promise.all([
                  GheModel.getById(id),
                  DatLichModel.NguoiDat_ghe_HienTai(id)
