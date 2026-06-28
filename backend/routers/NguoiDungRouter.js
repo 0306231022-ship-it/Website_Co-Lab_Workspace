@@ -20,4 +20,5 @@ nguoidungRouter.post('/ChinhSua_Anh', createUpload('DaiDien').any(),verifyToken,
 nguoidungRouter.post('/LichDat', upload.none(), LichDatController.DatLich);
 nguoidungRouter.get('/LayDanhSach', NguoiDungController.DanhSach_NguoiDung);
 nguoidungRouter.get('/TimKiem', NguoiDungController.TimKiem_Ten);
+//thoong bao
 export default nguoidungRouter;
