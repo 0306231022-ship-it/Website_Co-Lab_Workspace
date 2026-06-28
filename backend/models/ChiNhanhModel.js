@@ -86,8 +86,13 @@ export default class ChiNhanhModel{
     static async LayDanhSach(limit,offset){
         try {
             const [DanhSach] = await execute(`
-                SELECT*FROM chinhanh
-                 LIMIT ? OFFSET ?
+                SELECT c.*,
+              SUM(CASE WHEN k.LOAI_KHONG_GIAN = 1 THEN 1 ELSE 0 END) AS TongLoai1,
+              SUM(CASE WHEN k.LOAI_KHONG_GIAN = 2 THEN 1 ELSE 0 END) AS TongLoai2
+       FROM chinhanh c
+       LEFT JOIN khonggian k ON c.ID_CHI_NHANH = k.ID_CHI_NHANH
+       GROUP BY c.ID_CHI_NHANH
+       LIMIT ? OFFSET ?
                 `,[limit,offset]);
             const [TongSo] = await execute(`
                  SELECT COUNT(*) AS total FROM chinhanh
@@ -101,17 +106,34 @@ export default class ChiNhanhModel{
              throw new Error('Database query failed: ' + error.message);
         }
     }
-    static async TimKiem(DiaChi,TrangThai){
-        try {
-            const [danhsach] = await execute(`
-                SELECT*FROM chinhanh
-                WHERE TRANG_THAI=? AND DIA_CHI LIKE ?
-                `,[TrangThai,`%${DiaChi}%`]);
-            return danhsach;
-        } catch (error) {
-            throw new Error('Database query failed: ' + error.message);
-        }
-    }
+   static async TimKiem(limit, offset, DiaChi, TrangThai) {
+  try {
+    const [DanhSach] = await execute(
+      `SELECT c.*,
+       SUM(CASE WHEN k.LOAI_KHONG_GIAN = 1 THEN 1 ELSE 0 END) AS TongLoai1,
+       SUM(CASE WHEN k.LOAI_KHONG_GIAN = 2 THEN 1 ELSE 0 END) AS TongLoai2
+FROM chinhanh c
+LEFT JOIN khonggian k ON c.ID_CHI_NHANH = k.ID_CHI_NHANH
+WHERE c.TRANG_THAI = ? AND c.DIA_CHI LIKE ?
+GROUP BY c.ID_CHI_NHANH
+LIMIT ? OFFSET ?;`,
+      [TrangThai, `%${DiaChi}%`, limit, offset]
+    );
+    const [TongSo] = await execute(
+      `SELECT COUNT(*) AS TongDanhSach
+       FROM chinhanh
+       WHERE TRANG_THAI = ? AND DIA_CHI LIKE ?`,
+      [TrangThai, `%${DiaChi}%`]
+    );
+    return {
+      DanhSach,
+      TongDanhSach: TongSo[0].TongDanhSach,
+    };
+  } catch (error) {
+    throw new Error("Database query failed: " + error.message);
+  }
+}
+
     static async khoa_chinhanh(){
         try {
             const [update] = await execute(`

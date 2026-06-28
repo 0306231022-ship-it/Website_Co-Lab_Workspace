@@ -9,14 +9,15 @@ export default class ChiNhanhController{
    static async DanhSach_ChiNhanh(req, res) {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 3;
+        const DiaChi = req.query.DiaChi;
         const offset = (page - 1) * limit;
         try {
             await Promise.all([
                 query('page')
                      .notEmpty()
-                     .withMessage('Số lượng không được bỏ trống')
+                     .withMessage('trang không được bỏ trống')
                      .isInt({ min: 0 })
-                     .withMessage('Số trang phải là số nguyên và không được âm!')
+                     .withMessage('trang phải là số nguyên và không được âm!')
                      .run(req),
             ]);
             const errors = validationResult(req);
@@ -27,18 +28,15 @@ export default class ChiNhanhController{
                     errors: errors.array().map(err => err.msg)
                 });
             }
-            const danhsach = await ChiNhanhModel.LayDanhSach(limit,offset);
-            if(!danhsach){
-                return res.status(500).json({
-                    success:false,
-                    message:'Lỗi khi tải danh sách chi nhánh!'
-                })
-            }
+            let danhsach = DiaChi !== "" ?  
+                await ChiNhanhModel.TimKiem(limit, offset, DiaChi, 1) :
+                await ChiNhanhModel.LayDanhSach(limit, offset);
+            
             return res.status(200).json({
-                success:true,
+                success: true,
                 DanhSach: danhsach.DanhSach,
-                TongDS: danhsach.TongDanhSach
-            })
+                TongDS: danhsach.TongDanhSach,
+            });
         } catch (error) {
              return res.status(500).json({
                 success: false,
@@ -340,11 +338,15 @@ if (!errors.isEmpty()) {
     static async TimKiem_ChiNhanh(req, res) {
         const DiaChi = req.query.DiaChi;
         const TrangThai = req.query.TrangThai;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 3;
+        const offset = (page - 1) * limit;
         try {
-            const danhsach = await ChiNhanhModel.TimKiem(DiaChi,TrangThai);
+            const danhsach = await ChiNhanhModel.TimKiem(limit,offset,DiaChi,TrangThai);
             return res.status(200).json({
                 success:true,
-                danhsach:danhsach
+                danhsach:danhsach.DanhSach,
+                TongDanhSach:danhsach.TongDanhSach
             })
         } catch (error) {
              return res.status(500).json({

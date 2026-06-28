@@ -148,4 +148,5 @@ export default class KhongGianModel {
               throw new Error('Database query failed: ' + error.message);
         }
     }
+
 }
