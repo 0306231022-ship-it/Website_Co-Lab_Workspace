@@ -39,14 +39,6 @@ export async function CallAPI(dulieu: FormData | null = null, yeucau: YeuCau) {
 
     try {
         const response = await fetch(DuongDan, options);
-        if (!response.ok) {
-            const errorText = await response.text();
-            return {
-                status: true,
-                message: `Lỗi HTTP ${response.status}: ${errorText.substring(0, 50)}...`
-            };
-        }
-
         return await response.json();
     } catch (error) {
         return {

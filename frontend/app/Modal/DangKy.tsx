@@ -18,7 +18,7 @@ export function DangKy({ DuLieu, onClose }: DangKyProps) {
   const [MatKhau,setMatKhau] = useState<string>('');
   const [XacNhan,setXacNhan] = useState<string>('');
   const [OTP,setOTP] = useState<string>();
-  const { OpenMoDal } = useModalContext();
+  const { OpenMoDal , CloseMoDal } = useModalContext();
   const [err, setErr] = useState<string[]>([]);
 
   const handleSubmit = async () => {
@@ -40,13 +40,14 @@ export function DangKy({ DuLieu, onClose }: DangKyProps) {
     setLoading(true);
     try {
       const res = await api.CallAPI(formData, { url: '/NguoiDung/DangKy', PhuongThuc: 1 });
-      if(res.success){
-        ThongBao.ThongBao_ThanhCong(res.message);
-        //OpenMoDal(undefined,{TenTrang:'DangNhap'})
-      }
       if(res.validate){
         setErr(res.errors);
         return;
+      }
+      if(res.success){
+        ThongBao.ThongBao_ThanhCong(res.message);
+        CloseMoDal();
+        OpenMoDal(undefined,{TenTrang:'DangNhap'})
       }
       if(res.success===false){
         ThongBao.ThongBao_Loi(res.message);

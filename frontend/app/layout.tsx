@@ -4,9 +4,7 @@ import NavLink from "@/component/NavLink";
 import "./globals.css"; // Đảm bảo import file css tổng của bạn
 import { AppMDProvider, useModalContext } from "@/context/QuanLiMoal";
 
-// --- BƯỚC 1: TÁCH NỘI DUNG GIAO DIỆN RA COMPONENT CON ---
 function LayoutContent({ children }: { children: React.ReactNode }) {
-  // Bây giờ component này là con của AppMDProvider nên gọi hàm cực kỳ an toàn
   const { OpenMoDal } = useModalContext();
 
   return (
@@ -87,6 +85,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
             {/* Nút Đăng nhập mở modal DangNhap */}
             <button 
               type="button"
+              onClick={() => OpenMoDal(null, { TenTrang: 'DangNhap', TieuDe: 'Đăng nhập', icon: 'fa-solid fa-user-plus' })} 
               className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 rounded-lg text-xs transition shadow-sm cursor-pointer"
             >
               Đăng nhập

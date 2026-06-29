@@ -29,7 +29,7 @@ export default function HomePage() {
     const laydl = async () => {
       try {
         setLoading(true); 
-        const dulieu = await api.CallAPI(undefined, { url: `/admin/laydanhsach?page=${page}&DiaChi=${TimKiem}` });
+        const dulieu = await api.CallAPI(undefined, { url: `/admin/laydanhsach?page=${page}&DiaChi=${TimKiem}` , PhuongThuc:2 });
         if (dulieu.success) {
           setChiNhanh(dulieu.DanhSach);
           setTongDanhSach(dulieu.TongDS);
@@ -55,6 +55,7 @@ export default function HomePage() {
 
     const timkiem = await api.CallAPI(undefined, {
       url: `/admin/TimKiem?TrangThai=1&DiaChi=${TimKiem}`,
+      PhuongThuc:2
     });
 
     if (timkiem.success) {

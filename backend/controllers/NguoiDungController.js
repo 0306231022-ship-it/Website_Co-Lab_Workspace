@@ -20,13 +20,11 @@ export default class NguoiDungController{
          try {
             const { Email ,TrangThai } = req.body;
             const user = await NguoiDungModel.findByEmail(Email);
-            if(TrangThai===1){
-               if (user) {
-                  return res.status(404).json({
-                     success: false,
-                     message: 'Người dùng đã tồn tại!'
-                });
-               }
+            if(user){
+               return res.status(500).json({
+                  success:false,
+                  message:'Người dùng đã tồn tại! Vui lòng chọn email khác.'
+               })
             }
              const maOTP = taoMaOTP();
              const otpResult = await XacThucOTPModel.ThemOTP(Email, maOTP);
@@ -55,10 +53,6 @@ export default class NguoiDungController{
          }
       }
       static async DangNhap(req, res) {
-         /*{
-            Email: "",
-            MatKhau: ""
-         }*/
         try {
          const { Email, MatKhau } = req.body;
          await Promise.all([
@@ -68,8 +62,7 @@ export default class NguoiDungController{
          const errors = validationResult(req);
          if (!errors.isEmpty()) {
             return res.status(400).json({
-               success: false,
-               message: 'Dữ liệu không hợp lệ!',
+               validate: true,
                errors: errors.array().map(err => err.msg)
             });
          }
@@ -88,15 +81,16 @@ export default class NguoiDungController{
             });
          }
          const token = generateToken(user);
+         res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000
+         });
          return res.status(200).json({
             success: true,
             message: 'Đăng nhập thành công!',
-            ThongTin_NguoiDung: {
-               IDND: user.IDND,
-               TENND: user.TENND,
-               LOAIND: user.LOAIND
-            },
-            token
+            ThongTin_NguoiDung: user.TENND,
          });
         } catch (error) {
             return res.status(500).json({
@@ -511,5 +505,8 @@ export default class NguoiDungController{
                 message: 'Tìm kiếm người dùng thất bại: ' + error.message
             });
          }
+      }
+      static async DangXuat(req,res){
+
       }
 }
