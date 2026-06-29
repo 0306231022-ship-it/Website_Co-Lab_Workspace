@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useModalContext } from "@/context/QuanLiMoal";
 import * as ThongBao from '@/FUNCTION/ThongBao';
 import * as api from '@/API/API';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 export function DangNhap() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string[]>([]);
@@ -120,8 +120,9 @@ export function DangNhap() {
 
       {/* Nút Đăng Nhập */}
       <button 
-        type="submit" 
+        type="button" 
         disabled={loading}
+        onClick={handleSubmit}
         className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3.5 rounded-2xl transition-all duration-300 shadow-lg shadow-blue-600/15 hover:shadow-blue-600/25 hover:scale-[1.01] active:scale-[0.99] cursor-pointer disabled:bg-blue-400"
       >
         {loading ? "Đang kiểm tra..." : "Đăng Nhập Hệ Thống"}

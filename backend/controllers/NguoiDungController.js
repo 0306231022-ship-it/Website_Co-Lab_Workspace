@@ -4,6 +4,8 @@ import NguoiDungModel from '../models/NguoiDungModel.js';
 import XacThucOTPModel from '../models/XacThucOTPModel.js';
 import { body, query, validationResult } from 'express-validator';
 import { taoMaOTP , guiEmailOTP , generateToken } from '../function.js';
+import { io } from '../server.js';
+
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
@@ -73,6 +75,13 @@ export default class NguoiDungController{
                message: 'Người dùng không tồn tại!'
             });
          }
+         const TrangThai=user.TRANG_THAI;
+         if(TrangThai!==1){
+            return res.status(404).json({
+               success:false,
+               message:'Người dùng đã bị khóa hoặc đã xóa tài khoản!'
+            })
+         }
          const isPasswordValid = await compare(MatKhau, user.MAT_KHAU);
          if (!isPasswordValid) {
             return res.status(401).json({
@@ -87,6 +96,7 @@ export default class NguoiDungController{
             sameSite: "lax",
             maxAge: 7 * 24 * 60 * 60 * 1000
          });
+         io.emit('DangNhap', { ThongTinNguoiDung: user });
          return res.status(200).json({
             success: true,
             message: 'Đăng nhập thành công!',
@@ -100,13 +110,6 @@ export default class NguoiDungController{
         }
       }
       static async DangKy(req, res) {
-         /*{
-            TenND: "admin",
-            Email: "",
-            MatKhau: "123456",
-            XacNhanMatKhau: "123456",
-            OTP: "123456"
-         }*/
         try {
          const { TenND, Email, MatKhau, XacNhanMatKhau ,OTP } = req.body;
          console.log(req.body)
@@ -507,6 +510,14 @@ export default class NguoiDungController{
          }
       }
       static async DangXuat(req,res){
-
+         res.clearCookie("token", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax"
+         });
+         return res.status(200).json({
+            success: true,
+            message: 'Bạn đã đăng xuất thành công!'
+         });
       }
 }

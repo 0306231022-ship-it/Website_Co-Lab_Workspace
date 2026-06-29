@@ -60,7 +60,6 @@ export function DangKy({ DuLieu, onClose }: DangKyProps) {
   };
 
   return (
-    /* Đã loại bỏ div full-screen bao ngoài để vừa khít khung Modal */
     <div
     
       className="bg-white flex flex-col items-center justify-center max-w-md w-full text-center relative z-10 mx-auto"

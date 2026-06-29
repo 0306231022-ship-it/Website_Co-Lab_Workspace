@@ -1,11 +1,73 @@
 "use client";
 import React from "react";
 import NavLink from "@/component/NavLink";
-import "./globals.css"; // Đảm bảo import file css tổng của bạn
+import "./globals.css";
 import { AppMDProvider, useModalContext } from "@/context/QuanLiMoal";
-
+import { useState , useEffect } from "react";
+import * as api from '@/API/API';
+import * as ThongBao from '@/FUNCTION/ThongBao';
+import { io } from 'socket.io-client';
+interface NguoiDung {
+    TENND: string;
+    EMAIL: string;
+    HINH_ANH: number;
+}
+const socket = io('http://localhost:3001', {
+  withCredentials: true,
+  autoConnect: true // Cho phép tự động kết nối
+});
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const { OpenMoDal } = useModalContext();
+  const [DangNhap, setDangNhap] = useState<boolean>(false);
+  const [ThongTin, setThongTin] =useState<NguoiDung | null>(null);
+
+  const KiemTra = async () => {
+    try {
+      const kiemtra = await api.CallAPI(undefined, { url: '/NguoiDung/kiemtra_dangnhap', PhuongThuc: 2 });
+      if (kiemtra.success) {
+        setDangNhap(true);
+        setThongTin(kiemtra.dulieu);
+      } else {
+        setDangNhap(false);
+        setThongTin(null);
+      }
+    } catch (error) {
+      console.error("Lỗi xảy ra:", error);
+    }
+  };
+
+  useEffect(() => {
+    const load = async () => {
+        await KiemTra();
+    };
+    load();
+}, []);
+    useEffect(() => {
+    // Lắng nghe sự kiện từ Server đẩy về
+    socket.on('DangNhap', (item) => {
+      setDangNhap(true);
+      setThongTin(item.ThongTinNguoiDung);
+    });
+
+    // Hàm Clean-up: Chỉ hủy lắng nghe khi COMPONENT BỊ HỦY (Unmount)
+    return () => {
+      socket.off('DangNhap');
+    };
+  }, []);
+  const handleLogout = async () => {
+      const XacNhan = await ThongBao.ThongBao_XacNhanTT('Bạn có chắc chắn muốn đăng xuất không?');
+      if(!XacNhan) return ;
+      try {
+        const response = await api.CallAPI(undefined, { url: '/NguoiDung/dangxuat', PhuongThuc: 1 });
+        if(response.success){
+           ThongBao.ThongBao_ThanhCong(response.message)
+           setDangNhap(false);
+           setThongTin(null);
+        }
+      } catch (error) {
+        console.error("Lỗi đăng xuất:", error);
+      }
+  };
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-slate-50">
@@ -44,61 +106,94 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="mb-6">
-            <p className="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Cá nhân</p>
-            <nav className="space-y-1.5">
-              <a href="#" className="flex items-center justify-between px-4 py-3 hover:bg-slate-50 text-slate-700 rounded-xl relative group transition-all duration-300">
-                <div className="flex items-center gap-3 font-semibold">
-                  <i className="fa-solid fa-id-card w-5 text-center text-lg"></i>
-                  <span>Thông tin cá nhân</span>
-                </div>
-              </a>
+            {DangNhap ? (
+              <>
+                <p className="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Cá nhân</p>
+                <nav className="space-y-1.5">
+                  <a href="#" className="flex items-center justify-between px-4 py-3 hover:bg-slate-50 text-slate-700 rounded-xl relative group transition-all duration-300">
+                    <div className="flex items-center gap-3 font-semibold">
+                      <i className="fa-solid fa-id-card w-5 text-center text-lg"></i>
+                      <span>Thông tin cá nhân</span>
+                    </div>
+                  </a>
 
-              <a href="#" className="flex items-center justify-between px-4 py-3 hover:bg-slate-50 text-slate-700 rounded-xl relative group transition-all duration-300">
-                <div className="flex items-center gap-3 font-semibold">
-                  <i className="fa-solid fa-clock-rotate-left w-5 text-center text-lg"></i>
-                  <span>Lịch sử đặt lịch</span>
-                </div>
-                <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-                  12
-                </span>
-              </a>
+                  <a href="#" className="flex items-center justify-between px-4 py-3 hover:bg-slate-50 text-slate-700 rounded-xl relative group transition-all duration-300">
+                    <div className="flex items-center gap-3 font-semibold">
+                      <i className="fa-solid fa-clock-rotate-left w-5 text-center text-lg"></i>
+                      <span>Lịch sử đặt lịch</span>
+                    </div>
+                    <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                      12
+                    </span>
+                  </a>
 
-              <a href="#" className="flex items-center justify-between px-4 py-3 hover:bg-slate-50 text-slate-700 rounded-xl relative group transition-all duration-300">
-                <div className="flex items-center gap-3 font-semibold">
-                  <i className="fas fa-envelope w-5 text-center text-lg"></i>
-                  <span>Thông báo</span>
-                </div>
-                <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-                  12
-                </span>
-              </a>
-            </nav>
+                  <a href="#" className="flex items-center justify-between px-4 py-3 hover:bg-slate-50 text-slate-700 rounded-xl relative group transition-all duration-300">
+                    <div className="flex items-center gap-3 font-semibold">
+                      <i className="fas fa-envelope w-5 text-center text-lg"></i>
+                      <span>Thông báo</span>
+                    </div>
+                    <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                      12
+                    </span>
+                  </a>
+                </nav>
+              </>
+            ) : ''}
           </div>
         </div>
 
-        <div className="p-3 m-4 bg-slate-50 rounded-xl border border-slate-200 text-center shadow-sm">
-          <h4 className="text-xs font-bold text-slate-800 flex items-center justify-center gap-1.5 mb-1">
-            <i className="fa-solid fa-lock text-blue-500"></i> Trải nghiệm đầy đủ
-          </h4>
-          <p className="text-[10px] text-slate-500 mb-3 px-1 leading-tight">Đăng nhập để xem sơ đồ và tiến hành đặt chỗ.</p>
-          <div className="flex gap-2">
-            {/* Nút Đăng nhập mở modal DangNhap */}
-            <button 
-              type="button"
-              onClick={() => OpenMoDal(null, { TenTrang: 'DangNhap', TieuDe: 'Đăng nhập', icon: 'fa-solid fa-user-plus' })} 
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 rounded-lg text-xs transition shadow-sm cursor-pointer"
-            >
-              Đăng nhập
-            </button>
-            {/* Nút Đăng ký mở modal DangKy */}
-            <button 
-              type="button"
-              onClick={() => OpenMoDal(null, { TenTrang: 'DangKy', TieuDe: 'Đăng ký thành viên', icon: 'fa-solid fa-user-plus' })} 
-              className="flex-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-semibold py-1.5 rounded-lg text-xs transition cursor-pointer"
-            >
-              Đăng ký
-            </button>
-          </div>
+        {/* ================= PHẦN DƯỚI CÙNG: USER HOẶC LOGIN/REGISTER ================= */}
+        <div className="p-1 m-4 text-center">
+          {DangNhap ? (
+            <div className="flex flex-col items-center bg-slate-50 p-3 rounded-xl border border-slate-200 shadow-inner">
+              <div className="flex items-center gap-3 w-full mb-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+               <img
+                  src={`http://localhost:3001/${ThongTin?.HINH_ANH}`}
+                  alt="User avatar"
+                  className="w-10 h-10 rounded-full object-cover border border-slate-200"
+                  loading="lazy"
+                />
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">{ThongTin?.EMAIL}</p>
+                  {/* Map thuộc tính tên từ API của bạn ở đây (ví dụ: ThongTin.HoTen hoặc ThongTin.name) */}
+                  <p className="text-xs font-bold text-slate-800 truncate">{ThongTin?.TENND || "Thành viên"}</p>
+                </div>
+              </div>
+
+              <button 
+                type="button"
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center gap-1.5 bg-red-50 hover:bg-red-100 text-red-600 font-semibold py-1.5 rounded-lg text-xs transition cursor-pointer"
+              >
+                <i className="fa-solid fa-right-from-bracket"></i>
+                Đăng xuất
+              </button>
+            </div>
+          ) : (
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center shadow-sm">
+              <h4 className="text-xs font-bold text-slate-800 flex items-center justify-center gap-1.5 mb-1">
+                <i className="fa-solid fa-lock text-blue-500"></i> Trải nghiệm đầy đủ
+              </h4>
+              <p className="text-[10px] text-slate-500 mb-3 px-1 leading-tight">Đăng nhập để xem sơ đồ và tiến hành đặt chỗ.</p>
+              <div className="flex gap-2">
+                <button 
+                  type="button"
+                  onClick={() => OpenMoDal(null, { TenTrang: 'DangNhap', TieuDe: 'Đăng nhập', icon: 'fa-solid fa-user-plus' })} 
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 rounded-lg text-xs transition shadow-sm cursor-pointer"
+                >
+                  Đăng nhập
+                </button>
+                <button 
+                  type="button"
+                  onClick={() => OpenMoDal(null, { TenTrang: 'DangKy', TieuDe: 'Đăng ký thành viên', icon: 'fa-solid fa-user-plus' })} 
+                  className="flex-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-semibold py-1.5 rounded-lg text-xs transition cursor-pointer"
+                >
+                  Đăng ký
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </aside>
 
@@ -124,7 +219,6 @@ export default function RootLayout({
       </head>
       <body>
         <AppMDProvider>
-          {/* Đưa nội dung giao diện vào đây để nó tiêu thụ được dữ liệu từ AppMDProvider */}
           <LayoutContent>{children}</LayoutContent>
         </AppMDProvider>
       </body>

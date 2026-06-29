@@ -16,6 +16,8 @@ nguoidungRouter.post('/DoiMatKhau' , upload.none(), verifyToken, NguoiDungContro
 nguoidungRouter.post('/CapNhat_TrangThai', upload.none(), NguoiDungController.ChinhSua_TrangThai_NguoiDung);
 nguoidungRouter.post('/ChinhSua_thongTin' , upload.none(), verifyToken , NguoiDungController.ChinhSua_NguoiDung);
 nguoidungRouter.post('/ChinhSua_Anh', createUpload('DaiDien').any(),verifyToken, NguoiDungController.CapNhat_anhDaiDien);
+nguoidungRouter.get('/kiemtra_dangnhap' , verifyToken , NguoiDungController.ThongTin_NguoiDung);
+nguoidungRouter.post('/dangxuat' , upload.none(), NguoiDungController.DangXuat);
 //=========================================
 nguoidungRouter.post('/LichDat', upload.none(), LichDatController.DatLich);
 nguoidungRouter.get('/LayDanhSach', NguoiDungController.DanhSach_NguoiDung);
