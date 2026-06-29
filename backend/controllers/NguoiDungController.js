@@ -115,6 +115,7 @@ export default class NguoiDungController{
          }*/
         try {
          const { TenND, Email, MatKhau, XacNhanMatKhau ,OTP } = req.body;
+         console.log(req.body)
          await Promise.all([
             body('TenND').notEmpty().withMessage('Tên người dùng không được để trống').run(req),
             body('Email').isEmail().withMessage('Email không hợp lệ').run(req),
@@ -156,7 +157,7 @@ export default class NguoiDungController{
          const errors = validationResult(req);
          if (!errors.isEmpty()) {
             return res.status(400).json({
-               success: false,
+               validate: true,
                message: 'Dữ liệu không hợp lệ!',
                errors: errors.array().map(err => err.msg)
             });

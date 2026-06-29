@@ -2,24 +2,20 @@
 import React from "react";
 import NavLink from "@/component/NavLink";
 import "./globals.css"; // Đảm bảo import file css tổng của bạn
+import { AppMDProvider, useModalContext } from "@/context/QuanLiMoal";
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+// --- BƯỚC 1: TÁCH NỘI DUNG GIAO DIỆN RA COMPONENT CON ---
+function LayoutContent({ children }: { children: React.ReactNode }) {
+  // Bây giờ component này là con của AppMDProvider nên gọi hàm cực kỳ an toàn
+  const { OpenMoDal } = useModalContext();
+
   return (
-    <html lang="en">
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-      <body>
-        {/* Khung Flex layout cố định toàn màn hình */}
-        <div className="flex h-screen w-screen overflow-hidden bg-slate-50">
-          
-          {/* ================= SIDEBAR CỐ ĐỊNH ================= */}
-          <aside className="w-72 bg-white border-r border-slate-200 shadow-sm flex flex-col justify-between h-full z-20 shrink-0">
-           <div className="px-8 pt-8 pb-6 border-b border-slate-100">
+    <div className="flex h-screen w-screen overflow-hidden bg-slate-50">
+      
+      {/* ================= SIDEBAR CỐ ĐỊNH ================= */}
+      <aside className="w-72 bg-white border-r border-slate-200 shadow-sm flex flex-col justify-between h-full z-20 shrink-0">
+        <div className="px-8 pt-8 pb-6 border-b border-slate-100">
           <div className="flex items-center gap-3">
-            {/* Nếu chưa cấu hình màu brand, tạm thời dùng màu sky/blue hoặc cấu hình ở Bước 2 nhé */}
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-xl flex items-center justify-center font-bold text-xl shadow-lg shadow-blue-500/30">
               <i className="fa-solid fa-layer-group"></i>
             </div>
@@ -88,23 +84,50 @@ export default function RootLayout({
           </h4>
           <p className="text-[10px] text-slate-500 mb-3 px-1 leading-tight">Đăng nhập để xem sơ đồ và tiến hành đặt chỗ.</p>
           <div className="flex gap-2">
-            <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 rounded-lg text-xs transition shadow-sm cursor-pointer">
+            {/* Nút Đăng nhập mở modal DangNhap */}
+            <button 
+              type="button"
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 rounded-lg text-xs transition shadow-sm cursor-pointer"
+            >
               Đăng nhập
             </button>
-            <button className="flex-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-semibold py-1.5 rounded-lg text-xs transition cursor-pointer">
+            {/* Nút Đăng ký mở modal DangKy */}
+            <button 
+              type="button"
+              onClick={() => OpenMoDal(null, { TenTrang: 'DangKy', TieuDe: 'Đăng ký thành viên', icon: 'fa-solid fa-user-plus' })} 
+              className="flex-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-semibold py-1.5 rounded-lg text-xs transition cursor-pointer"
+            >
               Đăng ký
             </button>
           </div>
         </div>
-          </aside>
+      </aside>
 
-          {/* ================= THẺ MAIN ĐỘNG ================= */}
-          {/* Thẻ main này bao bọc {children}. Khi chuyển route, chỉ có phần {children} thay đổi */}
-          <main className="flex-1 overflow-y-auto relative bg-slate-50 flex flex-col h-full">
-            {children}
-          </main>
+      {/* ================= THẺ MAIN ĐỘNG ================= */}
+      <main className="flex-1 overflow-y-auto relative bg-slate-50 flex flex-col h-full">
+        {children}
+      </main>
 
-        </div>
+    </div>
+  );
+}
+
+// --- BƯỚC 2: ROOT LAYOUT CHỈ LÀM NHIỆM VỤ BỌC PROVIDER ---
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <head>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+      </head>
+      <body>
+        <AppMDProvider>
+          {/* Đưa nội dung giao diện vào đây để nó tiêu thụ được dữ liệu từ AppMDProvider */}
+          <LayoutContent>{children}</LayoutContent>
+        </AppMDProvider>
       </body>
     </html>
   );

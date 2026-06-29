@@ -1,13 +1,19 @@
-export async function CallAPI(dulieu = null, yeucau) {
+interface YeuCau {
+    url: string;
+    PhuongThuc: number;
+    token?: string;
+    fileArray?: File[];
+}
+export async function CallAPI(dulieu: FormData | null = null, yeucau: YeuCau) {
     const URL = 'http://localhost:3001/api';
     const DuongDan = URL + yeucau.url;
-    let options = {};
+    let options: RequestInit = {};
     if (yeucau.fileArray) {
         if (dulieu === null) {
             dulieu = new FormData();
         }
-        yeucau.fileArray.forEach(file => {
-            dulieu.append("files", file);
+        yeucau.fileArray.forEach((file: File) => {
+            dulieu!.append("files", file);
         });
     }
     if (yeucau.PhuongThuc === 1) {
@@ -43,11 +49,11 @@ export async function CallAPI(dulieu = null, yeucau) {
 
         return await response.json();
     } catch (error) {
-        console.log(error)
-        //đây sẽ là debug sau này hoàn tất sẽ trả về tin nhắn
-       return {
-            status : true,
-            message: error.message || String(error),
-       }
+        return {
+            status: true,
+            message: error instanceof Error
+                ? error.message
+                : String(error),
+        };
     }
 }
