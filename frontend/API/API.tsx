@@ -30,12 +30,22 @@ export async function CallAPI(dulieu: FormData | null = null, yeucau: YeuCau) {
             credentials: "include" 
         };
     }
-    if (yeucau.token) {
+   // Tìm đoạn này trong hàm CallAPI của bạn và cập nhật lại:
+if (yeucau.token) {
+    // Nếu chuỗi truyền vào bắt đầu bằng "token=" -> Gửi dạng Cookie Header cho Express
+    if (yeucau.token.startsWith('token=')) {
         options.headers = {
             ...(options.headers || {}),
-            Authorization: `Bearer ${yeucau.token}`
+            'Cookie': yeucau.token 
+        };
+    } else {
+        // Ngược lại, giữ nguyên cơ chế Bearer Token cho các trang khác nếu cần
+        options.headers = {
+            ...(options.headers || {}),
+            Authorization: `Bearer ${yeucau.token}` 
         };
     }
+}
 
     try {
         const response = await fetch(DuongDan, options);

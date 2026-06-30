@@ -100,7 +100,7 @@ export default class NguoiDungController{
          return res.status(200).json({
             success: true,
             message: 'Đăng nhập thành công!',
-            ThongTin_NguoiDung: user.TENND,
+            ThongTin_NguoiDung: user.LOAIND,
          });
         } catch (error) {
             return res.status(500).json({

@@ -7,19 +7,27 @@ import { useState , useEffect } from "react";
 import * as api from '@/API/API';
 import * as ThongBao from '@/FUNCTION/ThongBao';
 import { io } from 'socket.io-client';
+import { usePathname } from 'next/navigation';
+
 interface NguoiDung {
     TENND: string;
     EMAIL: string;
     HINH_ANH: number;
 }
+
 const socket = io('http://localhost:3001', {
   withCredentials: true,
   autoConnect: true // Cho phép tự động kết nối
 });
+
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const { OpenMoDal } = useModalContext();
   const [DangNhap, setDangNhap] = useState<boolean>(false);
-  const [ThongTin, setThongTin] =useState<NguoiDung | null>(null);
+  const [ThongTin, setThongTin] = useState<NguoiDung | null>(null);
+
+  // 1. Kiểm tra xem người dùng có đang truy cập vào trang Admin hay không
+  const pathname = usePathname();
+  const isAdminPage = pathname.startsWith('/admin');
 
   const KiemTra = async () => {
     try {
@@ -37,23 +45,29 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    const load = async () => {
-        await KiemTra();
-    };
-    load();
-}, []);
-    useEffect(() => {
-    // Lắng nghe sự kiện từ Server đẩy về
-    socket.on('DangNhap', (item) => {
-      setDangNhap(true);
-      setThongTin(item.ThongTinNguoiDung);
-    });
+    // Chỉ chạy kiểm tra đăng nhập nếu KHÔNG PHẢI trang admin
+    if (!isAdminPage) {
+      const load = async () => {
+          await KiemTra();
+      };
+      load();
+    }
+  }, [isAdminPage]);
 
-    // Hàm Clean-up: Chỉ hủy lắng nghe khi COMPONENT BỊ HỦY (Unmount)
-    return () => {
-      socket.off('DangNhap');
-    };
-  }, []);
+  useEffect(() => {
+    // Chỉ lắng nghe socket đăng nhập nếu KHÔNG PHẢI trang admin
+    if (!isAdminPage) {
+      socket.on('DangNhap', (item) => {
+        setDangNhap(true);
+        setThongTin(item.ThongTinNguoiDung);
+      });
+
+      return () => {
+        socket.off('DangNhap');
+      };
+    }
+  }, [isAdminPage]);
+
   const handleLogout = async () => {
       const XacNhan = await ThongBao.ThongBao_XacNhanTT('Bạn có chắc chắn muốn đăng xuất không?');
       if(!XacNhan) return ;
@@ -69,6 +83,12 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
       }
   };
 
+  // 2. NẾU LÀ TRANG ADMIN: Trả về trang trống hoàn toàn, không dính dáng layout cũ
+  if (isAdminPage) {
+    return <>{children}</>;
+  }
+
+  // 3. NẾU LÀ TRANG THƯỜNG: Render đầy đủ Sidebar + Header cũ
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-slate-50">
       
@@ -147,7 +167,6 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
           {DangNhap ? (
             <div className="flex flex-col items-center bg-slate-50 p-3 rounded-xl border border-slate-200 shadow-inner">
               <div className="flex items-center gap-3 w-full mb-3">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
                <img
                   src={`http://localhost:3001/${ThongTin?.HINH_ANH}`}
                   alt="User avatar"
@@ -156,7 +175,6 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                 />
                 <div className="flex-1 min-w-0 text-left">
                   <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">{ThongTin?.EMAIL}</p>
-                  {/* Map thuộc tính tên từ API của bạn ở đây (ví dụ: ThongTin.HoTen hoặc ThongTin.name) */}
                   <p className="text-xs font-bold text-slate-800 truncate">{ThongTin?.TENND || "Thành viên"}</p>
                 </div>
               </div>
@@ -199,6 +217,14 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
       {/* ================= THẺ MAIN ĐỘNG ================= */}
       <main className="flex-1 overflow-y-auto relative bg-slate-50 flex flex-col h-full">
+        <header className="h-20 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-8 sticky top-0 z-10 shrink-0">
+          <h2 className="text-lg font-bold text-slate-800">Khám phá không gian</h2>
+          <div className="flex gap-3">
+            <span className="text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Hệ thống hoạt động bình thường
+            </span>
+          </div>
+        </header>
         {children}
       </main>
 
@@ -206,7 +232,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   );
 }
 
-// --- BƯỚC 2: ROOT LAYOUT CHỈ LÀM NHIỆM VỤ BỌC PROVIDER ---
+// --- ROOT LAYOUT GỐC ---
 export default function RootLayout({
   children,
 }: {
