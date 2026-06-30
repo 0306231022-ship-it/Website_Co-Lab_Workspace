@@ -187,6 +187,7 @@ export default class NguoiDungController{
       }
       static async ThongTin_NguoiDung(req, res) {
           const userId = req.user.id;
+
           try {
             const ketqua= await NguoiDungModel.findByid(userId);
             if(!ketqua){
@@ -202,15 +203,11 @@ export default class NguoiDungController{
           } catch (error) {
              return res.status(500).json({
                 success: false,
-                message: 'Đăng ký thất bại: ' + error.message
+                message: 'Không thể lấy thông tin người dùng: ' + error.message
             });
           }
       }
       static async ChinhSua_NguoiDung(req, res) {
-         //Cập nhật tên
-         /*{
-            TENND
-         }*/
         const dulieu = req.body;
         const userId = req.user.id;
         try {
@@ -223,7 +220,7 @@ export default class NguoiDungController{
              const errors = validationResult(req);
              if (!errors.isEmpty()) {
                 return res.status(400).json({
-                  success: false,
+                  validate: true,
                   message: 'Dữ liệu không hợp lệ!',
                   errors: errors.array().map(err => err.msg)
                });
@@ -235,6 +232,8 @@ export default class NguoiDungController{
                   message:'Cập nhật dữ liệu thất bại!'
                })
             }
+             const user = await NguoiDungModel.findByid(userId);
+            io.emit('DangNhap', { ThongTinNguoiDung: user });
             return res.status(200).json({
                success:true,
                message:'Cập nhật dữ liệu thành công!'
@@ -265,6 +264,8 @@ export default class NguoiDungController{
                   message:'Cập nhật ảnh đại diện thất bại!'
                })
             }
+            const user = await NguoiDungModel.findByid(userId);
+             io.emit('DangNhap', { ThongTinNguoiDung: user });
             return res.status(200).json({
                success:true,
                message:'Cập nhật thành công ảnh đại diện!'
@@ -402,11 +403,6 @@ export default class NguoiDungController{
          }
       }
       static async DoiMatKhau(req, res) {
-         /*{
-            MatKhauCu,
-            MatKhauMoi,
-            XacNhanMatKhau
-         }*/
         try {
              const userId = req.user.id;
              const dulieu = req.body;
@@ -436,7 +432,7 @@ export default class NguoiDungController{
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                return res.status(400).json({
-                  success: false,
+                  validate: true,
                   message: 'Dữ liệu không hợp lệ!',
                   errors: errors.array().map(err => err.msg)
                });

@@ -6,19 +6,17 @@ import { AppMDProvider, useModalContext } from "@/context/QuanLiMoal";
 import { useState , useEffect } from "react";
 import * as api from '@/API/API';
 import * as ThongBao from '@/FUNCTION/ThongBao';
-import { io } from 'socket.io-client';
+import { socket } from '@/FUNCTION/socket';
 import { usePathname } from 'next/navigation';
 
 interface NguoiDung {
     TENND: string;
     EMAIL: string;
-    HINH_ANH: number;
+    HINH_ANH: string;
+    IDND:number;
 }
 
-const socket = io('http://localhost:3001', {
-  withCredentials: true,
-  autoConnect: true // Cho phép tự động kết nối
-});
+
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const { OpenMoDal } = useModalContext();
@@ -114,8 +112,9 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
             <nav className="space-y-1.5">
               <NavLink 
                 href="/"
-                activeClassName="bg-blue-50 text-blue-600 font-bold"
-                className="flex items-center justify-between px-4 py-3 bg-blue-50 text-blue-600 rounded-xl relative group transition-all duration-300">
+             activeClassName="bg-blue-50 text-blue-600 font-bold"
+        // Lúc thường: Chữ xám (text-slate-700), di chuột vào thì đổi nền xám nhẹ (hover:bg-slate-50)
+        className="flex items-center justify-between px-4 py-3 text-slate-700 hover:bg-slate-50 rounded-xl relative group transition-all duration-300">
                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-blue-600 rounded-r-md"></div>
                 <div className="flex items-center gap-3 font-semibold">
                   <i className="fa-solid fa-house w-5 text-center text-lg"></i>
@@ -130,12 +129,15 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
               <>
                 <p className="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Cá nhân</p>
                 <nav className="space-y-1.5">
-                  <a href="#" className="flex items-center justify-between px-4 py-3 hover:bg-slate-50 text-slate-700 rounded-xl relative group transition-all duration-300">
+                  <NavLink 
+                     href={`/NguoiDung/${ThongTin?.IDND}`}
+                   activeClassName="bg-blue-50 text-blue-600 font-bold"
+            className="flex items-center justify-between px-4 py-3 text-slate-700 hover:bg-slate-50 rounded-xl relative group transition-all duration-300">
                     <div className="flex items-center gap-3 font-semibold">
                       <i className="fa-solid fa-id-card w-5 text-center text-lg"></i>
                       <span>Thông tin cá nhân</span>
                     </div>
-                  </a>
+                  </NavLink>
 
                   <a href="#" className="flex items-center justify-between px-4 py-3 hover:bg-slate-50 text-slate-700 rounded-xl relative group transition-all duration-300">
                     <div className="flex items-center gap-3 font-semibold">

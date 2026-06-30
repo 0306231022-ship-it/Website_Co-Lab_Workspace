@@ -9,14 +9,22 @@ interface NavLinkProps {
   activeClassName: string;
   className?: string;
 }
+
 export default function NavLink({ href, children, activeClassName, className = "" }: NavLinkProps) {
   const pathname = usePathname();
-  const isActive = pathname === href;
+  
+  // Xử lý thông minh: 
+  // Trang chủ "/" thì check bằng nhau tuyệt đối
+  // Các trang khác (như /NguoiDung) thì check xem pathname hiện tại có bắt đầu bằng href đó không (để ăn cả /NguoiDung/5)
+  const isActive = href === "/" 
+    ? pathname === href 
+    : pathname.startsWith(href);
 
   return (
     <Link 
       href={href} 
-      className={`${className} ${isActive ? activeClassName : ""}`}
+      // Dùng logic sạch: Nếu active thì cộng class active, không thì giữ nguyên class thường
+      className={`${className} ${isActive ? activeClassName : ""}`.trim()}
     >
       {children}
     </Link>
