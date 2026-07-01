@@ -30,11 +30,11 @@ export default function NguoiDung() {
           return;
       }
       try {
-          const laytt = await api.CallAPI(undefined, { PhuongThuc: 2, url: `/NguoiDung/kiemtra_dangnhap` });
+          const laytt = await api.CallAPI(undefined, { PhuongThuc: 1, url: `/NguoiDung/kiemtra_dangnhap` });
           if (laytt.success) {
               setThongTin(laytt.dulieu);
               setTenND(laytt.dulieu.TENND);
-              
+        
               if (String(id) !== String(laytt.dulieu.IDND)) {
                   ThongBao.ThongBao_Loi('Thông tin đăng nhập không trùng khớp!');
                   return;

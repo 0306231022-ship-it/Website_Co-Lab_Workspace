@@ -34,9 +34,9 @@ export async function middleware(request: NextRequest) {
         if (pathname.startsWith("/admin") && loaiND !== 1) {
             return NextResponse.redirect(new URL("/", request.url));
         }
-        if (pathname.startsWith("/NguoiDung") && loaiND !== 0) {
+        /*if (pathname.startsWith("/NguoiDung") && loaiND !== 0) {
             return NextResponse.redirect(new URL("/", request.url));
-        }
+        }*/
         return NextResponse.next();
 
     } catch (error) {
@@ -47,6 +47,6 @@ export async function middleware(request: NextRequest) {
 export const config = {
     matcher: [
         "/admin/:path*",
-        "/NguoiDung/:path*",
+        /*"/NguoiDung/:path*",*/
     ],
 };

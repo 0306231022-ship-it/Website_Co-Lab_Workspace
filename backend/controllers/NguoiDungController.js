@@ -214,7 +214,7 @@ export default class NguoiDungController{
             }
             const loaiND = ketqua.LOAIND;
             if(LOAIND !== null){
-               if(loaiND !== LOAIND){
+               if(loaiND !== parseInt(LOAIND)){
                   return res.status(403).json({
                      success: false,
                      message: 'Bạn không có quyền truy cập thông tin người dùng này!'
@@ -531,7 +531,15 @@ export default class NguoiDungController{
          }
       }
       static async DangXuat(req,res){
-         const loaind = req.body.LOAIND || null;
+         const userId = parseInt(req.user.id);
+         const kiemtra = await NguoiDungModel.findByid(userId);
+         if(!kiemtra){
+            res.status(401).json({
+               success:false,
+               message:'Không tìm thấy người dùng!'
+            })
+         }
+         const loaind = kiemtra.LOAIND;
          if(loaind === 1){
             res.clearCookie("token_admin", {
                httpOnly: true,

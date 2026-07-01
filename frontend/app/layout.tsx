@@ -32,7 +32,6 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
        const formdata = new FormData();
       formdata.append('LoaiND', String(0));
       const kiemtra = await api.CallAPI(formdata, { url: '/NguoiDung/kiemtra_dangnhap', PhuongThuc: 1 });
-    
       if (kiemtra.success) {
         setDangNhap(true);
         setThongTin(kiemtra.dulieu);
@@ -134,8 +133,8 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                 <nav className="space-y-1.5">
                   <NavLink 
                      href={`/NguoiDung/${ThongTin?.IDND}`}
-                   activeClassName="bg-blue-50 text-blue-600 font-bold"
-            className="flex items-center justify-between px-4 py-3 text-slate-700 hover:bg-slate-50 rounded-xl relative group transition-all duration-300">
+                     activeClassName="bg-blue-50 text-blue-600 font-bold"
+                     className="flex items-center justify-between px-4 py-3 text-slate-700 hover:bg-slate-50 rounded-xl relative group transition-all duration-300">
                     <div className="flex items-center gap-3 font-semibold">
                       <i className="fa-solid fa-id-card w-5 text-center text-lg"></i>
                       <span>Thông tin cá nhân</span>
