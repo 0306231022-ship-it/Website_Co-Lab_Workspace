@@ -31,6 +31,7 @@ export default function NguoiDung() {
       }
       try {
           const laytt = await api.CallAPI(undefined, { PhuongThuc: 2, url: `/NguoiDung/kiemtra_dangnhap` });
+         console.log(laytt)
           if (laytt.success) {
               setThongTin(laytt.dulieu);
               setTenND(laytt.dulieu.TENND);
