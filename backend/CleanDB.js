@@ -1,43 +1,35 @@
 import cron from 'node-cron';
-import PhieuNhapModal from './models/PhieuNhapMoDel.js';
-import DonHangModel from './models/DonHang.js';
-import MaGiamGiaModel from './models/MaGiamGia.js';
+import ChiNhanhModel from './models/ChiNhanhModel';
+import KhongGianModel from './models/KhongGianModel';
 
-cron.schedule('0 0 0 * * *', async () => {
-    console.log('--- Bắt đầu tiến trình tự động 12h đêm ---');
     //0 0 0 * * * 12h đêm mỗi ngày'
     // 5s 1 lần : '*/5 * * * * *'
     // 15 phút 1 lần : '0 */15 * * * *'
-    try {
-        const XoaThungRac= await PhieuNhapModal.XoaPhieuNhap_ThungRac();
-        if (XoaThungRac.ThanhCong)
-            console.log('Xóa phiếu nhập trong thùng rác thành công!');
-        else
-            console.log('Xóa phiếu nhập trong thùng rác thất bại!');
-        //==========================================================
-        //Chuyển đổi TRANGTHAI mã giảm giá đã hết hạn
-        const CapNhatTrangThai = await MaGiamGiaModel.ChuyenTrangThai_MaGiamGia();
-        if (CapNhatTrangThai)
-            console.log('Cập nhật trạng thái mã giảm giá hết hạn thành công!');
-        else
-            console.log('Cập nhật trạng thái mã giảm giá hết hạn thất bại!');
-
-    } catch (error) {
-        console.error('Lỗi khi thực hiện tác vụ tự động:', error);
-    }
-}, {
-    scheduled: true,
-    timezone: "Asia/Ho_Chi_Minh" 
-});
+ 
 cron.schedule('*/15 * * * *', async () => {
-    console.log(`--- [${new Date().toLocaleTimeString()}] Đang kiểm tra đơn hàng hết hạn ---`);
+    console.log(`--- [${new Date().toLocaleTimeString()}] Đang kiểm tra ---`);
+    // Khóa chi nhánh để bảo trì
     try {
-        const result = await DonHangModel.XoaDonHang_Tam_HetHan();
-        if (result && result.ThanhCong) {
-            console.log('Kết quả: Hoàn tất kiểm tra.');
+        const [result1,result2] = await Promise.all([
+            ChiNhanhModel.Khoa_chinhanh(),
+            KhongGianModel.khoa_khonggian()
+        ]) 
+        if(result){
+            //khóa đặt phòng/ghế thuộc chi nhánh, không gian
         }
     } catch (error) {
-        console.error('Lỗi thực thi tác vụ 10 giây:', error.message);
+        console.error('Lỗi thực thi tác vụ 15 phút:', error.message);
+    }
+    // Mở chi nhánh hoạt động
+    try {
+        const [mo1,mo2] = await Promise.all([
+            ChiNhanhModel.MoChiNhanh(),
+            KhongGianModel.Mokhonggian(),
+        ]);
+        
+
+    } catch (error) {
+         console.error('Lỗi thực thi tác vụ 15 phút:', error.message);
     }
 }, {
     scheduled: true,
