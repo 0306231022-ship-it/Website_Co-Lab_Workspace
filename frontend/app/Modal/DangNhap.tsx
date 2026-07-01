@@ -22,7 +22,6 @@ export function DangNhap() {
     formdata.append('MatKhau' ,String(MatKhau));
     try {
         const DangNhap = await api.CallAPI(formdata,{url:`/NguoiDung/DangNhap` , PhuongThuc:1});
-        alert(JSON.stringify(DangNhap));
         if(DangNhap.validate){
             setErr(DangNhap.errors);
             return;

@@ -34,11 +34,6 @@ export default function NguoiDung() {
           if (laytt.success) {
               setThongTin(laytt.dulieu);
               setTenND(laytt.dulieu.TENND);
-        
-              if (String(id) !== String(laytt.dulieu.IDND)) {
-                  ThongBao.ThongBao_Loi('Thông tin đăng nhập không trùng khớp!');
-                  return;
-              }
           }
       } catch (error) {
           console.error("Lỗi xảy ra:", error);

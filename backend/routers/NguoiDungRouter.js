@@ -23,5 +23,6 @@ nguoidungRouter.post('/dangxuat' ,  upload.none(), verifyToken, NguoiDungControl
 nguoidungRouter.post('/LichDat', upload.none(), LichDatController.DatLich);
 nguoidungRouter.get('/LayDanhSach', NguoiDungController.DanhSach_NguoiDung);
 nguoidungRouter.get('/TimKiem', NguoiDungController.TimKiem_Ten);
+nguoidungRouter.get('/lichsu_datlich', verifyToken, LichDatController.LichSuDat_theoIDND);
 //thoong bao
 export default nguoidungRouter;

@@ -1,11 +1,12 @@
 import { execute, beginTransaction, rollbackTransaction, commitTransaction } from '../config/db.js';
-import { formatDateTime } from '../function.js';
 export default class DatLichModel{
     static async DatLich(dulieu){
         try {
-           await execute(`
+            
+          const [result] = await execute(`
             CALL sp_CreateBooking(?, ?, ?, ?, ?, @bookingID)
-            `,[dulieu.ID_KHONG_GIAN || null,dulieu.ID_GHE || null,formatDateTime(dulieu.KHUNG_BATDAU),formatDateTime(dulieu.KHUNG_KETTHUC), dulieu.IDND]);
+            `,[dulieu.ID_KHONG_GIAN || null,dulieu.ID_GHE || null,dulieu.KHUNG_BATDAU,dulieu.KHUNG_KETTHUC, dulieu.IDND]);
+            console.log('Result from stored procedure:', result);
             const [rows] = await execute(`SELECT @bookingID AS newBookingID`);
             return !!(rows && rows.length > 0 && rows[0].newBookingID > 0);
         } catch (error) {
@@ -101,6 +102,38 @@ export default class DatLichModel{
                 WHERE ? BETWEEN ld.KHUNG_BATDAU AND ld.KHUNG_KETTHUC;
                 `,[thoiGianHienTai]);
             return DanhSach;
+        } catch (error) {
+            throw new Error('Database query failed: ' + error.message);
+        }
+    }
+    static async DanhSach_theoIDND(limit, offset, userId){
+        try {
+            const [DanhSach] = await execute(`
+           SELECT 
+    ld.ID_LICH_DAT,
+    ld.KHUNG_BATDAU,
+    ld.KHUNG_KETTHUC,
+    COALESCE(g.ID_KHONG_GIAN, ld.ID_KHONG_GIAN) AS ID_KHONG_GIAN,
+    kg.TEN_KHONG_GIAN,
+    cn.TEN_CHI_NHANH,
+    ld.ID_GHE
+FROM lichdat ld
+LEFT JOIN ghe g ON ld.ID_GHE = g.ID_GHE
+LEFT JOIN khonggian kg ON kg.ID_KHONG_GIAN = COALESCE(g.ID_KHONG_GIAN, ld.ID_KHONG_GIAN)
+LEFT JOIN chinhanh cn ON kg.ID_CHI_NHANH = cn.ID_CHI_NHANH
+WHERE ld.IDND = ?
+ORDER BY ld.KHUNG_BATDAU DESC
+
+LIMIT ? OFFSET ?;
+                `,[userId,limit,offset]);
+            const [TongSo] = await execute(`
+                 SELECT COUNT(*) AS total FROM lichdat
+                 WHERE IDND=?
+                `,[userId]);
+            return {
+                DanhSach:DanhSach,
+                TongSo:TongSo[0].total
+            }
         } catch (error) {
             throw new Error('Database query failed: ' + error.message);
         }

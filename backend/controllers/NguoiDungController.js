@@ -101,6 +101,7 @@ export default class NguoiDungController{
          if( user.LOAIND===1){
             res.cookie("token_admin", token, {
                httpOnly: true,
+               path: "/",
                secure: process.env.NODE_ENV === "production",
                sameSite: "lax",
                maxAge: 7 * 24 * 60 * 60 * 1000
@@ -108,6 +109,7 @@ export default class NguoiDungController{
          }else{
             res.cookie("token", token, {
                httpOnly: true,
+               path: "/",
                secure: process.env.NODE_ENV === "production",
                sameSite: "lax",
                maxAge: 7 * 24 * 60 * 60 * 1000
@@ -534,7 +536,7 @@ export default class NguoiDungController{
          const userId = parseInt(req.user.id);
          const kiemtra = await NguoiDungModel.findByid(userId);
          if(!kiemtra){
-            res.status(401).json({
+            return res.status(401).json({
                success:false,
                message:'Không tìm thấy người dùng!'
             })
@@ -544,13 +546,17 @@ export default class NguoiDungController{
             res.clearCookie("token_admin", {
                httpOnly: true,
                secure: process.env.NODE_ENV === "production",
-               sameSite: "lax"
+               sameSite: "lax",
+               path: "/",
+               domain: "localhost"
             });  
          }else{
-            res.clearCookie("token", {
+             res.clearCookie("token", {
                httpOnly: true,
                secure: process.env.NODE_ENV === "production",
-               sameSite: "lax"
+               sameSite: "lax",
+               path: "/",
+               domain: "localhost"
             });
          }
          return res.status(200).json({

@@ -73,6 +73,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
       if(!XacNhan) return ;
       try {
         const response = await api.CallAPI(undefined, { url: '/NguoiDung/dangxuat', PhuongThuc: 1 });
+        await fetch("/api/auth/logout", { method: "POST" });
         if(response.success){
            ThongBao.ThongBao_ThanhCong(response.message)
            setDangNhap(false);
@@ -141,7 +142,10 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                     </div>
                   </NavLink>
 
-                  <a href="#" className="flex items-center justify-between px-4 py-3 hover:bg-slate-50 text-slate-700 rounded-xl relative group transition-all duration-300">
+                  <NavLink 
+                     href={`/NguoiDung/lich-su-dat-lich`}
+                     activeClassName="bg-blue-50 text-blue-600 font-bold"
+                     className="flex items-center justify-between px-4 py-3 text-slate-700 hover:bg-slate-50 rounded-xl relative group transition-all duration-300">
                     <div className="flex items-center gap-3 font-semibold">
                       <i className="fa-solid fa-clock-rotate-left w-5 text-center text-lg"></i>
                       <span>Lịch sử đặt lịch</span>
@@ -149,9 +153,12 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                     <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
                       12
                     </span>
-                  </a>
+                  </NavLink>
 
-                  <a href="#" className="flex items-center justify-between px-4 py-3 hover:bg-slate-50 text-slate-700 rounded-xl relative group transition-all duration-300">
+                  <NavLink 
+                     href={`/NguoiDung/ThongBao`}
+                     activeClassName="bg-blue-50 text-blue-600 font-bold"
+                     className="flex items-center justify-between px-4 py-3 text-slate-700 hover:bg-slate-50 rounded-xl relative group transition-all duration-300">
                     <div className="flex items-center gap-3 font-semibold">
                       <i className="fas fa-envelope w-5 text-center text-lg"></i>
                       <span>Thông báo</span>
@@ -159,7 +166,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                     <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
                       12
                     </span>
-                  </a>
+                  </NavLink>
                 </nav>
               </>
             ) : ''}

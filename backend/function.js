@@ -88,16 +88,7 @@ export const xoaFileCu = (duongDanTuDatabase) => {
         return false; // Trả về false vì không có file để xóa
     }
 };
-export const formatDateTime = (isoString) => {
-            if (!isoString) return null;
-            const d = new Date(isoString);
-            return d.getFullYear() + '-' +
-                   String(d.getMonth() + 1).padStart(2, '0') + '-' +
-                   String(d.getDate()).padStart(2, '0') + ' ' +
-                   String(d.getHours()).padStart(2, '0') + ':' +
-                   String(d.getMinutes()).padStart(2, '0') + ':' +
-                   String(d.getSeconds()).padStart(2, '0');
-        };
+
 
 
 
