@@ -13,22 +13,30 @@ const PASSWORD_HASH_ROUNDS = parseInt(process.env.PASSWORD_HASH_ROUNDS) || 10;
 
 export default class NguoiDungController{
       static async XacThucOTP(req, res) {
-         /*{
-            Email: "",
-            TrangThai:
-            1: kiểm tra tồn tại
-            2: kiểm tra không tonnf tại
-         }*/
          try {
             const { Email ,TrangThai } = req.body;
             const user = await NguoiDungModel.findByEmail(Email);
-            if(user){
-               return res.status(500).json({
-                  success:false,
-                  message:'Người dùng đã tồn tại! Vui lòng chọn email khác.'
-               })
+            const statusValue = parseInt(TrangThai, 10);
+            if (statusValue === 1 && user) {
+               return res.status(400).json({ 
+                  success: false, 
+                  message: 'Người dùng đã tồn tại! Vui lòng chọn email khác.' 
+               });
+            }
+            if (statusValue !== 1 && !user) {
+               return res.status(404).json({ 
+                  success: false, 
+                  message: 'Người dùng không tồn tại!' 
+               });
             }
              const maOTP = taoMaOTP();
+             const kiemtraOTP = await XacThucOTPModel.findByEmail(Email);
+             if(kiemtraOTP){
+               return res.status(500).json({
+                  success:false,
+                  message:'Lỗi từ hệ thống! Vui lòng thực hiện sau.'
+               })
+             }
              const otpResult = await XacThucOTPModel.ThemOTP(Email, maOTP);
              if (!otpResult) {
                return res.status(500).json({
@@ -90,12 +98,21 @@ export default class NguoiDungController{
             });
          }
          const token = generateToken(user);
-         res.cookie("token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            maxAge: 7 * 24 * 60 * 60 * 1000
+         if( user.LOAIND===1){
+            res.cookie("token_admin", token, {
+               httpOnly: true,
+               secure: process.env.NODE_ENV === "production",
+               sameSite: "lax",
+               maxAge: 7 * 24 * 60 * 60 * 1000
          });
+         }else{
+            res.cookie("token", token, {
+               httpOnly: true,
+               secure: process.env.NODE_ENV === "production",
+               sameSite: "lax",
+               maxAge: 7 * 24 * 60 * 60 * 1000
+            });
+         }
          io.emit('DangNhap', { ThongTinNguoiDung: user });
          return res.status(200).json({
             success: true,
@@ -112,7 +129,6 @@ export default class NguoiDungController{
       static async DangKy(req, res) {
         try {
          const { TenND, Email, MatKhau, XacNhanMatKhau ,OTP } = req.body;
-         console.log(req.body)
          await Promise.all([
             body('TenND').notEmpty().withMessage('Tên người dùng không được để trống').run(req),
             body('Email').isEmail().withMessage('Email không hợp lệ').run(req),
@@ -187,7 +203,7 @@ export default class NguoiDungController{
       }
       static async ThongTin_NguoiDung(req, res) {
           const userId = req.user.id;
-
+          const LOAIND = req.body?.LoaiND || null;
           try {
             const ketqua= await NguoiDungModel.findByid(userId);
             if(!ketqua){
@@ -195,6 +211,15 @@ export default class NguoiDungController{
                   success:false,
                   message:'Không thể lấy thông tin người dùng, Vui lòng kiểm tra lại!'
                })
+            }
+            const loaiND = ketqua.LOAIND;
+            if(LOAIND !== null){
+               if(loaiND !== LOAIND){
+                  return res.status(403).json({
+                     success: false,
+                     message: 'Bạn không có quyền truy cập thông tin người dùng này!'
+                  });
+               }
             }
             return res.status(200).json({
                success:true,
@@ -506,11 +531,20 @@ export default class NguoiDungController{
          }
       }
       static async DangXuat(req,res){
-         res.clearCookie("token", {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax"
-         });
+         const loaind = req.body.LOAIND || null;
+         if(loaind === 1){
+            res.clearCookie("token_admin", {
+               httpOnly: true,
+               secure: process.env.NODE_ENV === "production",
+               sameSite: "lax"
+            });  
+         }else{
+            res.clearCookie("token", {
+               httpOnly: true,
+               secure: process.env.NODE_ENV === "production",
+               sameSite: "lax"
+            });
+         }
          return res.status(200).json({
             success: true,
             message: 'Bạn đã đăng xuất thành công!'

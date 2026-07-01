@@ -4,6 +4,7 @@ import * as api from '@/API/API';
 import * as ThongBao from '@/FUNCTION/ThongBao';
 import { useEffect, useState } from 'react';
 import {socket} from '@/FUNCTION/socket';
+import { useModalContext } from "@/context/QuanLiMoal";
 type NguoiDung = {
     TENND: string,
     EMAIL: string,
@@ -20,7 +21,8 @@ export default function NguoiDung() {
   const [matKhauCu, setMatKhauCu] = useState<string>("");
   const [matKhauMoi, setMatKhauMoi] = useState<string>("");
   const [xacNhanMatKhau, setXacNhanMatKhau] = useState<string>("");
-   const [errors, setErrors] = useState<string[]>([]);
+  const [errors, setErrors] = useState<string[]>([]);
+  const { OpenMoDal } = useModalContext();
   useEffect(() => {
     const fetchData = async () => {
      if (!id) {
@@ -31,7 +33,7 @@ export default function NguoiDung() {
           const laytt = await api.CallAPI(undefined, { PhuongThuc: 2, url: `/NguoiDung/kiemtra_dangnhap` });
           if (laytt.success) {
               setThongTin(laytt.dulieu);
-              setTenND(laytt.dulieu.TENND); // Gán giá trị mặc định cho ô nhập tên
+              setTenND(laytt.dulieu.TENND);
               
               if (String(id) !== String(laytt.dulieu.IDND)) {
                   ThongBao.ThongBao_Loi('Thông tin đăng nhập không trùng khớp!');
@@ -125,11 +127,10 @@ export default function NguoiDung() {
     try {
          const formData = new FormData();
          formData.append("TENND", tenND);
-      const response = await api.CallAPI(formData, { 
-        url: `/NguoiDung/ChinhSua_thongTin`, 
-        PhuongThuc: 1 
-      });
-      alert(JSON.stringify(response))
+        const response = await api.CallAPI(formData, { 
+          url: `/NguoiDung/ChinhSua_thongTin`, 
+          PhuongThuc: 1 
+        });
       if (response.validate) {
         setErrors(response.errors);
         ThongBao.ThongBao_CanhBao(response.errors);
@@ -153,13 +154,17 @@ export default function NguoiDung() {
     }
     const XacNhan = await ThongBao.ThongBao_XacNhanTT(`Hệ thống sẽ gửi liên kết khôi phục mật khẩu tới email: ${ThongTin.EMAIL}. Bạn có muốn tiếp tục không?`);
     if(!XacNhan) return;
-
     try {
-        const response = await api.CallAPI({ EMAIL: ThongTin.EMAIL }, { 
-            url: '/NguoiDung/QuenMatKhau', 
+         const formData = new FormData();
+         formData.append("Email", ThongTin.EMAIL);
+         formData.append('TrangThai',String(2));
+         const response = await api.CallAPI(formData, { 
+            url: '/NguoiDung/XacThucOTP', 
             PhuongThuc: 1 
         });
         if (response.success) {
+            //Mở modal quên mất khẩu
+            OpenMoDal(undefined,{TenTrang:'QuenMatKhau'})
             ThongBao.ThongBao_ThanhCong(response.message || "Vui lòng kiểm tra email để đặt lại mật khẩu!");
         } else {
             ThongBao.ThongBao_Loi(response.message || "Gửi yêu cầu thất bại!");

@@ -29,7 +29,10 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
   const KiemTra = async () => {
     try {
-      const kiemtra = await api.CallAPI(undefined, { url: '/NguoiDung/kiemtra_dangnhap', PhuongThuc: 2 });
+       const formdata = new FormData();
+      formdata.append('LoaiND', String(0));
+      const kiemtra = await api.CallAPI(formdata, { url: '/NguoiDung/kiemtra_dangnhap', PhuongThuc: 1 });
+    
       if (kiemtra.success) {
         setDangNhap(true);
         setThongTin(kiemtra.dulieu);

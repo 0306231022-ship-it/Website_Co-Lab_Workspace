@@ -56,7 +56,6 @@ export const guiEmailOTP = async (emailNguoiNhan, maOTP) => {
 
   try {
     const info = await transporter.sendMail(mailOptions);
-    console.log("Gửi mail thành công! ID tin nhắn:", info.messageId);
     return { 
       success: true, 
       messageId: info.messageId 
