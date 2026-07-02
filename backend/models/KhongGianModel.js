@@ -72,7 +72,7 @@ export default class KhongGianModel {
             throw new Error('Database query failed: ' + error.message);
         }
     }
-    static async LayDanhSach(ID, limit, offset){
+    static async LayDanhSach(limit,offset,ID){
         try {
             const [DanhSach] = await execute(`
                 SELECT*FROM khonggian
@@ -116,17 +116,32 @@ export default class KhongGianModel {
              throw new Error('Database query failed: ' + error.message);
         }
     }
-    static async TimKiem_KhongGian(ten,trangthai){
+   static async TimKiem_KhongGian(ten, trangthai, idcn , limit, offset) {
         try {
-               const [danhsach] = await execute(`
-                SELECT*FROM khonggian
-                WHERE TRANG_THAI=? AND TEN_KHONG_GIAN LIKE ?
-                `,[trangthai,`%${ten}%`]);
-            return danhsach;
+            let whereClause = ` WHERE ID_CHI_NHANH = ?`;
+            let params = [idcn];
+            if (ten && ten.trim() !== "") {
+                whereClause += ` AND TEN_KHONG_GIAN LIKE ?`;
+                params.push(`%${ten.trim()}%`);
+            }
+            if (trangthai !== 'all' && trangthai !== undefined && trangthai !== null) {
+                whereClause += ` AND TRANG_THAI = ?`;
+                params.push(Number(trangthai));
+            }
+            const sqlCount = `SELECT COUNT(*) AS Tong FROM khonggian` + whereClause;
+            const [kqCount] = await execute(sqlCount, params);
+            const tongDanhSach = kqCount[0]?.Tong || 0;
+            const sqlData = `SELECT * FROM khonggian` + whereClause + ` LIMIT ? OFFSET ?`;
+            const dataParams = [...params, Number(limit), Number(offset)];
+            const [danhsach] = await execute(sqlData, dataParams);
+             return {
+                DanhSach: danhsach,
+                TongDanhSach: tongDanhSach
+            };
         } catch (error) {
             throw new Error('Database query failed: ' + error.message);
         }
-    }
+}
     static async TruyVan_ChiNhanh(IDKG){
         try {
             const [danhsach] = await execute(`

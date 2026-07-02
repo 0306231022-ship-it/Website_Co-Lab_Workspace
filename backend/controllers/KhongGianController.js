@@ -8,7 +8,7 @@ export default class KhongGianController{
           const page = parseInt(req.query.page) || 1;
                 const limit = parseInt(req.query.limit) || 3;
                 const offset = (page - 1) * limit;
-         const ID = parseInt(req.query.IDCN);
+                const ID = parseInt(req.query.IDCN);
                 try {
                     await Promise.all([
                         query('page')
@@ -35,7 +35,11 @@ export default class KhongGianController{
                             errors: errors.array().map(err => err.msg)
                         });
                     }
-                    const danhsach = await KhongGianModel.LayDanhSach(ID,limit,offset);
+                    const trangthai = req.query.Loai;
+                    const ten = req.query.TimKiem;
+                    const coTrangThai = trangthai !== undefined && trangthai !== null && trangthai !== '';
+                    const coTen = ten !== undefined && ten !== null && ten.trim() !== '';
+                    const danhsach = coTrangThai || coTen ? await KhongGianModel.TimKiem_KhongGian(ten,trangthai,ID , limit, offset) : await KhongGianModel.LayDanhSach(limit,offset,ID);
                     if(!danhsach){
                         return res.status(500).json({
                             success:false,
@@ -45,7 +49,7 @@ export default class KhongGianController{
                     return res.status(200).json({
                         success:true,
                         DanhSach: danhsach.DanhSach,
-                        TongDS: danhsach.TongDanhSach
+                        TongDanhSach: danhsach.TongDanhSach
                     })
                 } catch (error) {
                      return res.status(500).json({
@@ -325,13 +329,22 @@ export default class KhongGianController{
         }
     }
     static async TimKiem_KhongGian(req, res) {
-        const ten = req.query.ten;
-        const trangthai = req.query.trangthai;
+        const ten = req.query.TimKiem;
+        const trangthai = req.query.Loai;
+        const IDCN = req.query.IDCN;
         try {
-            const timkiem = await KhongGianModel.TimKiem_KhongGian(ten,trangthai);
+            const kiemtra = await ChiNhanhModel.kiemtraid(IDCN);
+            if(!kiemtra){
+                return res.status(401).json({
+                    success:false,
+                    message:'ID chi nhánh không tồn tại!'
+                })
+            }
+            const timkiem = await KhongGianModel.TimKiem_KhongGian(ten,trangthai,IDCN ,3 ,0);
             return res.status(200).json({
                 success:true,
-                danhsach:timkiem
+                danhsach:timkiem.DanhSach,
+                TongDanhSach:timkiem.TongDanhSach
             })
         } catch (error) {
             return res.status(500).json({

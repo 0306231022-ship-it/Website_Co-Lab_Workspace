@@ -305,7 +305,7 @@ if (!errors.isEmpty()) {
         message: 'Dữ liệu không hợp lệ!',
         errors: errors.array().map(err => err.msg)
     });
-}       const limit = 5;
+}       const limit = 3;
         const offset = 0;
         const [chitiet1,chitiet2] = await Promise.all([
              ChiNhanhModel.LayChiTiet(IDCN),
