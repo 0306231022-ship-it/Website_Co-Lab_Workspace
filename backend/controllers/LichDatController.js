@@ -212,6 +212,45 @@ export default class LichDatController{
             });
         }
     }
-
-    
+    static async ChiTiet_LichDat_theoIDDL(req, res) {
+        const id = req.query.Id;
+        //const userId = req.user.id;
+        try {
+            const kiemtra = await DatLichModel.kiemtraid(id);
+            if (!kiemtra) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Lịch đặt không tồn tại.'
+                });
+            }
+           /* const kiemtra2 = await DatLichModel.kiemtraidND(id, userId);
+            if (!kiemtra2) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Bạn không có quyền truy cập chi tiết lịch đặt này.'
+                });
+            }*/
+            const lichDat = await DatLichModel.ChiTiet_LichDat_theoIDDL(id);
+            if (!lichDat.success) {
+                return res.status(404).json({
+                    success: false,
+                    message: lichDat.message
+                });
+            }
+            return res.status(200).json({
+                success: true,
+                lichDat :{
+                    cHITiet_NguoiDung: lichDat.ChiTiet_NguoiDung,
+                    ChiTiet_ThoiGian: lichDat.ChiTiet_ThoiGian,
+                    ChiTiet_Ghe_KhongGian: lichDat.ChiTiet_Ghe_KhongGian,
+                    ChiTiet_HoaDon: lichDat.ChiTiet_HoaDon
+                } 
+            });
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                message: 'Lấy chi tiết lịch đặt thất bại: ' + error.message
+            });
+        }
+    }
 }

@@ -138,4 +138,88 @@ LIMIT ? OFFSET ?;
             throw new Error('Database query failed: ' + error.message);
         }
     }
+    static async ChiTiet_LichDat_theoIDDL(id){
+        let connection = await beginTransaction();
+        try {
+            // dỰA VÀO  id lấy thông tin người dùng
+            const [ChiTiet_NguoiDung] = await connection.query(`
+                SELECT ND.TENND,  ND.EMAIL
+                FROM lichdat LD
+                INNER JOIN nguoidung ND ON LD.IDND = ND.IDND
+                WHERE LD.ID_LICH_DAT = ?
+                `,[id]);
+            if (!ChiTiet_NguoiDung || ChiTiet_NguoiDung.length === 0) {
+                await rollbackTransaction(connection);
+               return {
+                    success: false,
+                    message: 'Không tìm thấy thông tin người dùng cho ID_LICH_DAT đã cho.'
+                };
+            }
+            //dựa vào id lấy thông tin thời gian
+            const [ChiTiet_ThoiGian] =await connection.query(`
+                SELECT KHUNG_BATDAU, KHUNG_KETTHUC
+                FROM lichdat
+                WHERE ID_LICH_DAT = ?
+                `,[id]);
+            if (!ChiTiet_ThoiGian || ChiTiet_ThoiGian.length === 0) {
+                await rollbackTransaction(connection);
+                return {
+                    success: false,
+                    message: 'Không tìm thấy thông tin thời gian cho ID_LICH_DAT đã cho.'
+                };
+            }
+            //dựa vào id lấy thông tin ghế, hoặc không gian 1 TRONG 2 TRƯỜNG SẼ NULL trường nào con thì lấy trường đó
+            const [ChiTiet_Ghe_KhongGian] = await connection.query(`
+                SELECT LD.ID_GHE, LD.ID_KHONG_GIAN, G.TEN_GHE, KG.TEN_KHONG_GIAN , CN.TEN_CHI_NHANH
+                FROM lichdat LD
+                LEFT JOIN ghe G ON LD.ID_GHE = G.ID_GHE
+                LEFT JOIN khonggian KG ON LD.ID_KHONG_GIAN = KG.ID_KHONG_GIAN
+                LEFT JOIN chinhanh CN ON KG.ID_CHI_NHANH = CN.ID_CHI_NHANH
+                WHERE LD.ID_LICH_DAT = ?
+                `,[id]);
+            if (!ChiTiet_Ghe_KhongGian || ChiTiet_Ghe_KhongGian.length === 0) {
+                await rollbackTransaction(connection);
+                return {
+                    success: false,
+                    message: 'Không tìm thấy thông tin ghế hoặc không gian cho ID_LICH_DAT đã cho.'
+                };
+            }
+            // lấy thông tin hóa đơn dựa vào id
+            const [ChiTiet_HoaDon] = await connection.query(`
+                SELECT HD.ID_HOADON, HD.GIA_TIEN, HD.NGAY_TAO , HD.TRANG_THAI
+                FROM hoadon HD
+                WHERE HD.ID_LICHDAT = ?
+                `,[id]);
+            if (!ChiTiet_HoaDon || ChiTiet_HoaDon.length === 0) {
+                await rollbackTransaction(connection);
+                return {
+                    success: false,
+                    message: 'Không tìm thấy thông tin hóa đơn cho ID_LICH_DAT đã cho.'
+                };
+            }
+            // Nếu tất cả các truy vấn đều thành công, commit transaction
+            await commitTransaction(connection);
+            return {
+                success: true,
+                ChiTiet_NguoiDung: ChiTiet_NguoiDung[0],
+                ChiTiet_ThoiGian: ChiTiet_ThoiGian[0],
+                ChiTiet_Ghe_KhongGian: ChiTiet_Ghe_KhongGian[0],
+                ChiTiet_HoaDon: ChiTiet_HoaDon[0]
+            };
+        }catch (error) {
+                await rollbackTransaction(connection);
+                throw new Error('Database query failed: ' + error.message);
+        }
+    }
+    static async kiemtraidND(id, userId){
+        try {
+            const [kiemtra] = await execute(`
+                SELECT*FROM lichdat
+                WHERE ID_LICH_DAT = ? AND IDND = ?
+                `,[id,userId]);
+            return kiemtra.length>0? true : false;
+        } catch (error) {
+            throw new Error('Database query failed: ' + error.message);
+        }
+    }
 }

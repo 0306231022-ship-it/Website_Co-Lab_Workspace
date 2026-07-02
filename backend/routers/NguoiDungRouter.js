@@ -8,7 +8,6 @@ import multer from "multer";
 const upload = multer();
 const nguoidungRouter = Router();
 //==========================================
-//adminRouter.post('/ThemThuongHieu', createUpload('thuonghieu').any(),ThuongHieuController.ThemThuongHieu);
 nguoidungRouter.post('/DangKy', upload.none(), NguoiDungController.DangKy);
 nguoidungRouter.post('/XacThucOTP', upload.none(), NguoiDungController.XacThucOTP);
 nguoidungRouter.post('/DangNhap' , upload.none(), NguoiDungController.DangNhap);
@@ -24,5 +23,6 @@ nguoidungRouter.post('/LichDat', upload.none(), LichDatController.DatLich);
 nguoidungRouter.get('/LayDanhSach', NguoiDungController.DanhSach_NguoiDung);
 nguoidungRouter.get('/TimKiem', NguoiDungController.TimKiem_Ten);
 nguoidungRouter.get('/lichsu_datlich', verifyToken, LichDatController.LichSuDat_theoIDND);
+nguoidungRouter.get('/lich-dat', LichDatController.ChiTiet_LichDat_theoIDDL);
 //thoong bao
 export default nguoidungRouter;

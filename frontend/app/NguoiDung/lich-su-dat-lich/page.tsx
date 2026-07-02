@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { CallAPI } from "@/API/API";
-
+import Link from "next/link";
 interface LichDatItems {
     ID_LICH_DAT: number;
     KHUNG_BATDAU: string;
@@ -32,7 +32,7 @@ function LichSuLichDat() {
                     url: `/NguoiDung/lichsu_datlich?page=${trangHienTai}&limit=${itemsPerPage}`, 
                     PhuongThuc: 2, 
                 });
-
+        
                 if (res && res.success) {
                     setDanhSach(res.DanhSach || []); 
                     setTongSoDong(res.TongSo || 0);   
@@ -176,10 +176,10 @@ function LichSuLichDat() {
                                                 </button>
                                             )}
             
-                                       <button className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-1.5">
+                                       <Link href={`/NguoiDung/lich-su-dat-lich/chi-tiet-lich-dat/${item.ID_LICH_DAT}`} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-1.5">
     <i className="fa-regular fa-eye"></i>
     <span>Xem chi tiết</span>
-</button>
+</Link>
                                         </div>
 
                                     </div>
