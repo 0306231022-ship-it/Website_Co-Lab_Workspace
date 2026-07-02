@@ -5,7 +5,7 @@ import * as api from '@/API/API';
 import * as ThongBao from '@/FUNCTION/ThongBao';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-
+import QRCode from "react-qr-code";
 interface ChiTietNguoiDung {
     TENND: string;
     EMAIL: string;
@@ -46,7 +46,8 @@ function ChiTietLichDat() {
   const { id } = useParams();
   const [lichDat, setLichDat] = useState<LichDat | null>(null);
   const router = useRouter();
-
+  const localIP = "127.0.0.1"; // Thay bằng địa chỉ IP của máy tính chạy server
+  const qrUrl = `http://${localIP}:3000/admin/check-in?room_id=${lichDat?.ChiTiet_Ghe_KhongGian?.ID_GHE || ''}`;
   useEffect(() => {
     const fetchLichDat = async () => {
       if (!id) {
@@ -294,13 +295,7 @@ const formatTime = (dateString: string) => {
             <div className="flex flex-col items-center text-center bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
               <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Quét mã để Check-in</h3>
               <div className="w-32 h-32 bg-white border-2 border-slate-800 p-2 rounded-xl flex items-center justify-center relative shadow-inner">
-                <i className="fa-solid fa-qrcode text-7xl text-slate-800"></i>
-                
-                {/* Khung định vị góc QR */}
-                <div className="absolute top-0 left-0 w-4 h-4 border-t-4 border-l-4 border-brand-500 rounded-tl-md"></div>
-                <div className="absolute top-0 right-0 w-4 h-4 border-t-4 border-r-4 border-brand-500 rounded-tr-md"></div>
-                <div className="absolute bottom-0 left-0 w-4 h-4 border-b-4 border-l-4 border-brand-500 rounded-bl-md"></div>
-                <div className="absolute bottom-0 right-0 w-4 h-4 border-b-4 border-r-4 border-brand-500 rounded-br-md"></div>
+                <QRCode value={qrUrl} size={300} bgColor="#ffffff" fgColor="#000000" level="H" />
               </div>
               <p className="text-[11px] text-slate-400 mt-4 font-medium leading-relaxed">Vui lòng đưa mã này cho lễ tân khi bạn đến nhận chỗ.</p>
             </div>

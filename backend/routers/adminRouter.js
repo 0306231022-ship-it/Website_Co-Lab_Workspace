@@ -29,7 +29,7 @@ adminRouter.post('/ThemKhongGian' , createUpload('KhongGian').any(), KhongGianCo
 adminRouter.post('/ChinhSuaTen_kg', upload.none() , KhongGianController.ChinhSua_TenKhongGian );
 adminRouter.post('/ChinhSuaAnh', createUpload('KhongGian').any(), KhongGianController.ChinhAnh);
 adminRouter.post('/ChinhSua_TrangThai_KhongGian' , upload.none(), KhongGianController.ChinhSua_TrangThai_KhongGian);
-adminRouter.get('/DanhSach_khonggian' , KhongGianController.DanhSach_KhongGian);
+adminRouter.get('/laydanhsachkhonggian' , KhongGianController.DanhSach_KhongGian);
 adminRouter.get('/TimKiem_khonggian', KhongGianController.TimKiem_KhongGian);
 adminRouter.get('/ChiTiet_KhongGian', KhongGianController.ChiTiet_KhongGian);
 // =========================================

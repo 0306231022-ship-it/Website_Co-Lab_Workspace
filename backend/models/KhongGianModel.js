@@ -72,7 +72,7 @@ export default class KhongGianModel {
             throw new Error('Database query failed: ' + error.message);
         }
     }
-    static async LayDanhSach(limit,offset, ID){
+    static async LayDanhSach(ID, limit, offset){
         try {
             const [DanhSach] = await execute(`
                 SELECT*FROM khonggian
@@ -81,7 +81,8 @@ export default class KhongGianModel {
                 `,[ID,limit,offset]);
             const [TongSo] = await execute(`
                  SELECT COUNT(*) AS total FROM khonggian
-                `);
+                WHERE ID_CHI_NHANH = ?
+                `,[ID]);
             return {
                 DanhSach: DanhSach,
                 TongDanhSach: TongSo[0].total

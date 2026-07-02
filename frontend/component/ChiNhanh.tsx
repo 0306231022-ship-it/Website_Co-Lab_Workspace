@@ -1,6 +1,6 @@
 import React from "react";
 import Image from "next/image";
-import NavLink from "./NavLink";
+import Link from "next/link";
 interface objChiNhanh{
     ID_CHI_NHANH: number;
     TEN_CHI_NHANH : string;
@@ -50,10 +50,10 @@ export default function ChiNhanh({DuLieu} : ChiNhanh){
                         <div className="flex items-center gap-1.5" title="Phòng họp"><i className="fa-solid fa-people-roof text-emerald-500"></i> <span>{DuLieu.TongLoai2} phòng họp</span></div>
                       </div>
                     </div>
-                    <button disabled={DuLieu.TRANG_THAI!==1} className="w-full mt-5 bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white border border-blue-100 font-bold py-2.5 rounded-xl text-sm transition-all duration-300 flex items-center justify-center gap-2">
+                    <Link href={`/chi-tiet-chi-nhanh/${DuLieu.ID_CHI_NHANH}`}  className="w-full mt-5 bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white border border-blue-100 font-bold py-2.5 rounded-xl text-sm transition-all duration-300 flex items-center justify-center gap-2">
                       <span>Xem chi tiết không gian</span>
                       <i className="fa-solid fa-arrow-right text-xs"></i>
-                    </button>
+                    </Link>
                   </div>
                 </div>
                    </div>

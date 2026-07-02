@@ -6,8 +6,9 @@ import { body, query, validationResult } from 'express-validator';
 export default class KhongGianController{
     static async DanhSach_KhongGian(req, res) {
           const page = parseInt(req.query.page) || 1;
-                const limit = parseInt(req.query.limit) || 5;
+                const limit = parseInt(req.query.limit) || 3;
                 const offset = (page - 1) * limit;
+         const ID = parseInt(req.query.IDCN);
                 try {
                     await Promise.all([
                         query('page')
@@ -34,7 +35,7 @@ export default class KhongGianController{
                             errors: errors.array().map(err => err.msg)
                         });
                     }
-                    const danhsach = await KhongGianModel.LayDanhSach(limit,offset);
+                    const danhsach = await KhongGianModel.LayDanhSach(ID,limit,offset);
                     if(!danhsach){
                         return res.status(500).json({
                             success:false,
