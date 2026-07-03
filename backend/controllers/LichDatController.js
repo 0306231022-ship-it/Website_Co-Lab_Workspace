@@ -214,7 +214,7 @@ export default class LichDatController{
     }
     static async ChiTiet_LichDat_theoIDDL(req, res) {
         const id = req.query.Id;
-        //const userId = req.user.id;
+        const userId = req.user.id;
         try {
             const kiemtra = await DatLichModel.kiemtraid(id);
             if (!kiemtra) {
@@ -223,13 +223,13 @@ export default class LichDatController{
                     message: 'Lịch đặt không tồn tại.'
                 });
             }
-           /* const kiemtra2 = await DatLichModel.kiemtraidND(id, userId);
+            const kiemtra2 = await DatLichModel.kiemtraidND(id, userId);
             if (!kiemtra2) {
                 return res.status(403).json({
                     success: false,
                     message: 'Bạn không có quyền truy cập chi tiết lịch đặt này.'
                 });
-            }*/
+            }
             const lichDat = await DatLichModel.ChiTiet_LichDat_theoIDDL(id);
             if (!lichDat.success) {
                 return res.status(404).json({

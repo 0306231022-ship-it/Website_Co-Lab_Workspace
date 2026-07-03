@@ -8,26 +8,14 @@ export default class thongBaoController {
     // 1. [GET] /api/admin/thongbao/user (CHI TIẾT THEO IDND + PHÂN TRANG)
     // ========================================================
     static async getThongBaoByUser(req, res) {
+        const userId = req.user.id;
         try {
-            await Promise.all([
-                query('IDND')
-                    .notEmpty().withMessage('ID người dùng không được bỏ trống!')
-                    .isInt({ min: 1 }).withMessage('ID người dùng phải là số nguyên dương!'),
-                query('page').optional().isInt({ min: 1 }).withMessage('Số trang phải từ 1!'),
-                query('limit').optional().isInt({ min: 1 }).withMessage('Số lượng bản ghi phải từ 1!')
-            ]);
-
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                return res.status(400).json({ success: false, errors: errors.array().map(err => err.msg) });
-            }
-
-            const idnd = parseInt(req.query.IDND, 10);
+    
             const page = parseInt(req.query.page, 10) || 1;
             const limit = parseInt(req.query.limit, 10) || 10;
             const offset = (page - 1) * limit;
 
-            const result = await thongBaoModel.getByUserId(idnd, offset, limit);
+            const result = await thongBaoModel.getByUserId(userId, offset, limit);
             return res.status(200).json({ success: true, ...result });
 
         } catch (error) {
@@ -113,22 +101,15 @@ export default class thongBaoController {
     // ========================================================
     static async deleteAllThongBaoByUserId(req, res) {
         try {
-            const { IDND } = req.body;
-
-            await Promise.all([
-                body('IDND')
-                    .notEmpty().withMessage('ID người dùng để dọn sạch thông báo không được bỏ trống!')
-                    .isInt({ min: 1 }).withMessage('ID người dùng phải là số nguyên dương!')
-            ]);
-
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                return res.status(400).json({ success: false, errors: errors.array().map(err => err.msg) });
+             const userId = req.user.id;
+            const kq = await thongBaoModel.deleteAllByUserId(userId);
+            if(!kq){
+                return res.status(500).json({
+                    success:false,
+                    message:'Không thể xóa tất cả thông báo!'
+                })
             }
-
-            await thongBaoModel.deleteAllByUserId(IDND);
             return res.status(200).json({ success: true, message: "Đã dọn sạch toàn bộ thông báo của người dùng này!" });
-
         } catch (error) {
             return res.status(500).json({ success: false, message: error.message });
         }

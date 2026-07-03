@@ -4,6 +4,7 @@ import { verifyToken } from "../middleware/CheckToken.js";
 import {authorize} from "../middleware/PhanQuyen.js";
 import createUpload from '../middleware/upload.js';
 import LichDatController from "../controllers/LichDatController.js";
+import thongBaoController from "../controllers/ThongBaoController.js";
 import multer from "multer";
 const upload = multer();
 const nguoidungRouter = Router();
@@ -25,4 +26,7 @@ nguoidungRouter.get('/TimKiem', NguoiDungController.TimKiem_Ten);
 nguoidungRouter.get('/lichsu_datlich', verifyToken, LichDatController.LichSuDat_theoIDND);
 nguoidungRouter.get('/lich-dat', LichDatController.ChiTiet_LichDat_theoIDDL);
 //thoong bao
+nguoidungRouter.get('/layDS_thongbao', verifyToken , thongBaoController.getThongBaoByUser);
+nguoidungRouter.post('/XoaTheoid' , upload.none(), thongBaoController.deleteThongBao);
+nguoidungRouter.post('/XoaTatCa' , upload.none() , verifyToken , thongBaoController.deleteAllThongBaoByUserId);
 export default nguoidungRouter;

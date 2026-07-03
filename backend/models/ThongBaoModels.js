@@ -41,8 +41,9 @@ export default class thongBaoModel {
                  WHERE IDND = ? 
                  ORDER BY NGAY_TAO DESC 
                  LIMIT ? OFFSET ?`,
-                [idnd, offset,limit]
+                [idnd, limit,offset]
             );
+
 
             const [totalRows] = await execute("SELECT COUNT(*) as total FROM thongbao WHERE IDND = ?", [idnd]);
             const total = totalRows[0]?.total || 0;
@@ -51,7 +52,7 @@ export default class thongBaoModel {
                 data: rows,
                 pagination: {
                     totalItems: total,
-                    totalPages: Math.ceil(total / parsedLimit)
+                    totalPages: Math.ceil(total / limit)
                 }
             };
         } catch (error) {
@@ -90,8 +91,7 @@ export default class thongBaoModel {
     static async deleteAllByUserId(idnd) {
         try {
             const [result] = await execute("DELETE FROM thongbao WHERE IDND = ?", [idnd]);
-            // Nếu người dùng không có thông báo nào sẵn thì affectedRows = 0, vẫn trả về true vì mục đích là làm trống rỗng
-            return true;
+            return result.affectedRows>0;
         } catch (error) {
             console.error(`❌ Lỗi Database trong thongBaoModel.deleteAllByUserId (${idnd}):`, error.message);
             throw new Error("Không thể xóa toàn bộ thông báo của người dùng này!");
