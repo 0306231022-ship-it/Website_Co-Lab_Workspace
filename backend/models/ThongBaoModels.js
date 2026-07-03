@@ -22,7 +22,7 @@ export default class thongBaoModel {
                 data: rows,
                 pagination: {
                     totalItems: total,
-                    totalPages: Math.ceil(total / parsedLimit)
+                    totalPages: Math.ceil(total / limit)
                 }
             };
         } catch (error) {
@@ -41,7 +41,7 @@ export default class thongBaoModel {
                  WHERE IDND = ? 
                  ORDER BY NGAY_TAO DESC 
                  LIMIT ? OFFSET ?`,
-                [idnd, offset,limit]
+                [idnd, limit,offset]
             );
 
             const [totalRows] = await execute("SELECT COUNT(*) as total FROM thongbao WHERE IDND = ?", [idnd]);
@@ -51,7 +51,7 @@ export default class thongBaoModel {
                 data: rows,
                 pagination: {
                     totalItems: total,
-                    totalPages: Math.ceil(total / parsedLimit)
+                    totalPages: Math.ceil(total / limit)
                 }
             };
         } catch (error) {
