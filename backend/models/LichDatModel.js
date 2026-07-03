@@ -170,12 +170,25 @@ LIMIT ? OFFSET ?;
             }
             //dựa vào id lấy thông tin ghế, hoặc không gian 1 TRONG 2 TRƯỜNG SẼ NULL trường nào con thì lấy trường đó
             const [ChiTiet_Ghe_KhongGian] = await connection.query(`
-                SELECT LD.ID_GHE, LD.ID_KHONG_GIAN, G.TEN_GHE, KG.TEN_KHONG_GIAN , CN.TEN_CHI_NHANH
-                FROM lichdat LD
-                LEFT JOIN ghe G ON LD.ID_GHE = G.ID_GHE
-                LEFT JOIN khonggian KG ON LD.ID_KHONG_GIAN = KG.ID_KHONG_GIAN
-                LEFT JOIN chinhanh CN ON KG.ID_CHI_NHANH = CN.ID_CHI_NHANH
-                WHERE LD.ID_LICH_DAT = ?
+               SELECT
+    LD.ID_GHE,
+    LD.ID_KHONG_GIAN,
+    G.TEN_GHE,
+    COALESCE(KG1.TEN_KHONG_GIAN, KG2.TEN_KHONG_GIAN) AS TEN_KHONG_GIAN,
+    COALESCE(CN1.TEN_CHI_NHANH, CN2.TEN_CHI_NHANH) AS TEN_CHI_NHANH
+FROM lichdat LD
+LEFT JOIN ghe G
+    ON LD.ID_GHE = G.ID_GHE
+LEFT JOIN khonggian KG1
+    ON LD.ID_KHONG_GIAN = KG1.ID_KHONG_GIAN
+LEFT JOIN khonggian KG2
+    ON G.ID_KHONG_GIAN = KG2.ID_KHONG_GIAN
+LEFT JOIN chinhanh CN1
+    ON KG1.ID_CHI_NHANH = CN1.ID_CHI_NHANH
+LEFT JOIN chinhanh CN2
+    ON KG2.ID_CHI_NHANH = CN2.ID_CHI_NHANH
+
+WHERE LD.ID_LICH_DAT = ?;
                 `,[id]);
             if (!ChiTiet_Ghe_KhongGian || ChiTiet_Ghe_KhongGian.length === 0) {
                 await rollbackTransaction(connection);

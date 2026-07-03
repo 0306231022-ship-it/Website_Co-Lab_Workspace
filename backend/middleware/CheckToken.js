@@ -1,7 +1,9 @@
 import jwt from 'jsonwebtoken';
 
 export const verifyToken = (req, res, next) => {
-   const token = req.cookies.token_admin || req.cookies.token;
+    const loaiNguoiDung = parseInt(req.body.LoaiND);
+    console.log(loaiNguoiDung);
+    const token = loaiNguoiDung===1 ? req.cookies.token_admin : req.cookies.token;
     if (!token) {
         return res.status(401).json({ 
             success: false, 
@@ -11,11 +13,13 @@ export const verifyToken = (req, res, next) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.user = decoded;
-        next(); 
+        return next(); 
+        
     } catch (error) {
+        console.error("❌ LỖI KHI VERIFY JWT:", error.message); 
         return res.status(403).json({ 
             success: false, 
-            message: "Token đã hết hạn hoặc không hợp lệ!" 
+            message: `Lỗi Token: ${error.message}` 
         });
     }
 };

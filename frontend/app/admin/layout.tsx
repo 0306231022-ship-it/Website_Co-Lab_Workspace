@@ -1,8 +1,28 @@
-export default function AdminLayout({
+import * as api from '@/API/API';
+import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+   
+   const cookieStore = await cookies();
+   const token = cookieStore.get("token_admin")?.value;
+    try {
+        const formData = new FormData();
+        formData.append("LoaiND", String(1));
+        const res = await api.CallAPI(formData, {
+            url: "/NguoiDung/kiemtra_dangnhap",
+            PhuongThuc: 1,
+            token: `token_admin=${token}`,
+        });
+        if(!res.success){
+            redirect('/')
+        }
+    } catch (error) {
+        console.error("Lỗi hệ thống tại Layout:", error);
+    }
     return (
         <>
                   <div className="flex h-screen overflow-hidden">

@@ -31,17 +31,15 @@ export async function CallAPI(dulieu: FormData | null = null, yeucau: YeuCau) {
         };
     }
     if (yeucau.token) {
-        if (yeucau.token.startsWith('token=')) {
-            options.headers = {
-                ...(options.headers || {}),
-                'Cookie': yeucau.token 
-            };
-        } else {
-            options.headers = {
-                ...(options.headers || {}),
-                Authorization: `Bearer ${yeucau.token}` 
-            };
-        }
+       if (
+        yeucau.token.startsWith("token_admin=") ||
+        yeucau.token.startsWith("token=")
+        ) {
+        options.headers = {
+        ...(options.headers || {}),
+        Cookie: yeucau.token,
+    };
+}
     }
     try {
         const response = await fetch(DuongDan, options);
