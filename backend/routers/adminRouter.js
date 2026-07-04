@@ -13,6 +13,7 @@ import DatLichModel from "../models/LichDatModel.js";
 import hoadonController from "../controllers/hoadonController.js";
 import giaController from "../controllers/QLGiaController.js";
 import thongBaoController from "../controllers/ThongBaoController.js";
+import { verifyToken } from "../middleware/CheckToken.js";
 const upload = multer();  
 //==========================================
 //QUẢN LÝ CHI NHÁNH
@@ -60,7 +61,7 @@ adminRouter.post("/themhoadon",upload.none(),hoadonController.createHoaDon);
 adminRouter.get("/chitiethoadon",hoadonController.getHoaDonById);
 //Quản lý giá
 adminRouter.post("/themgiamoi",upload.none(),giaController.createGia);
-//thông báo
-adminRouter.post("/themthongbao",upload.none(),thongBaoController.createThongBao);
+adminRouter.get("/layDS_Gia",giaController.getAllGia);
+
 console.log("✅ adminRouter loaded");
 export default adminRouter;

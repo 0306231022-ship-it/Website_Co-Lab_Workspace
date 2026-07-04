@@ -1,7 +1,9 @@
 import * as api from '@/API/API';
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
+import Link from "next/link";
 export default async function AdminLayout({
+
   children,
 }: {
   children: React.ReactNode;
@@ -67,10 +69,13 @@ export default async function AdminLayout({
                     <div>
                         <p className="px-4 text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-2.5">Danh mục & Cấu hình</p>
                         <div className="space-y-1">
-                            <a href="#" className="flex items-center space-x-3 text-slate-400 hover:bg-slate-800/50 hover:text-indigo-400 hover:translate-x-1 px-4 py-2.5 rounded-xl transition-all duration-300 font-medium group">
-                                <i className="fa-solid fa-tags w-5 text-center text-base transition-transform duration-300 group-hover:scale-110"></i>
-                                <span className="text-sm">Quản lý đơn giá</span>
-                            </a>
+                           <Link
+    href="/admin/QLGia"
+    className="flex items-center space-x-3 text-slate-400 hover:bg-slate-800/50 hover:text-indigo-400 hover:translate-x-1 px-4 py-2.5 rounded-xl transition-all duration-300 font-medium group"
+>
+    <i className="fa-solid fa-tags w-5 text-center text-base transition-transform duration-300 group-hover:scale-110"></i>
+    <span className="text-sm">Quản lý đơn giá</span>
+</Link>
                             <a href="#" className="flex items-center space-x-3 text-slate-400 hover:bg-slate-800/50 hover:text-indigo-400 hover:translate-x-1 px-4 py-2.5 rounded-xl transition-all duration-300 font-medium group">
                                 <i className="fa-solid fa-chair w-5 text-center text-base transition-transform duration-300 group-hover:scale-110"></i>
                                 <span className="text-sm">Quản lý danh mục ghế</span>
