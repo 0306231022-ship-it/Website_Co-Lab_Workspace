@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from "react";
 import * as api from '@/API/API';
 import * as ThongBao from '@/FUNCTION/ThongBao';
-
+import * as fun from '@/FUNCTION/function';
 export interface BangGia {
     ID_GIA: number;
     TEN_GIA: string;
@@ -23,13 +23,6 @@ export interface BangGiaResponse {
     data: BangGia[];
     pagination: Pagination;
 }
-
-// Hàm định dạng tiền tệ VNĐ
-const formatCurrency = (amount: string | number): string => {
-    const num = typeof amount === 'string' ? parseFloat(amount) : amount;
-    if (isNaN(num)) return "0 đ";
-    return new Intl.NumberFormat('vi-VN').format(num) + " đ";
-};
 
 export default function QuanLyGia() {
     const [page, setPage] = useState<number>(1);
@@ -172,7 +165,7 @@ export default function QuanLyGia() {
                                             </td>
                                             <td className="py-4 px-6 text-right">
                                                 <span className={`font-black font-mono text-sm ${isActive ? 'text-gray-900' : 'text-gray-400 line-through'}`}>
-                                                    {formatCurrency(item.DON_GIA)}
+                                                    {fun.formatCurrency(item.DON_GIA)}
                                                 </span>
                                             </td>
                                             <td className="py-4 px-6 text-center">
