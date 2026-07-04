@@ -2,7 +2,8 @@
 import { useState, useEffect, useMemo } from "react";
 import * as api from '@/API/API';
 import * as ThongBao from '@/FUNCTION/ThongBao';
-
+import { useModalContext } from "@/context/QuanLiMoal"; // <-- Import context quản lý modal
+import Link from 'next/link'; // 1. Import Link từ Next.js
 export interface BangGia {
     ID_GIA: number;
     TEN_GIA: string;
@@ -37,7 +38,7 @@ export default function QuanLyGia() {
     const [pagination, setPagination] = useState<Pagination | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [searchTerm, setSearchTerm] = useState<string>("");
-
+  const { OpenMoDal } = useModalContext();
     // Gọi API lấy danh sách giá theo page
     useEffect(() => {
         const fetchDanhSachGia = async () => {
@@ -99,10 +100,13 @@ export default function QuanLyGia() {
                 </div>
                 
                 <div>
-                    <button type="button" className="w-full sm:w-auto px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center space-x-1.5">
-                        <i className="fa-solid fa-plus text-[10px]"></i>
-                        <span>Tạo gói giá mới</span>
-                    </button>
+    <Link 
+                href="/Modal/themgiamoi" // 👉 Đường dẫn trang mới của bạn
+                className="w-full sm:w-auto px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer inline-flex items-center justify-center space-x-1.5"
+            >
+                <i className="fa-solid fa-plus text-[10px]"></i>
+                <span>Tạo gói giá mới</span>
+            </Link>
                 </div>
             </div>
 

@@ -5,6 +5,7 @@ import SignUpForm from "@/app/Modal/page";
 import DangKy from "@/app/Modal/DangKy";
 import DangNhap from "@/app/Modal/DangNhap";
 import QuenMatKhau from "@/app/Modal/QuenMatKhau";
+
 const MODAL_REGISTRY = {
     'DangKy' : SignUpForm,
     'formDangKy' : DangKy,
