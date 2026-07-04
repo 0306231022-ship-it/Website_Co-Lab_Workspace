@@ -164,5 +164,16 @@ export default class KhongGianModel {
               throw new Error('Database query failed: ' + error.message);
         }
     }
+    static async kiemtra(value,IDKG){
+        try {
+            const [kt] = await execute(`
+                SELECT*FROM khonggian
+                WHERE ID_KHONG_GIAN = ? AND ID_CHI_NHANH = ?
+                `,[IDKG,value]);
+            return kt.length>0 ? true : false;
+        } catch (error) {
+            throw new Error('Database query failed: ' + error.message);
+        }
+    }
 
 }

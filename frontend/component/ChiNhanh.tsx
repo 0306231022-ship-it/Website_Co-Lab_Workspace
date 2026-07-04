@@ -1,24 +1,9 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-interface objChiNhanh{
-    ID_CHI_NHANH: number;
-    TEN_CHI_NHANH : string;
-    DIA_CHI:string;
-    NGAY_NHAP: Date;
-    NGAY_CAP_NHAT:Date;
-    TRANG_THAI:number;
-    NGAY_BAO_TRI:Date;
-    NGAY_XONG:Date;
-    HINHANH:string;
-    TongLoai1:number;
-    TongLoai2: number;
-}
-interface ChiNhanh{
-    DuLieu:objChiNhanh
-}
-export default function ChiNhanh({DuLieu} : ChiNhanh){
+import { Chinhanh } from "@/interface/ChiNhanh";
 
+export default function ChiNhanh({DuLieu} : Chinhanh){
     return(
         <>
         <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition duration-300 flex flex-col group cursor-pointer">

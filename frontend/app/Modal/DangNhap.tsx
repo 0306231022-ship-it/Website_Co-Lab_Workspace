@@ -22,7 +22,6 @@ export function DangNhap() {
     formdata.append('MatKhau' ,String(MatKhau));
     try {
         const DangNhap = await api.CallAPI(formdata,{url:`/NguoiDung/DangNhap` , PhuongThuc:1});
-        alert(JSON.stringify(DangNhap))
         if(DangNhap.validate){
             setErr(DangNhap.errors);
             return;
@@ -31,6 +30,7 @@ export function DangNhap() {
             ThongBao.ThongBao_Loi(DangNhap.message);
             return;
         }else{
+          console.log(DangNhap.ThongTin_NguoiDung)
             if(DangNhap.ThongTin_NguoiDung===1){
                 router.push('/admin'); 
             }

@@ -3,6 +3,7 @@ import React from 'react';
 import { useParams } from 'next/navigation';
 import * as api from '@/API/API';
 import * as ThongBao from '@/FUNCTION/ThongBao';
+import * as fun from '@/FUNCTION/function';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import QRCode from "react-qr-code";
@@ -93,19 +94,9 @@ function ChiTietLichDat() {
   };
 
 
-const formatTime = (dateString: string) => {
-  return new Date(dateString).toLocaleTimeString("vi-VN", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-};
-  // Hàm format giá tiền dạng đồng (ví dụ: 120000 -> 120.000đ)
-  const formatCurrency = (amount: string | number | undefined) => {
-    if (!amount) return '0đ';
-    const numericAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
-    return new Intl.NumberFormat('vi-VN').format(numericAmount) + 'đ';
-  };
+
+
+  
   const getStatusDetails = (start: string | undefined, end: string | undefined) => {
   if (!start || !end) {
     return {
@@ -223,9 +214,9 @@ const formatTime = (dateString: string) => {
                 <div>
                   <div>
   <p className="text-lg font-bold text-slate-800 flex items-center gap-2">
-    {formatTime(lichDat.ChiTiet_ThoiGian?.KHUNG_BATDAU)} 
+    {fun.formatTime(lichDat.ChiTiet_ThoiGian?.KHUNG_BATDAU)} 
     <i className="fa-solid fa-arrow-right text-slate-300 text-sm"></i> 
-    {formatTime(lichDat.ChiTiet_ThoiGian?.KHUNG_KETTHUC)}
+    {fun.formatTime(lichDat.ChiTiet_ThoiGian?.KHUNG_KETTHUC)}
   </p>
   
   
@@ -309,13 +300,13 @@ const formatTime = (dateString: string) => {
                 <div className="flex justify-between items-center text-slate-600 font-medium">
                   <span>Phí dịch vụ</span>
                   <span className="text-slate-800 font-semibold">
-                    {formatCurrency(lichDat.ChiTiet_HoaDon?.GIA_TIEN)}
+                    {fun.formatCurrency(lichDat.ChiTiet_HoaDon?.GIA_TIEN)}
                   </span>
                 </div>
                 <div className="pt-3 border-t border-slate-200 border-dashed flex justify-between items-baseline">
                   <span className="text-slate-800 font-bold">Tổng thanh toán</span>
                   <span className="text-2xl font-black text-brand-600">
-                    {formatCurrency(lichDat.ChiTiet_HoaDon?.GIA_TIEN)}
+                    {fun.formatCurrency(lichDat.ChiTiet_HoaDon?.GIA_TIEN)}
                   </span>
                 </div>
               </div>

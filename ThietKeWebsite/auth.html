@@ -1,497 +1,201 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="vi">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Co-lab Workspace - Nền tảng Đặt chỗ Thời gian thực</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Inter -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <!-- FontAwesome Icons -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chi tiết không gian - Co-lab Ngọc Hếu Gò Vấp</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+  </style>
+</head>
+<body class="text-gray-800 antialiased p-4 md:p-6">
 
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ["Inter", "sans-serif"],
-            },
-            colors: {
-              brand: {
-                50: "#f0f5ff",
-                100: "#e0e9fe",
-                500: "#2563eb",
-                600: "#1d4ed8",
-                900: "#1e3a8a",
-                dark: "#0f172a",
-              },
-            },
-          },
-        },
-      };
-    </script>
+  <div class="max-w-6xl mx-auto">
+    <nav class="text-xs text-gray-500 mb-4 flex items-center gap-2">
+      <span>Trang chủ</span> <span>&gt;</span>
+      <span>Không gian</span> <span>&gt;</span>
+      <span class="text-gray-800 font-medium">Chi tiết không gian</span>
+    </nav>
 
-    <style>
-      /* Hiệu ứng chuyển dịch đặc biệt giữa Đăng Nhập & Đăng Ký */
-      .container-box.right-panel-active .sign-in-container {
-        transform: translateX(100%);
-        opacity: 0;
-        z-index: 1;
-      }
-      .container-box.right-panel-active .sign-up-container {
-        transform: translateX(100%);
-        opacity: 1;
-        z-index: 5;
-        animation: show 0.6s;
-      }
-      .container-box.right-panel-active .overlay-container {
-        transform: translateX(-100%);
-      }
-      .container-box.right-panel-active .overlay {
-        transform: translateX(50%);
-      }
-      .container-box.right-panel-active .overlay-left {
-        transform: translateX(0);
-      }
-      .container-box.right-panel-active .overlay-right {
-        transform: translateX(20%);
-      }
-
-      @keyframes show {
-        0%,
-        49.99% {
-          opacity: 0;
-          z-index: 1;
-        }
-        50%,
-        100% {
-          opacity: 1;
-          z-index: 5;
-        }
-      }
-
-      /* Tùy biến thanh cuộn mượt */
-      ::-webkit-scrollbar {
-        width: 6px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #f1f1f1;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 4px;
-      }
-    </style>
-  </head>
-  <body
-    class="bg-slate-50 font-sans h-screen flex flex-col justify-center items-center overflow-hidden relative"
-  >
-    <!-- Nền trang trí trừu tượng phía sau -->
-    <div
-      class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0"
-    >
-      <div
-        class="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-blue-200/40 blur-3xl"
-      ></div>
-      <div
-        class="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-indigo-200/40 blur-3xl"
-      ></div>
-    </div>
-
-    <!-- Container Chính -->
-    <div
-      class="container-box bg-white rounded-3xl shadow-2xl relative overflow-hidden w-[950px] max-w-full min-h-[600px] flex z-10 transition-all duration-700 ease-in-out"
-      id="container"
-    >
-      <!-- ================= KHU VỰC ĐĂNG KÝ (SIGN UP) ================= -->
-      <div
-        class="form-container sign-up-container absolute top-0 left-0 w-1/2 h-full transition-all duration-700 ease-in-out z-1 opacity-0"
-      >
-        <form
-          id="signUpForm"
-          class="bg-white flex flex-col items-center justify-center px-12 h-full text-center"
-        >
-          <div class="flex items-center gap-2 mb-4">
-            <span
-              class="bg-brand-500 text-white p-2 rounded-xl flex items-center justify-center w-10 h-10"
-            >
-              <i class="fa-solid fa-square-poll-vertical text-xl"></i>
+    <div class="space-y-6">
+        
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-12 gap-6">
+        <div class="md:col-span-4 rounded-xl overflow-hidden h-48 bg-gray-200">
+          <img src="uploads/KhongGian/os_a.jpg" alt="Space" class="w-full h-full object-cover">
+        </div>
+        <div class="md:col-span-8 flex flex-col justify-between">
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">Khu Vực Tập Trung OpenSpace A</h1>
+            <span class="inline-block bg-emerald-50 text-emerald-600 text-xs font-semibold px-2.5 py-1 rounded-md mt-2">
+              Đang hoạt động
             </span>
-            <span class="font-extrabold text-2xl tracking-tight text-brand-dark"
-              >Co-lab<span class="text-brand-500">.</span></span
-            >
           </div>
-
-          <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">
-            Tạo tài khoản
-          </h1>
-          <p class="text-sm text-slate-500 mt-2 mb-6">
-            Trải nghiệm đặt chỗ thời gian thực trong 30 giây
-          </p>
-
-          <!-- Input Họ Tên -->
-          <div class="w-full mb-3">
-            <div
-              class="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus-within:border-brand-500 focus-within:bg-white transition duration-200"
-            >
-              <i class="fa-solid fa-user text-slate-400 mr-3"></i>
-              <input
-                type="text"
-                id="regName"
-                placeholder="Họ và tên của bạn"
-                class="bg-transparent border-none outline-none w-full text-sm text-slate-700"
-                required
-              />
-            </div>
-          </div>
-
-          <!-- Input Email -->
-          <div class="w-full mb-3">
-            <div
-              class="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus-within:border-brand-500 focus-within:bg-white transition duration-200"
-            >
-              <i class="fa-solid fa-envelope text-slate-400 mr-3"></i>
-              <input
-                type="email"
-                id="regEmail"
-                placeholder="Địa chỉ Email"
-                class="bg-transparent border-none outline-none w-full text-sm text-slate-700"
-                required
-              />
-            </div>
-          </div>
-
-          <!-- Input Mật khẩu -->
-          <div class="w-full mb-4">
-            <div
-              class="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus-within:border-brand-500 focus-within:bg-white transition duration-200"
-            >
-              <i class="fa-solid fa-lock text-slate-400 mr-3"></i>
-              <input
-                type="password"
-                id="regPassword"
-                placeholder="Mật khẩu bảo mật"
-                class="bg-transparent border-none outline-none w-full text-sm text-slate-700"
-                required
-              />
-            </div>
-          </div>
-
-          <!-- Đồng ý điều khoản -->
-          <div class="flex items-start text-left w-full mb-5">
-            <input
-              type="checkbox"
-              id="terms"
-              class="mt-1 mr-2 rounded text-brand-500 focus:ring-brand-500"
-              required
-            />
-            <label for="terms" class="text-xs text-slate-500"
-              >Tôi đồng ý với các điều khoản dịch vụ và chính sách bảo mật của
-              Co-lab.</label
-            >
-          </div>
-
-          <button
-            type="submit"
-            class="w-full bg-brand-500 hover:bg-brand-600 text-white font-semibold py-3 rounded-xl transition-all duration-200 shadow-lg shadow-brand-500/20 active:scale-95"
-          >
-            Đăng Ký Thành Viên
-          </button>
-        </form>
-      </div>
-
-      <!-- ================= KHU VỰC ĐĂNG NHẬP (SIGN IN) ================= -->
-      <div
-        class="form-container sign-in-container absolute top-0 left-0 w-1/2 h-full transition-all duration-700 ease-in-out z-2"
-      >
-        <form
-          id="signInForm"
-          class="bg-white flex flex-col items-center justify-center px-12 h-full text-center"
-        >
-          <div class="flex items-center gap-2 mb-4">
-            <span
-              class="bg-brand-500 text-white p-2 rounded-xl flex items-center justify-center w-10 h-10"
-            >
-              <i class="fa-solid fa-square-poll-vertical text-xl"></i>
-            </span>
-            <span class="font-extrabold text-2xl tracking-tight text-brand-dark"
-              >Co-lab<span class="text-brand-500">.</span></span
-            >
-          </div>
-
-          <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">
-            Chào mừng quay lại!
-          </h1>
-          <p class="text-sm text-slate-500 mt-2 mb-8">
-            Hãy đăng nhập để quản lý và đặt không gian của bạn
-          </p>
-
-          <!-- Input Email -->
-          <div class="w-full mb-3">
-            <div
-              class="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus-within:border-brand-500 focus-within:bg-white transition duration-200"
-            >
-              <i class="fa-solid fa-envelope text-slate-400 mr-3"></i>
-              <input
-                type="email"
-                id="loginEmail"
-                placeholder="Địa chỉ Email"
-                class="bg-transparent border-none outline-none w-full text-sm text-slate-700"
-                required
-              />
-            </div>
-          </div>
-
-          <!-- Input Mật khẩu -->
-          <div class="w-full mb-3">
-            <div
-              class="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus-within:border-brand-500 focus-within:bg-white transition duration-200"
-            >
-              <i class="fa-solid fa-lock text-slate-400 mr-3"></i>
-              <input
-                type="password"
-                id="loginPassword"
-                placeholder="Mật khẩu"
-                class="bg-transparent border-none outline-none w-full text-sm text-slate-700"
-                required
-              />
-            </div>
-          </div>
-
-          <!-- Quên mật khẩu -->
-          <div class="w-full text-right mb-6">
-            <a
-              href="#"
-              class="text-xs text-brand-500 hover:text-brand-600 hover:underline font-medium"
-              >Quên mật khẩu?</a
-            >
-          </div>
-
-          <button
-            type="submit"
-            class="w-full bg-brand-500 hover:bg-brand-600 text-white font-semibold py-3 rounded-xl transition-all duration-200 shadow-lg shadow-brand-500/20 active:scale-95"
-          >
-            Đăng Nhập Ngay
-          </button>
-        </form>
-      </div>
-
-      <!-- ================= KHU VỰC CHUYỂN ĐỔI (OVERLAY) ================= -->
-      <div
-        class="overlay-container absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-transform duration-700 ease-in-out z-[100]"
-      >
-        <div
-          class="overlay bg-gradient-to-tr from-brand-dark via-brand-900 to-brand-600 text-white relative -left-full h-full w-[200%] transform translate-x-0 transition-transform duration-700 ease-in-out"
-        >
-          <!-- Overlay Bên Trái (Hiển thị khi ở chế độ Đăng ký) -->
-          <div
-            class="overlay-panel overlay-left absolute flex flex-col items-center justify-center px-10 text-center top-0 h-full w-1/2 transform transition-transform duration-700 ease-in-out"
-          >
-            <h2 class="text-2xl font-bold mb-3">Bạn đã có tài khoản Co-lab?</h2>
-            <p
-              class="text-sm text-blue-100 font-light leading-relaxed mb-8 max-w-xs"
-            >
-              Hãy đăng nhập để tiếp tục quản lý các đặt chỗ hiện tại và kết nối
-              với đồng nghiệp của bạn.
+          <div class="space-y-2 mt-4 text-sm text-gray-600">
+            <p class="flex items-center gap-2">
+              📍 <span class="font-medium text-gray-800">Co-lab Ngọc Hếu Gò Vấp</span>
             </p>
-            <button
-              class="bg-transparent border-2 border-white/60 hover:border-white text-white hover:bg-white/10 font-semibold px-8 py-3 rounded-xl transition-all duration-200 active:scale-95"
-              id="signInBtn"
-            >
-              Đăng Nhập
-            </button>
-          </div>
-
-          <!-- Overlay Bên Phải (Hiển thị khi ở chế độ Đăng nhập) -->
-          <div
-            class="overlay-panel overlay-right absolute flex flex-col items-center justify-center px-10 text-center top-0 right-0 h-full w-1/2 transform transition-transform duration-700 ease-in-out"
-          >
-            <h2 class="text-2xl font-bold mb-3">Xin chào, Thành viên mới!</h2>
-            <p
-              class="text-sm text-blue-100 font-light leading-relaxed mb-8 max-w-xs"
-            >
-              Gia nhập cộng đồng Co-lab ngay hôm nay để nhận thông báo thời gian
-              thực về vị trí trống tốt nhất!
+            <p class="flex items-center gap-2 text-gray-500">
+              124/45A Phạm Văn Đồng, Gò Vấp, TP.HCM
             </p>
-            <button
-              class="bg-transparent border-2 border-white/60 hover:border-white text-white hover:bg-white/10 font-semibold px-8 py-3 rounded-xl transition-all duration-200 active:scale-95"
-              id="signUpBtn"
-            >
-              Đăng Ký
-            </button>
-
-            <!-- Real-time Status Card (Ghi điểm đồ án tốt nghiệp về tính Real-time) -->
-            <div
-              class="mt-10 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 w-72 text-left shadow-lg"
-            >
-              <div class="flex items-center justify-between mb-2">
-                <span
-                  class="text-xs uppercase tracking-wider font-bold text-blue-200"
-                  >Trạng thái hệ thống</span
-                >
-                <span class="flex h-2 w-2 relative">
-                  <span
-                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"
-                  ></span>
-                  <span
-                    class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"
-                  ></span>
-                </span>
-              </div>
-              <div class="text-xs text-blue-100 space-y-1">
-                <p class="flex justify-between">
-                  <span>Bàn làm việc trống:</span>
-                  <span
-                    class="font-bold text-white text-right"
-                    id="liveDeskCount"
-                    >24</span
-                  >
-                </p>
-                <p class="flex justify-between">
-                  <span>Người dùng trực tuyến:</span>
-                  <span
-                    class="font-bold text-white text-right"
-                    id="liveUserCount"
-                    >156</span
-                  >
-                </p>
-                <p class="flex justify-between">
-                  <span>Phiên đặt phòng gần nhất:</span>
-                  <span class="font-bold text-emerald-300 text-right"
-                    >Mới đây (3 phút trước)</span
-                  >
-                </p>
-              </div>
-            </div>
           </div>
         </div>
       </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-3">
+          <div class="w-10 h-10 bg-blue-50 text-blue-500 rounded-lg flex items-center justify-center text-lg">🏢</div>
+          <div>
+            <p class="text-[11px] text-gray-400 font-medium uppercase">Loại không gian</p>
+            <p class="text-sm font-bold text-gray-800">Open Space</p>
+          </div>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-3">
+          <div class="w-10 h-10 bg-emerald-50 text-emerald-500 rounded-lg flex items-center justify-center text-lg">🪑</div>
+          <div>
+            <p class="text-[11px] text-gray-400 font-medium uppercase">Số ghế</p>
+            <p class="text-sm font-bold text-gray-800">4 ghế</p>
+          </div>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-3">
+          <div class="w-10 h-10 bg-purple-50 text-purple-500 rounded-lg flex items-center justify-center text-lg">📦</div>
+          <div>
+            <p class="text-[11px] text-gray-400 font-medium uppercase">Thiết bị</p>
+            <p class="text-sm font-bold text-gray-800">5 thiết bị</p>
+          </div>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-3">
+          <div class="w-10 h-10 bg-orange-50 text-orange-500 rounded-lg flex items-center justify-center text-lg">📅</div>
+          <div>
+            <p class="text-[11px] text-gray-400 font-medium uppercase">Ngày tạo</p>
+            <p class="text-sm font-bold text-gray-800">24/06/2026</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+        
+        <div class="md:col-span-5 bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="mb-2">
+              <h3 class="text-sm font-bold text-gray-800">Thiết bị trong không gian (5)</h3>
+              <p class="text-[11px] text-gray-400">Danh sách thiết bị hỗ trợ tại khu vực</p>
+            </div>
+            
+            <div class="p-3 bg-gray-50/50 rounded-xl border border-gray-100 flex items-center gap-3">
+              <div class="w-11 h-11 bg-white rounded-lg flex items-center justify-center text-lg border shadow-sm">🖨️</div>
+              <div class="flex-1">
+                <p class="text-xs font-semibold text-gray-800 leading-tight">Máy in laser đa năng HP</p>
+                <p class="text-[10px] text-gray-400 mt-0.5">Số lượng: <span class="font-bold text-gray-600">1</span></p>
+              </div>
+            </div>
+
+            <div class="p-3 bg-gray-50/50 rounded-xl border border-gray-100 flex items-center gap-3">
+              <div class="w-11 h-11 bg-white rounded-lg flex items-center justify-center text-lg border shadow-sm">🖥️</div>
+              <div class="flex-1">
+                <p class="text-xs font-semibold text-gray-800 leading-tight">Màn hình Dell UltraSharp 27 inch</p>
+                <p class="text-[10px] text-gray-400 mt-0.5">Số lượng: <span class="font-bold text-gray-600">1</span></p>
+              </div>
+            </div>
+
+            <div class="p-3 bg-gray-50/50 rounded-xl border border-gray-100 flex items-center gap-3">
+              <div class="w-11 h-11 bg-white rounded-lg flex items-center justify-center text-lg border shadow-sm">📶</div>
+              <div class="flex-1">
+                <p class="text-xs font-semibold text-gray-800 leading-tight">Bộ phát Wifi 6 Aruba tốc độ cao</p>
+                <p class="text-[10px] text-gray-400 mt-0.5">Số lượng: <span class="font-bold text-gray-600">1</span></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-between items-center pt-4 mt-4 border-t border-gray-100 text-[11px]">
+            <span class="text-gray-400">Hiển thị 1-3 / 5</span>
+            <div class="inline-flex gap-1">
+              <button class="w-6 h-6 rounded border border-gray-200 text-gray-400 bg-gray-50 flex items-center justify-center cursor-not-allowed" disabled>◀</button>
+              <button class="w-6 h-6 rounded bg-emerald-600 text-white font-medium flex items-center justify-center">1</button>
+              <button class="w-6 h-6 rounded border border-gray-200 text-gray-600 hover:bg-gray-50 flex items-center justify-center transition">2</button>
+              <button class="w-6 h-6 rounded border border-gray-200 text-gray-600 hover:bg-gray-50 flex items-center justify-center transition">▶</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="md:col-span-7 bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
+          <div>
+            <div class="flex flex-wrap justify-between items-center gap-2 mb-6">
+              <div>
+                <h3 class="text-sm font-bold text-gray-800">Sơ đồ vị trí chỗ ngồi</h3>
+                <p class="text-[11px] text-gray-400">Nhấp vào vị trí ghế trống để tiến hành lựa chọn</p>
+              </div>
+              <div class="flex gap-3 text-[10px] text-gray-500 font-medium">
+                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-emerald-50 border border-emerald-400"></span> Trống</span>
+                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-red-50 border border-red-300"></span> Đang có người</span>
+                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-amber-400"></span> Đang chọn</span>
+              </div>
+            </div>
+
+            <div class="bg-gray-50 p-6 rounded-xl border border-dashed border-gray-200 grid grid-cols-2 gap-4 max-w-md mx-auto">
+              
+              <button class="bg-white border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50/30 rounded-xl p-3 flex flex-col items-center justify-center shadow-sm transition group">
+                <span class="text-gray-400 group-hover:text-emerald-500 text-xl transition">🪑</span>
+                <span class="text-xs font-bold text-gray-700 mt-1">Ghế A-01</span>
+                <span class="text-[9px] px-1.5 py-0.5 bg-emerald-50 text-emerald-600 rounded mt-1 font-medium">Còn trống</span>
+              </button>
+
+              <div class="bg-red-50/60 border border-red-200 rounded-xl p-3 flex flex-col items-center justify-center shadow-sm cursor-not-allowed relative overflow-hidden">
+                <span class="text-red-400 text-xl">👤</span>
+                <span class="text-xs font-bold text-gray-400 mt-1 line-through">Ghế A-02</span>
+                <span class="text-[9px] px-1.5 py-0.5 bg-red-100 text-red-600 rounded mt-1 font-semibold tracking-wide truncate max-w-full">
+                  🔴 Nguyễn An
+                </span>
+              </div>
+
+              <button class="bg-amber-50 border-2 border-amber-500 rounded-xl p-3 flex flex-col items-center justify-center shadow-md ring-4 ring-amber-400/10 relative">
+                <span class="text-amber-500 text-xl">🪑</span>
+                <span class="text-xs font-bold text-amber-900 mt-1">Ghế E-01</span>
+                <span class="text-[9px] px-1.5 py-0.5 bg-amber-500 text-white rounded mt-1 font-bold">Bạn chọn</span>
+              </button>
+
+              <div class="bg-red-50/60 border border-red-200 rounded-xl p-3 flex flex-col items-center justify-center shadow-sm cursor-not-allowed">
+                <span class="text-red-400 text-xl">👤</span>
+                <span class="text-xs font-bold text-gray-400 mt-1 line-through">Ghế E-02</span>
+                <span class="text-[9px] px-1.5 py-0.5 bg-red-100 text-red-600 rounded mt-1 font-semibold">
+                  🔴 Trần Bình
+                </span>
+              </div>
+
+            </div>
+
+            <div class="mt-6 p-3 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl flex justify-between items-center text-xs font-medium max-w-md mx-auto">
+              <div class="flex items-center gap-2">
+                <span>⚡ Chỗ ngồi đang chọn: <span class="font-bold underline">Ghế E-01</span></span>
+              </div>
+              <button class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1 rounded-lg font-bold transition shadow-sm">
+                Xác nhận vị trí
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+        <div class="bg-emerald-50/50 border border-emerald-100 p-4 rounded-xl text-xs text-gray-600 space-y-1.5">
+          <p class="font-bold text-emerald-800 flex items-center gap-1.5">💡 Lưu ý sử dụng không gian</p>
+          <p class="pl-2">• Vui lòng ngồi đúng vị trí ghế đã chọn để tránh ảnh hưởng tới thành viên khác.</p>
+          <p class="pl-2">• Giữ gìn vệ sinh chung tại khu vực OpenSpace, không đem đồ ăn nặng mùi vào phòng.</p>
+        </div>
+        <div class="bg-white border border-gray-100 p-4 rounded-xl flex items-center gap-4">
+          <div class="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-lg border">🎧</div>
+          <div>
+            <p class="text-xs font-bold text-gray-800">Gặp sự cố về chỗ ngồi?</p>
+            <p class="text-[11px] text-gray-400 mt-0.5">Liên hệ quản lý chi nhánh hoặc gọi hotline để đổi vị trí</p>
+            <p class="text-sm font-bold text-emerald-600 mt-1">📞 028 7109 8888</p>
+          </div>
+        </div>
+      </div>
+
     </div>
+  </div>
 
-    <!-- Hệ thống Toast Notification thay thế Alert -->
-    <div
-      id="toastContainer"
-      class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"
-    ></div>
-
-    <!-- Xử lý logic và tương tác giả lập -->
-    <script>
-      const signUpBtn = document.getElementById("signUpBtn");
-      const signInBtn = document.getElementById("signInBtn");
-      const container = document.getElementById("container");
-
-      const signUpForm = document.getElementById("signUpForm");
-      const signInForm = document.getElementById("signInForm");
-
-      // Chuyển đổi tab Đăng nhập - Đăng ký
-      signUpBtn.addEventListener("click", () => {
-        container.classList.add("right-panel-active");
-      });
-
-      signInBtn.addEventListener("click", () => {
-        container.classList.remove("right-panel-active");
-      });
-
-      // Hàm hiển thị Toast Custom chất lượng cao
-      function showToast(message, type = "success") {
-        const container = document.getElementById("toastContainer");
-        const toast = document.createElement("div");
-
-        let bgClass = "bg-emerald-500";
-        let iconClass = "fa-check-circle";
-        if (type === "error") {
-          bgClass = "bg-rose-500";
-          iconClass = "fa-times-circle";
-        }
-
-        toast.className = `${bgClass} text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 transition-all duration-300 transform translate-y-2 opacity-0 text-sm font-medium max-w-sm`;
-        toast.innerHTML = `
-                <i class="fa-solid ${iconClass} text-lg"></i>
-                <span>${message}</span>
-            `;
-
-        container.appendChild(toast);
-
-        // Trigger animation vào
-        setTimeout(() => {
-          toast.classList.remove("translate-y-2", "opacity-0");
-        }, 10);
-
-        // Tự tắt sau 3.5 giây
-        setTimeout(() => {
-          toast.classList.add("opacity-0", "translate-y-[-10px]");
-          setTimeout(() => {
-            toast.remove();
-          }, 300);
-        }, 3500);
-      }
-
-      // Đăng nhập giả lập
-      signInForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const email = document.getElementById("loginEmail").value;
-        showToast(
-          `Chào mừng trở lại! Hệ thống đang xác thực tài khoản ${email}...`,
-          "success",
-        );
-      });
-
-      // Đăng ký giả lập
-      signUpForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const name = document.getElementById("regName").value;
-        showToast(
-          `Tạo tài khoản cho ${name} thành công! Đang thiết lập cấu hình...`,
-          "success",
-        );
-      });
-
-      // Giả lập trạng thái thời gian thực nhảy số (Real-time Simulation)
-      setInterval(() => {
-        const deskCountEl = document.getElementById("liveDeskCount");
-        const userCountEl = document.getElementById("liveUserCount");
-
-        // Tăng giảm ngẫu nhiên để mô phỏng hoạt động real-time thực tế
-        let currentDesks = parseInt(deskCountEl.innerText);
-        let currentUsers = parseInt(userCountEl.innerText);
-
-        currentDesks += Math.floor(Math.random() * 3) - 1; // dao động từ -1 đến +1
-        currentUsers += Math.floor(Math.random() * 5) - 2; // dao động từ -2 đến +2
-
-        // Đảm bảo không âm và có giới hạn hợp lý
-        if (currentDesks < 5) currentDesks = 8;
-        if (currentDesks > 40) currentDesks = 30;
-        if (currentUsers < 100) currentUsers = 120;
-        if (currentUsers > 250) currentUsers = 180;
-
-        deskCountEl.innerText = currentDesks;
-        userCountEl.innerText = currentUsers;
-      }, 3000);
-    </script>
-  </body>
+</body>
 </html>
-
-<!-- ---
-
-### 💡 Hướng dẫn thầy dành riêng cho Đồ Án Tốt Nghiệp của em:
-
-Khi bước vào buổi bảo vệ đồ án trước hội đồng giám khảo, giao diện này sẽ là điểm cộng rất lớn nếu em giải thích rõ được các cơ chế sau:
-
-1. **Ý tưởng thiết kế (UX/UI):** Em sử dụng lối thiết kế **Single-Page Switching Overlay** (Chuyển đổi một trang có lớp phủ trượt). Thiết kế này giúp hạn chế thời gian tải trang (page reload), mang lại trải nghiệm mượt mà giống như các ứng dụng native app.
-2. **Tại sao lại có phần Real-time Mockup trên trang Đăng nhập?**
-   * Trong một ứng dụng thời gian thực như *Co-lab Workspace*, việc hiển thị các thông số động (như số bàn trống, số người online) ngay bên ngoài màn hình chờ giúp kích thích tâm lý đăng ký của người dùng mới, chứng minh hệ thống đang thực sự hoạt động sôi nổi và trực quan (Live state).
-   * Về mặt công nghệ (khi làm Backend), em sẽ dùng **Socket.io** (trong Node.js) để broadcast trạng thái này từ Server đến toàn bộ Client, bao gồm cả trang chưa cần login này.
-
-### Phân tích kiến trúc Backend em cần chuẩn bị tiếp theo:
-* **Hệ cơ sở dữ liệu (Database):** Cần lưu cấu trúc phân vùng bàn làm việc (Desk/Seat Layout). Em nên phân chia thành các phòng (Rooms), phân khu (Zone), và các Bàn (Desk) có tọa độ X-Y để sau này vẽ sơ đồ dạng SVG tương tác kéo thả.
-* **Tích hợp Token:** Khi đăng nhập thành công ở Node.js Backend, hãy sinh ra **JWT (JSON Web Token)** để trả về Frontend và lưu vào `localStorage` hoặc `HTTP-only Cookie`, phục vụ cho việc authenticate khi kết nối WebSocket (Socket.io) đặt chỗ sau này.
-
-Em hãy thử chạy file `auth_page.html` này xem độ mượt mà của hiệu ứng trượt nhé. Nếu muốn chuyển giao diện này thành mã nguồn Component của **React.js (JSX)** với quản lý trạng thái bằng `useState` để bắt đầu dựng khung Frontend, hãy báo cho thầy hướng dẫn tiếp! -->

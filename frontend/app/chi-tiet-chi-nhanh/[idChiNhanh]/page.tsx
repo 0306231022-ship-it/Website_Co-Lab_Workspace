@@ -4,48 +4,15 @@ import * as api from '@/API/API';
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-
-export interface ChiNhanh {
-    ID_CHI_NHANH: number;
-    TEN_CHI_NHANH: string;
-    DIA_CHI: string;
-    NGAY_NHAP: string;
-    NGAY_CAP_NHAT: string;
-    TRANG_THAI: number; 
-    NGAY_BAO_TRI: string | null;
-    NGAY_XONG: string | null;
-    HINHANH: string;
-}
-
-export interface KhongGian {
-    ID_KHONG_GIAN: number;
-    TEN_KHONG_GIAN: string;
-    LOAI_KHONG_GIAN: number; 
-    TRANG_THAI: number;      
-    ID_GIA: number;
-    NGAY_TAO: string;
-    NGAY_CAP_NHAT: string;
-    NGAY_BAO_TRI: string | null;
-    NGAY_XONG: string | null;
-    ID_CHI_NHANH: number;
-    HINHANH: string;
-}
-
-export interface ChiTietKhongGian {
-    DanhSach: KhongGian[];
-    TongDanhSach: number;
-}
-
-export interface ChiTietChiNhanhResponse {
-    chitiet1: ChiNhanh[];
-    chitiet2: ChiTietKhongGian;
-}
+import { objChiNhanh } from '@/interface/ChiNhanh';
+import { ChiTietKhongGian } from '@/interface/KhongGian';
+import Link from 'next/link';
 
 function ChiTietChiNhanh() {
-    const { id } = useParams();
+    const { idChiNhanh } = useParams();
     const router = useRouter();
     
-    const [chitiet1, setChiTiet1] = useState<ChiNhanh[] | null>(null);
+    const [chitiet1, setChiTiet1] = useState< objChiNhanh | null>(null);
     const [chitiet2, setChiTiet2] = useState<ChiTietKhongGian | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
 
@@ -57,7 +24,7 @@ function ChiTietChiNhanh() {
     useEffect(() => {
         const fetchChiNhanh = async () => {
             try {
-                const response = await api.CallAPI(undefined, { url: `/admin/laychitiet?IDCN=${id}`, PhuongThuc: 2 });
+                const response = await api.CallAPI(undefined, { url: `/admin/laychitiet?IDCN=${idChiNhanh}`, PhuongThuc: 2 });
                 if (response.success) {
                     setChiTiet1(response.chitiet1);
                     setChiTiet2(response.chitiet2); 
@@ -71,14 +38,22 @@ function ChiTietChiNhanh() {
                 setLoading(false);
             }
         };
-        if (id) fetchChiNhanh();
-    }, [id]);
-    const fetchKhongGian = async (HanhDong: 'next' | 'prev') => {
-        const trangMoi = HanhDong === 'next' ? page + 1 : Math.max(page - 1, 1);
+        if (idChiNhanh) fetchChiNhanh();
+    }, [idChiNhanh]);
+
+    // Hàm gọi API lấy danh sách không gian (Phân trang + Bộ lọc)
+    const fetchKhongGian = async (HanhDong: 'next' | 'prev' | 'search', trangChiDinh?: number) => {
+        let trangMoi = page;
+        if (HanhDong === 'next') trangMoi = page + 1;
+        else if (HanhDong === 'prev') trangMoi = Math.max(page - 1, 1);
+        else if (HanhDong === 'search') trangMoi = 1; // Tìm kiếm thì reset về trang 1
+        if (trangChiDinh) trangMoi = trangChiDinh;
+        
         setPage(trangMoi);
+
         try {
             const response = await api.CallAPI(undefined, { 
-                url: `/admin/laydanhsachkhonggian?IDCN=${id}&page=${trangMoi}&limit=${limit}&TimKiem=${searchFilter}&Loai=${typeFilter}`, 
+                url: `/admin/laydanhsachkhonggian?IDCN=${idChiNhanh}&page=${trangMoi}&limit=${limit}&TimKiem=${searchFilter}&Loai=${typeFilter}`, 
                 PhuongThuc: 2 
             });
             if (response.success) {
@@ -94,22 +69,11 @@ function ChiTietChiNhanh() {
             ThongBao.ThongBao_CanhBao('Lỗi khi tải thông tin không gian');
         }
     };
-    const TimKiem = async()=>{
-        try {
-            const Timkiem = await api.CallAPI(undefined,{url:`/admin/TimKiem_khonggian?IDCN=${id}&TimKiem=${searchFilter}&Loai=${typeFilter}`, PhuongThuc:2})
-             if (Timkiem.success) {
-                setChiTiet2({
-                    DanhSach: Timkiem.danhsach || [],
-                    TongDanhSach: Timkiem.TongDanhSach || 0
-                });
-            } else {
-                ThongBao.ThongBao_CanhBao('Không tìm thấy thông tin không gian hoặc dữ liệu trống');
-            }
-        } catch (error) {
-             console.error("Lỗi khi tải thông tin không gian:", error);
-            ThongBao.ThongBao_CanhBao('Lỗi khi tải thông tin không gian');
-        }
-    }
+
+    // Hàm Tìm kiếm riêng biệt (gọi lại fetchKhongGian với hành động 'search' để reset trang)
+    const TimKiem = () => {
+        fetchKhongGian('search');
+    };
 
     if (loading) {
         return (
@@ -120,7 +84,7 @@ function ChiTietChiNhanh() {
         );
     }
 
-    const thongTinChiNhanh = chitiet1?.[0] || {
+    const thongTinChiNhanh = chitiet1 || {
         ID_CHI_NHANH: 0,
         TEN_CHI_NHANH: "Không rõ chi nhánh",
         DIA_CHI: "Chưa có địa chỉ",
@@ -128,6 +92,7 @@ function ChiTietChiNhanh() {
         HINHANH: ""
     };
 
+    // Định nghĩa an toàn biến danhSachKhongGian từ dữ liệu state chitiet2
     const danhSachKhongGian = chitiet2?.DanhSach || [];
     const tongSoKhongGian = chitiet2?.TongDanhSach || 0;
 
@@ -197,43 +162,41 @@ function ChiTietChiNhanh() {
                         
                         {/* Bộ lọc */}
                         <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto shrink-0">
-                    
-    <div className="relative w-full sm:w-52">
-        <i className="fa-solid fa-sliders absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-        <select 
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            className="w-full bg-slate-50/80 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold rounded-xl pl-9 pr-8 py-3 focus:outline-none focus:border-slate-400 appearance-none cursor-pointer transition-all"
-        >
-            <option value="all">Tất cả loại không gian</option>
-            <option value="1">Không gian chung</option>
-            <option value="2">Không gian họp</option>
-        </select>
-        <i className="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] pointer-events-none"></i>
-    </div>
-    
-    {/* Ô nhập và Nút tìm kiếm gộp nhóm */}
-    <div className="flex items-center gap-2 w-full sm:w-80">
-        <div className="relative flex-1">
-            <input 
-                type="text" 
-                value={searchFilter}
-                onChange={(e) => setSearchFilter(e.target.value)}
-                placeholder="Tìm tên phòng, không gian..." 
-                className="w-full bg-slate-50/80 border border-slate-200 text-slate-800 text-xs font-medium rounded-xl pl-4 pr-4 py-3 focus:outline-none focus:border-slate-400 placeholder-slate-400 transition-all" 
-            />
-        </div>
-        
-        {/* ✨ ĐÃ THÊM: Nút Tìm kiếm thiết kế đồng bộ UI */}
-        <button
-            onClick={() => {TimKiem()}}
-            className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-4 py-3 rounded-xl transition-all active:scale-95 shadow-sm shrink-0 flex items-center gap-1.5 h-[40px]"
-        >
-            <i className="fa-solid fa-magnifying-glass text-[11px]"></i>
-            <span>Tìm kiếm</span>
-        </button>
-    </div>
-
+                            <div className="relative w-full sm:w-52">
+                                <i className="fa-solid fa-sliders absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                                <select 
+                                    value={typeFilter}
+                                    onChange={(e) => setTypeFilter(e.target.value)}
+                                    className="w-full bg-slate-50/80 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold rounded-xl pl-9 pr-8 py-3 focus:outline-none focus:border-slate-400 appearance-none cursor-pointer transition-all"
+                                >
+                                    <option value="all">Tất cả loại không gian</option>
+                                    <option value="1">Không gian chung</option>
+                                    <option value="2">Không gian họp</option>
+                                </select>
+                                <i className="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] pointer-events-none"></i>
+                            </div>
+                            
+                            {/* Ô nhập và Nút tìm kiếm */}
+                            <div className="flex items-center gap-2 w-full sm:w-80">
+                                <div className="relative flex-1">
+                                    <input 
+                                        type="text" 
+                                        value={searchFilter}
+                                        onChange={(e) => setSearchFilter(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && TimKiem()} // Gõ enter tự tìm
+                                        placeholder="Tìm tên phòng, không gian..." 
+                                        className="w-full bg-slate-50/80 border border-slate-200 text-slate-800 text-xs font-medium rounded-xl pl-4 pr-4 py-3 focus:outline-none focus:border-slate-400 placeholder-slate-400 transition-all" 
+                                    />
+                                </div>
+                                
+                                <button
+                                    onClick={TimKiem}
+                                    className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-4 py-3 rounded-xl transition-all active:scale-95 shadow-sm shrink-0 flex items-center gap-1.5 h-[40px]"
+                                >
+                                    <i className="fa-solid fa-magnifying-glass text-[11px]"></i>
+                                    <span>Tìm kiếm</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -258,7 +221,7 @@ function ChiTietChiNhanh() {
                                         <div className="w-full h-44 relative bg-slate-100 overflow-hidden">
                                             {space.HINHANH && (
                                                 <Image
-                                                    src={`http://localhost:3001/${space.HINHANH}`} // ✅ ĐÃ SỬA: Lấy đúng ảnh của không gian thay vì ảnh chi nhánh
+                                                    src={`http://localhost:3001/${space.HINHANH}`}
                                                     alt={space.TEN_KHONG_GIAN}
                                                     width={500}
                                                     height={300}
@@ -320,13 +283,17 @@ function ChiTietChiNhanh() {
                                                             Tạm đóng
                                                         </button>
                                                     ) : isLoaiChung ? (
-                                                        <button className="bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white border border-blue-100 font-bold py-2 px-3 rounded-xl text-xs transition-all duration-300">
-                                                            Xem sơ đồ
-                                                        </button>
+                                                        <Link
+                                                            href={`/chi-tiet-chi-nhanh/${idChiNhanh}/chi-tiet-khong-gian/${space.ID_KHONG_GIAN}`}
+                                                            className="bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white border border-blue-100 font-bold py-2 px-3 rounded-xl text-xs transition-all duration-300">
+                                                            Xem chi tiết
+                                                        </Link>
                                                     ) : (
-                                                        <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-xl text-xs transition-all duration-300">
-                                                            Đặt phòng
-                                                        </button>
+                                                        <Link
+                                                            href={`/chi-tiet-chi-nhanh/${idChiNhanh}/chi-tiet-khong-gian/${space.ID_KHONG_GIAN}`}
+                                                            className="bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white border border-blue-100 font-bold py-2 px-3 rounded-xl text-xs transition-all duration-300">
+                                                            Xem chi tiết
+                                                        </Link>
                                                     )}
                                                 </div>
                                             </div>

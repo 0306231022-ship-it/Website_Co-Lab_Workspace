@@ -3,20 +3,7 @@ import React, { useState, useEffect } from "react";
 import * as api from "@/API/API";
 import * as ThongBao from "@/FUNCTION/ThongBao";
 import ChiNhanh from "@/component/ChiNhanh";
-
-interface objChiNhanh {
-  ID_CHI_NHANH: number;
-  TEN_CHI_NHANH: string;
-  DIA_CHI: string;
-  NGAY_NHAP: Date;
-  NGAY_CAP_NHAT: Date;
-  TRANG_THAI: number;
-  NGAY_BAO_TRI: Date;
-  NGAY_XONG: Date;
-  HINHANH: string;
-  TongLoai1:number;
-    TongLoai2: number;
-}
+import { objChiNhanh } from "@/interface/ChiNhanh";
 
 export default function HomePage() {
   const [loading, setLoading] = useState<boolean>(true); 
@@ -149,7 +136,7 @@ export default function HomePage() {
               Đang hiển thị <span className="font-bold text-slate-800">{(page - 1) * 3 + 1}</span> đến <span className="font-bold text-slate-800">{Math.min(page * 3, TongDanhSach)}</span> trong tổng số <span className="font-bold text-slate-800">{TongDanhSach}</span> chi nhánh
             </p>
             <nav className="flex items-center gap-1 w-full sm:w-auto justify-center">
-              <button onClick={() => setpage(p => p - 1)} disabled={page == 1} className="w-10 h-10 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed">
+              <button onClick={() => setpage(p => p - 1)} disabled={page === 1} className="w-10 h-10 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed">
                 <i className="fa-solid fa-chevron-left text-xs"></i>
               </button>
               <span className="w-10 h-10 flex items-center justify-center text-slate-400">{page}</span>

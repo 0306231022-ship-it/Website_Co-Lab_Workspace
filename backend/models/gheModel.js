@@ -10,7 +10,7 @@ export default class GheModel {
             SELECT * FROM ghe 
             WHERE ID_KHONG_GIAN =?    
             `,[idkhongigan]);
-            return rows; // Trả về thẳng mảng danh sách ghế
+            return rows; 
         } catch (error) {
             console.error(" Lỗi Database trong GheModel.getAll:", error.message);
             throw new Error("Không thể kết nối đến cơ sở dữ liệu để lấy danh sách ghế!");

@@ -325,7 +325,7 @@ if (!errors.isEmpty()) {
         }
         return res.status(200).json({
             success:true,
-            chitiet1:chitiet1,
+            chitiet1:chitiet1[0],
             chitiet2:chitiet2
         })
         } catch (error) {

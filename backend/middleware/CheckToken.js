@@ -2,7 +2,6 @@ import jwt from 'jsonwebtoken';
 
 export const verifyToken = (req, res, next) => {
     const loaiNguoiDung = parseInt(req.body.LoaiND);
-    console.log(loaiNguoiDung);
     const token = loaiNguoiDung===1 ? req.cookies.token_admin : req.cookies.token;
     if (!token) {
         return res.status(401).json({ 

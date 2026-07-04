@@ -2,6 +2,7 @@
 import ChiNhanhModel from '../models/ChiNhanhModel.js';
 import ChiTietThietBiModel from '../models/ChiTiet_ThietBiModel.js';
 import KhongGianModel from '../models/KhongGianModel.js';
+import GheModel from '../models/gheModel.js';
 import { body, query, validationResult } from 'express-validator';
 export default class KhongGianController{
     static async DanhSach_KhongGian(req, res) {
@@ -271,7 +272,8 @@ export default class KhongGianController{
     }
     static async ChiTiet_KhongGian(req, res) {
         const IDKG = req.query.IDKG;
-        const DanhSachGhe= null;
+        const IDCN = req.query.IDCN;
+        let DanhSachGhe= null;
         try {
             await Promise.all([
                 query('IDKG')
@@ -282,12 +284,23 @@ export default class KhongGianController{
                          if (!kiemtra) throw new Error('ID không gian không tồn tại!');
                         return true;
                     })
-                    .run(req) 
+                    .run(req),
+                query('IDCN')
+                    .notEmpty().withMessage('id ghế không được bỏ trống!')
+                    .isInt().withMessage('ID ghế phải là số nguyên')
+                    .custom(async (value) => {
+                        const check = await ChiNhanhModel.kiemtraid(value);
+                        if (!check) throw new Error('ID không tồn tại!');
+                        const check2 = await KhongGianModel.kiemtra(value,IDKG);
+                        if(!check2) throw new Error('ID này không thuộc chi nhánh!');
+                        return true;
+                    })
+                    .run(req),
             ])
             const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({
-                success: false,
+                validate: true,
                 message: 'Dữ liệu không hợp lệ!',
                 errors: errors.array().map(err => err.msg)
             });
@@ -295,12 +308,29 @@ export default class KhongGianController{
             const [ThongTin_ChiNhanh,thongTin_KhongGian, DanhSach_ThietBi] = await Promise.all([
                 KhongGianModel.TruyVan_ChiNhanh(IDKG),
                 KhongGianModel.LayChiTiet(IDKG),
-                ChiTietThietBiModel.DanhSachThietBi_Khonggian(IDKG, 10, 0)
+                ChiTietThietBiModel.DanhSachThietBi_Khonggian(IDKG, 5, 0)
             ]);
             // Lấy loại không gian
-            const LoaiKG= thongTin_KhongGian.LOAI_KHONG_GIAN
+            const LoaiKG= thongTin_KhongGian[0].LOAI_KHONG_GIAN;
             if(LoaiKG===1){
-                //truy vấn real-time lấy danh sách ghế hiện tại
+                const ghe = await GheModel.getIDkhongian(IDKG);
+                DanhSachGhe = ghe
+                return res.status(200).json({
+                     success:true,
+                    DanhSach : {
+                        ChiNhanh: {
+                            TEN_CHI_NHANH:ThongTin_ChiNhanh.TEN_CHI_NHANH,
+                            TRANG_THAI: ThongTin_ChiNhanh.TRANG_THAI,
+                            DIA_CHI:ThongTin_ChiNhanh.DIA_CHI
+                        },
+                        KhongGian : thongTin_KhongGian,
+                        ThietBi: {
+                            DanhSach: DanhSach_ThietBi.DanhSach,
+                            TongDanhSach:DanhSach_ThietBi.TongDanhSach
+                        }, 
+                        Ghe: DanhSachGhe
+                    }
+                })
             }
             if(DanhSachGhe===null){
                 return res.status(200).json({

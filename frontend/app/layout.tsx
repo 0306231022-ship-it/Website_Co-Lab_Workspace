@@ -8,13 +8,8 @@ import * as api from '@/API/API';
 import * as ThongBao from '@/FUNCTION/ThongBao';
 import { socket } from '@/FUNCTION/socket';
 import { usePathname } from 'next/navigation';
+import { NguoiDung } from "@/interface/NguoiDung";
 
-interface NguoiDung {
-    TENND: string;
-    EMAIL: string;
-    HINH_ANH: string;
-    IDND:number;
-}
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const { OpenMoDal } = useModalContext();
@@ -24,11 +19,11 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   // 1. Kiểm tra xem người dùng có đang truy cập vào trang Admin hay không
   const pathname = usePathname();
   const isAdminPage = pathname.startsWith('/admin');
-
+  const formdata = new FormData();
+  formdata.append('LoaiND', String(0));
   const KiemTra = async () => {
     try {
-       const formdata = new FormData();
-      formdata.append('LoaiND', String(0));
+       
       const kiemtra = await api.CallAPI(formdata, { url: '/NguoiDung/kiemtra_dangnhap', PhuongThuc: 1 });
       if (kiemtra.success) {
         setDangNhap(true);
@@ -70,8 +65,13 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
       const XacNhan = await ThongBao.ThongBao_XacNhanTT('Bạn có chắc chắn muốn đăng xuất không?');
       if(!XacNhan) return ;
       try {
-        const response = await api.CallAPI(undefined, { url: '/NguoiDung/dangxuat', PhuongThuc: 1 });
-        await fetch("/api/auth/logout", { method: "POST" });
+        const response = await api.CallAPI(formdata, { url: '/NguoiDung/dangxuat', PhuongThuc: 1 });
+        await fetch("/api/auth/logout", {
+           method: "POST" ,    
+           body: JSON.stringify({
+            LoaiND: 0, 
+          }), 
+       });
         if(response.success){
            ThongBao.ThongBao_ThanhCong(response.message)
            setDangNhap(false);
