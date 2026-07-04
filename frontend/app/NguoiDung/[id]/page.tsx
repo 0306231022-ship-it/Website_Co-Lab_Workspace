@@ -30,7 +30,9 @@ export default function NguoiDung() {
           return;
       }
       try {
-          const laytt = await api.CallAPI(undefined, { PhuongThuc: 1, url: `/NguoiDung/kiemtra_dangnhap` });
+           const formdata = new FormData();
+          formdata.append('LoaiND', String(0));
+          const laytt = await api.CallAPI(formdata, { PhuongThuc: 1, url: `/NguoiDung/kiemtra_dangnhap` });
           if (laytt.success) {
               setThongTin(laytt.dulieu);
               setTenND(laytt.dulieu.TENND);

@@ -215,14 +215,12 @@ export default class NguoiDungController{
                })
             }
             const loaiND = ketqua.LOAIND;
-            if(LOAIND !== null){
                if(loaiND !== parseInt(LOAIND)){
                   return res.status(403).json({
                      success: false,
                      message: 'Bạn không có quyền truy cập thông tin người dùng này!'
                   });
                }
-            }
             return res.status(200).json({
                success:true,
                dulieu: ketqua

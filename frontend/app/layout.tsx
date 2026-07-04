@@ -16,8 +16,6 @@ interface NguoiDung {
     IDND:number;
 }
 
-
-
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const { OpenMoDal } = useModalContext();
   const [DangNhap, setDangNhap] = useState<boolean>(false);

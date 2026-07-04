@@ -9,7 +9,7 @@ export function DangNhap() {
   const [err, setErr] = useState<string[]>([]);
   const [email,setemail] = useState<string>();
   const [MatKhau,setMatKhau] = useState<string>();
-  const { OpenMoDal , CloseMoDal } = useModalContext();
+  const { OpenMoDal , CloseMoDal , CloseAllModals } = useModalContext();
   const router = useRouter();
   const handleSubmit = async () => {
     setLoading(true)
@@ -22,6 +22,7 @@ export function DangNhap() {
     formdata.append('MatKhau' ,String(MatKhau));
     try {
         const DangNhap = await api.CallAPI(formdata,{url:`/NguoiDung/DangNhap` , PhuongThuc:1});
+        alert(JSON.stringify(DangNhap))
         if(DangNhap.validate){
             setErr(DangNhap.errors);
             return;
@@ -33,7 +34,7 @@ export function DangNhap() {
             if(DangNhap.ThongTin_NguoiDung===1){
                 router.push('/admin'); 
             }
-            CloseMoDal();
+            CloseAllModals();
             ThongBao.ThongBao_ThanhCong(DangNhap.message);
             return;
         }
