@@ -96,7 +96,7 @@ export default class KhongGianController{
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 return res.status(400).json({
-                    success: false,
+                    validate:true,
                     message: 'Dữ liệu không hợp lệ!',
                     errors: errors.array().map(err => err.msg)
                 });

@@ -14,8 +14,6 @@ type NguoiDung = {
 }
 
 export default function NguoiDung() {
-  const params = useParams();
-  const id = params?.id;
   const [ThongTin, setThongTin] = useState<NguoiDung | null>(null);
   const [tenND, setTenND] = useState<string>("");
   const [matKhauCu, setMatKhauCu] = useState<string>("");
@@ -25,13 +23,9 @@ export default function NguoiDung() {
   const { OpenMoDal } = useModalContext();
   useEffect(() => {
     const fetchData = async () => {
-     if (!id) {
-          ThongBao.ThongBao_CanhBao('không kết nối!');
-          return;
-      }
       try {
            const formdata = new FormData();
-          formdata.append('LoaiND', String(0));
+          formdata.append('LoaiND', String(1));
           const laytt = await api.CallAPI(formdata, { PhuongThuc: 1, url: `/NguoiDung/kiemtra_dangnhap` });
           if (laytt.success) {
               setThongTin(laytt.dulieu);
@@ -42,7 +36,7 @@ export default function NguoiDung() {
       }
   };
   fetchData();
-  }, [id]);
+  }, []);
     useEffect(() => {
         socket.on('DangNhap', (item) => {
           setThongTin(item.ThongTinNguoiDung);
@@ -57,7 +51,7 @@ export default function NguoiDung() {
     const fileAnh = files[0];
     const formData = new FormData();
     formData.append("files", fileAnh);
-    formData.append('LoaiND', String(0));
+    formData.append('LoaiND', String(1));
     try {
       const response = await api.CallAPI(formData, { 
         url: `/NguoiDung/ChinhSua_Anh`, 
@@ -94,8 +88,8 @@ export default function NguoiDung() {
        const formData = new FormData();
        formData.append("MatKhauCu", matKhauCu);
        formData.append('MatKhauMoi',matKhauMoi);
-       formData.append('XacNhanMatKhau' , xacNhanMatKhau);
-       formData.append('LoaiND', String(0));
+       formData.append('XacNhanMatKhau', xacNhanMatKhau);
+       formData.append('LoaiND', String(1));
       const response = await api.CallAPI(formData, { 
         url: `/NguoiDung/DoiMatKhau`, 
         PhuongThuc: 1 
@@ -126,7 +120,7 @@ export default function NguoiDung() {
     try {
          const formData = new FormData();
          formData.append("TENND", tenND);
-         formData.append('LoaiND', String(0));
+         formData.append('LoaiND', String(1));
         const response = await api.CallAPI(formData, { 
           url: `/NguoiDung/ChinhSua_thongTin`, 
           PhuongThuc: 1 
@@ -158,7 +152,7 @@ export default function NguoiDung() {
          const formData = new FormData();
          formData.append("Email", ThongTin.EMAIL);
          formData.append('TrangThai',String(2));
-         formData.append('LoaiND', String(0));
+         formData.append('LoaiND', String(1));
          const response = await api.CallAPI(formData, { 
             url: '/NguoiDung/XacThucOTP', 
             PhuongThuc: 1 

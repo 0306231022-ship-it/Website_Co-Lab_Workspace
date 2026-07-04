@@ -1,15 +1,22 @@
 "use client";
-
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import SignUpForm from "@/app/Modal/page";
 import DangKy from "@/app/Modal/DangKy";
 import DangNhap from "@/app/Modal/DangNhap";
 import QuenMatKhau from "@/app/Modal/QuenMatKhau";
+import ThemGiaMoi from "@/app/Modal/ThemGia";
+import ThemChiNhanh from "@/app/Modal/ThemChiNhanh";
+import ThemKhongGian from "@/app/Modal/ThemKhongGian";
+import ChinhSuaChiNhanh from "@/app/Modal/ChinhSuaChiNhanh";
 const MODAL_REGISTRY = {
     'DangKy' : SignUpForm,
     'formDangKy' : DangKy,
     'DangNhap' : DangNhap,
-    'QuenMatKhau' : QuenMatKhau
+    'QuenMatKhau' : QuenMatKhau,
+    'ThenGia' : ThemGiaMoi,
+    'ThemChiNhanh' : ThemChiNhanh,
+    'ThemKhongGian' : ThemKhongGian,
+    'ChinhSuaChiNhanh' : ChinhSuaChiNhanh
 };
 
 // Khai báo kiểu dữ liệu cho các key (Tên trang) hợp lệ trong hệ thống

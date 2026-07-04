@@ -4,7 +4,10 @@ import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import * as ThongBao from '@/FUNCTION/ThongBao';
 import { NguoiDung } from "@/interface/NguoiDung";
-
+import Image from "next/image";
+import NavLink from "@/component/NavLink";
+import Link from 'next/link';
+import {socket} from '@/FUNCTION/socket';
 export default function AdminLayout({
 
   children,
@@ -42,6 +45,14 @@ export default function AdminLayout({
     }
     checkAuth();
   }, [router]);
+   useEffect(() => {
+      socket.on('DangNhap', (item) => {
+        setThongTin(item.ThongTinNguoiDung);
+      });
+      return () => {
+        socket.off('DangNhap');
+      };
+      }, []);
 
   // Đóng các menu khi click ra ngoài vùng dropdown
   useEffect(() => {
@@ -93,16 +104,21 @@ export default function AdminLayout({
             
             <nav className="flex-1 mt-6 px-4 space-y-6">
               <div>
+
                 <p className="px-4 text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-2.5">Hệ thống</p>
                 <div className="space-y-1">
-                  <a href="#" className="flex items-center space-x-3 bg-indigo-600 text-white px-4 py-2.5 rounded-xl transition-all font-semibold shadow-md">
+                <NavLink href={`/admin`}
+                         activeClassName="bg-indigo-600"
+                        className="flex items-center space-x-3  text-white px-4 py-2.5 rounded-xl transition-all font-semibold shadow-md">
                     <i className="fa-solid fa-chart-pie w-5 text-center text-base"></i>
                     <span className="text-sm">Tổng quan</span>
-                  </a>
-                  <a href="./QuanLyChiNhanh.html" className="flex items-center space-x-3 text-slate-400 hover:bg-slate-800/50 hover:text-indigo-400 hover:translate-x-1 px-4 py-2.5 rounded-xl transition-all duration-300 font-medium group">
+                  </NavLink>
+                   <NavLink href={`/admin/ChiNhanh`}
+                        activeClassName="bg-indigo-600"
+                        className="flex items-center space-x-3  text-white px-4 py-2.5 rounded-xl transition-all font-semibold shadow-md">
                     <i className="fa-solid fa-map-location-dot w-5 text-center text-base transition-transform duration-300 group-hover:scale-110"></i>
                     <span className="text-sm">Quản lý chi nhánh</span>
-                  </a>
+                  </NavLink>
                   <a href="#" className="flex items-center justify-between text-slate-400 hover:bg-slate-800/50 hover:text-indigo-400 hover:translate-x-1 px-4 py-2.5 rounded-xl transition-all duration-300 font-medium group">
                     <div className="flex items-center space-x-3">
                       <i className="fa-solid fa-file-invoice-dollar w-5 text-center text-base transition-transform duration-300 group-hover:scale-110"></i>
@@ -119,10 +135,12 @@ export default function AdminLayout({
               <div>
                 <p className="px-4 text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-2.5">Danh mục & Cấu hình</p>
                 <div className="space-y-1">
-                  <a href="#" className="flex items-center space-x-3 text-slate-400 hover:bg-slate-800/50 hover:text-indigo-400 hover:translate-x-1 px-4 py-2.5 rounded-xl transition-all duration-300 font-medium group">
+                   <NavLink href={`/admin/QuanLiGia`}
+                        activeClassName="bg-indigo-600"
+                        className="flex items-center space-x-3  text-white px-4 py-2.5 rounded-xl transition-all font-semibold shadow-md">
                     <i className="fa-solid fa-tags w-5 text-center text-base transition-transform duration-300 group-hover:scale-110"></i>
                     <span className="text-sm">Quản lý đơn giá</span>
-                  </a>
+                 </NavLink>
                   <a href="#" className="flex items-center space-x-3 text-slate-400 hover:bg-slate-800/50 hover:text-indigo-400 hover:translate-x-1 px-4 py-2.5 rounded-xl transition-all duration-300 font-medium group">
                     <i className="fa-solid fa-chair w-5 text-center text-base transition-transform duration-300 group-hover:scale-110"></i>
                     <span className="text-sm">Quản lý danh mục ghế</span>
@@ -223,11 +241,13 @@ export default function AdminLayout({
                   }}
                   className={`flex items-center space-x-3 p-1.5 rounded-xl transition-all cursor-pointer group focus:outline-none ${isOpenProfile ? 'bg-slate-100' : 'hover:bg-slate-50'}`}
                 >
-                     <img
-                  src={`http://localhost:3001/${ThongTin?.HINH_ANH}`}
-                  alt="User avatar"
-                  className="w-8 h-8 rounded-full object-cover border border-slate-200"
-                  loading="lazy"
+                     <Image
+                       src={`http://localhost:3001/${ThongTin?.HINH_ANH}`}
+                      alt="User avatar"
+                      className="w-8 h-8 rounded-full object-cover border border-slate-200"
+                      width={500}
+                     height={192}
+                     unoptimized
                 />
                   <div className="hidden md:block text-left leading-tight">
                     <p className="text-xs font-bold text-slate-700">{ThongTin?.TENND}</p>
@@ -242,10 +262,10 @@ export default function AdminLayout({
                     isOpenProfile ? 'block opacity-100 scale-100' : 'hidden opacity-0 scale-95'
                   }`}
                 >
-                  <a href="#" className="flex items-center space-x-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 font-medium">
+                  <Link href={'/admin/CaNhan'} className="flex items-center space-x-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 font-medium">
                     <i className="fa-regular fa-user text-slate-400 w-4 text-center"></i>
                     <span>Hồ sơ cá nhân</span>
-                  </a>
+                  </Link>
                   <a href="#" className="flex items-center space-x-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium transition-colors">
                     <i className="fa-regular fa-circle-question text-slate-400 text-base w-5 text-center"></i>
                     <span>Hỗ trợ trợ giúp</span>

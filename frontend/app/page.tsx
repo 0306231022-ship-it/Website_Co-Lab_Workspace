@@ -30,7 +30,7 @@ export default function HomePage() {
       }
     };
     laydl();
-  }, [page]);
+  }, [page,TimKiem]);
 
  const TimKiem_ChiNhanh = async () => {
   try {

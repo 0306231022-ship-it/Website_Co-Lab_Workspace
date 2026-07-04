@@ -16,7 +16,7 @@ nguoidungRouter.post('/DangNhap' , upload.none(), NguoiDungController.DangNhap);
 nguoidungRouter.post('/QuenMatKhau' , upload.none(), NguoiDungController.QuenMatKhau);
 nguoidungRouter.post('/DoiMatKhau' , upload.none(), verifyToken, authorize(0,1), NguoiDungController.DoiMatKhau);
 nguoidungRouter.post('/CapNhat_TrangThai', upload.none(), NguoiDungController.ChinhSua_TrangThai_NguoiDung);
-nguoidungRouter.post('/ChinhSua_thongTin' , upload.none(), verifyToken , authorize(0,1) , NguoiDungController.ChinhSua_NguoiDung);
+nguoidungRouter.post('/ChinhSua_thongTin' , upload.none(), verifyToken, NguoiDungController.ChinhSua_NguoiDung);
 nguoidungRouter.post('/ChinhSua_Anh', createUpload('DaiDien').any(),verifyToken, NguoiDungController.CapNhat_anhDaiDien);
 nguoidungRouter.post('/kiemtra_dangnhap' , upload.none(), verifyToken , NguoiDungController.ThongTin_NguoiDung);
 nguoidungRouter.post('/dangxuat' ,  upload.none(), verifyToken, NguoiDungController.DangXuat);

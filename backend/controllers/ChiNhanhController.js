@@ -45,11 +45,6 @@ export default class ChiNhanhController{
         }
    }
     static async Them_ChiNhanh(req, res) {
-        /*{
-            TenCN,
-            DiaChi,
-            file,
-        }*/
        const dulieu = req.body;
        const files = req.files;
        let pathFile = files[0].filename;
@@ -75,7 +70,7 @@ export default class ChiNhanhController{
              const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 return res.status(400).json({
-                    success: false,
+                    validate:true,
                     message: 'Dữ liệu không hợp lệ!',
                     errors: errors.array().map(err => err.msg)
                 });
@@ -182,6 +177,13 @@ if (!errors.isEmpty()) {
                     message:'Lỗi tải ảnh!'
                 })
             };
+            const kiemtra = await ChiNhanhModel.kiemtraid(dulieu.IDCN);
+            if(!kiemtra){
+                return res.status(500).json({
+                    success:false,
+                    message:'Lỗi khi gửi ID chi nhánh lên!'
+                })
+            }
             const dd_db = await ChiNhanhModel.LayChiTiet(dulieu.IDCN);
             const dd = dd_db[0].HINHANH;
             const xoa = xoaFileCu(dd);
@@ -210,12 +212,7 @@ if (!errors.isEmpty()) {
         }
     }
     static async ChinhSua_TrangThai_ChiNhanh(req, res) {
-        /*{
-            IDCN,
-            TrangThai,
-            NgayBatDau,
-            NgayKetThuc
-        }*/
+       
         const dulieu = req.body;
         try {
             await Promise.all([
@@ -229,9 +226,6 @@ if (!errors.isEmpty()) {
                     if (startDate < now) {
                          throw new Error('Ngày chỉnh sửa chi nhánh phải lớn hơn hoặc bằng ngày hiện tại!');
                     }
-                    //Trường hợp 2: lớn hơn thời gian cuối cùng mà khách thuê
-                    
-
                     return true;
                   }).run(req),
                   body('NgayHoanThanh')
@@ -355,5 +349,6 @@ if (!errors.isEmpty()) {
             })
         }
     }
+
 
 }
