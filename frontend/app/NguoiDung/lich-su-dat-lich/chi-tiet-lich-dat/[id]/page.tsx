@@ -48,7 +48,7 @@ function ChiTietLichDat() {
   const [lichDat, setLichDat] = useState<LichDat | null>(null);
   const router = useRouter();
   const localIP = "127.0.0.1"; // Thay bằng địa chỉ IP của máy tính chạy server
-  const qrUrl = `http://${localIP}:3000/admin/check-in?room_id=${lichDat?.ChiTiet_Ghe_KhongGian?.ID_GHE || ''}`;
+  const qrUrl = `http://${localIP}:3000/admin/checkin?room_id=${lichDat?.ChiTiet_Ghe_KhongGian?.ID_GHE || ''}`;
   useEffect(() => {
     const fetchLichDat = async () => {
       if (!id) {
@@ -56,7 +56,7 @@ function ChiTietLichDat() {
         return;
       }
       try {
-        const res = await api.CallAPI(undefined, { url: `/NguoiDung/lich-dat?Id=${id}`, PhuongThuc: 2 });
+        const res = await api.CallAPI(undefined, { url: `/NguoiDung/LICHDAT?Id=${id}`, PhuongThuc: 2 });
         if (res && res.success) {
           setLichDat(res.lichDat);
         } else {

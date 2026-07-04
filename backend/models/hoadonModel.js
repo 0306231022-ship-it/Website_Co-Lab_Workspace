@@ -1,9 +1,7 @@
 import { execute } from "../config/db.js";
 
 export default class hoadonModel {
-    //  Lấy chi tiết một hóa đơn theo ID
-    // Lấy chi tiết một hóa đơn theo ID (Có liên kết Lịch đặt và Người dùng)
-// Lấy chi tiết một hóa đơn theo ID (Khớp chính xác 100% theo ảnh cấu trúc bảng của em)
+   
 static async getById(id) {
       try {
                const [dulieu] = await execute(`

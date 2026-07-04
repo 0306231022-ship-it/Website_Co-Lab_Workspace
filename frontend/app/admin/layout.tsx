@@ -1,5 +1,4 @@
 "use client";
-
 import * as api from '@/API/API';
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
@@ -7,6 +6,7 @@ import * as ThongBao from '@/FUNCTION/ThongBao';
 import { NguoiDung } from "@/interface/NguoiDung";
 
 export default function AdminLayout({
+
   children,
 }: {
   children: React.ReactNode;
@@ -116,7 +116,6 @@ export default function AdminLayout({
                   </a>
                 </div>
               </div>
-
               <div>
                 <p className="px-4 text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-2.5">Danh mục & Cấu hình</p>
                 <div className="space-y-1">
@@ -136,6 +135,7 @@ export default function AdminLayout({
               </div>
             </nav>
           </div>
+
 
           <div className="p-4 border-t border-slate-900 shrink-0 group">
             <button onClick={DangXuat} className="w-full flex items-center justify-center space-x-2 bg-slate-900/50 hover:bg-rose-500 hover:text-white text-slate-400 py-2.5 rounded-xl transition-all duration-300 text-sm font-medium border border-slate-800 hover:border-rose-500 hover:shadow-lg hover:shadow-rose-500/25 hover:-translate-y-0.5 active:translate-y-0">
