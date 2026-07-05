@@ -106,7 +106,19 @@ function ChiTietChiNhanh() {
     return (
         <div className="p-4 md:p-8 max-w-7xl mx-auto text-slate-800 bg-slate-50/50 min-h-screen">
             <div className="w-full space-y-6">
-                
+                <button onClick={() => window.history.back()} className="group flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg shadow-sm transition-all duration-200">
+                    <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        fill="none" 
+                        viewBox="0 0 24 24" 
+                        strokeWidth={2} 
+                        stroke="currentColor" 
+                        className="w-4 h-4 transform transition-transform duration-200 group-hover:-translate-x-1"
+                     >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                    </svg>
+                    Quay lại
+                </button>
                 {/* Khu vực 1: Thông tin chi tiết & Thống kê số lượng */}
                 <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                     <div className="flex items-center space-x-5">

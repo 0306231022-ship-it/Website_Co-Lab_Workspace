@@ -11,7 +11,7 @@ import NguoiDungRoute from './routers/NguoiDungRouter.js';
 import adminRouter from './routers/adminRouter.js';
 
 
-//import './CleanDB.js';
+import './CleanDB.js';
 
 const app = express();
 

@@ -186,13 +186,13 @@ if (!errors.isEmpty()) {
             }
             const dd_db = await ChiNhanhModel.LayChiTiet(dulieu.IDCN);
             const dd = dd_db[0].HINHANH;
-            const xoa = xoaFileCu(dd);
+            /*const xoa = xoaFileCu(dd);
             if(!xoa){
                 return res.status(500).json({
                     success:false,
                     message:'lỗi khi thao tác hệ thống!'
                 })
-            }
+            }*/
             const update = await ChiNhanhModel.CapNhatAnh(dulieu.IDCN,DuongDan);
             if(!update){
                 return res.status(500).json({
@@ -212,11 +212,11 @@ if (!errors.isEmpty()) {
         }
     }
     static async ChinhSua_TrangThai_ChiNhanh(req, res) {
-       
+   
         const dulieu = req.body;
         try {
             await Promise.all([
-                body('NgayBatDau')
+                body('ThoiGianApDung')
                   .notEmpty()
                   .withMessage('ngày bắt đầu không được bỏ trống')
                   .custom(async (value, { req }) => {
@@ -228,29 +228,21 @@ if (!errors.isEmpty()) {
                     }
                     return true;
                   }).run(req),
-                  body('NgayHoanThanh')
-                     .notEmpty()
-                  .withMessage('ngày hoàn thành không được bỏ trống')
-                  .custom(async (value, { req }) => {
-                    //Trường hợp 1: phải lớn hơn hoặc bằng ngày bắt đầu
-
-                    const endDate = new Date(value);
-                    const startDate = new Date(dulieu.NgayBatDau)
-                    if (endDate < startDate ) {
-                         throw new Error('Ngày hoàn thành chi nhánh phải lớn hơn hoặc bằng ngày bắt đầu!');
-                    }
-                    return true;
-                  }).run(req),
-                  body('IDCN')
-        .notEmpty().withMessage('ID chi nhánh là thông tin bắt buộc')
-        .isInt().withMessage('Giá trị nhập vào phải là một số nguyên!')
-        .custom(async (value) => {
-            const kiemtra = await ChiNhanhModel.kiemtraid(value);
-            if (!kiemtra) throw new Error('ID chi nhánh không tồn tại!');
-            return true;
-        })
-        .run(req)
-
+                body('IDCN')
+                    .notEmpty().withMessage('ID chi nhánh là thông tin bắt buộc')
+                    .isInt().withMessage('Giá trị nhập vào phải là một số nguyên!')
+                    .custom(async (value) => {
+                    const kiemtra = await ChiNhanhModel.kiemtraid(value);
+                         if (!kiemtra) throw new Error('ID chi nhánh không tồn tại!');
+                        return true;
+                    })
+                    .run(req),
+                body('TrangThai')
+                    .notEmpty()
+                    .withMessage('trạng thái không được bỏ trống')
+                    .isIn([0, 1, '0', '1']).withMessage('Giá trị nhập vào chỉ được phép là số 0 hoặc 1!')
+                    .isInt().withMessage('Giá trị nhập vào phải là một số nguyên!')
+                    .run(req),
             ]);  
             const errors = validationResult(req);
 if (!errors.isEmpty()) {
@@ -260,7 +252,7 @@ if (!errors.isEmpty()) {
         errors: errors.array().map(err => err.msg)
     });
 }
-        const update = await ChiNhanhModel.CapNhatTrangThai(dulieu.IDCN,dulieu.NgayBatDau,dulieu.NgayHoanThanh);
+        const update = await ChiNhanhModel.CapNhatTrangThai(parseInt(dulieu.IDCN),dulieu.ThoiGianApDung,parseInt(dulieu.TrangThai));
         if(!update){
             return res.status(500).json({
                 success:false,

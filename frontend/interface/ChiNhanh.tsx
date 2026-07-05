@@ -6,8 +6,6 @@
   NGAY_NHAP: Date;
   NGAY_CAP_NHAT: Date;
   TRANG_THAI: number;
-  NGAY_BAO_TRI: Date;
-  NGAY_XONG: Date;
   HINHANH: string;
   TongLoai1:number;
   TongLoai2: number;

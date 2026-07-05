@@ -5,14 +5,7 @@ import * as ThongBao from '@/FUNCTION/ThongBao';
 import { useEffect, useState } from 'react';
 import {socket} from '@/FUNCTION/socket';
 import { useModalContext } from "@/context/QuanLiMoal";
-type NguoiDung = {
-    TENND: string,
-    EMAIL: string,
-    HINH_ANH: string,
-    IDND: string,
-    LOAIND: number
-}
-
+import type { NguoiDung } from '@/interface/NguoiDung';
 export default function NguoiDung() {
   const params = useParams();
   const id = params?.id;
@@ -192,7 +185,7 @@ export default function NguoiDung() {
                 <div>
                     <div className="flex items-center justify-center sm:justify-start gap-2">
                         <h1 className="text-lg font-bold text-slate-900">{ThongTin?.TENND}</h1>
-                        <span className="bg-indigo-50 text-indigo-600 text-[10px] font-bold px-2 py-0.5 rounded-md border border-indigo-100">{ThongTin?.LOAIND === 1 ? 'Quản trị viên' : 'Thành viên'}</span>
+                        <span className="bg-indigo-50 text-indigo-600 text-[10px] font-bold px-2 py-0.5 rounded-md border border-indigo-100">{'Thành viên'}</span>
                     </div>
                     <p className="text-xs text-slate-400 mt-0.5">Mã số: <span className="font-mono text-slate-600">{ThongTin?.IDND}</span></p>
                 </div>

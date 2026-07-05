@@ -126,10 +126,12 @@ export default function AdminLayout({
                     </div>
                     <span className="bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-xs animate-pulse">5</span>
                   </a>
-                  <a href="#" className="flex items-center space-x-3 text-slate-400 hover:bg-slate-800/50 hover:text-indigo-400 hover:translate-x-1 px-4 py-2.5 rounded-xl transition-all duration-300 font-medium group">
+                  <NavLink href={`/admin/QuanLiKhachHang`}
+                        activeClassName="bg-indigo-600"
+                        className="flex items-center space-x-3  text-white px-4 py-2.5 rounded-xl transition-all font-semibold shadow-md">
                     <i className="fa-solid fa-users w-5 text-center text-base transition-transform duration-300 group-hover:scale-110"></i>
                     <span className="text-sm">Khách hàng</span>
-                  </a>
+                  </NavLink>
                 </div>
               </div>
               <div>

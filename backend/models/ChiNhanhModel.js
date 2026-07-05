@@ -71,13 +71,13 @@ export default class ChiNhanhModel{
            throw new Error('Database query failed: ' + error.message);
         }
     }
-    static async CapNhatTrangThai(IDCN,NgayBatDau,NgayHoanThanh){
+    static async CapNhatTrangThai(IDCN,ThoiGianApDung,TrangThai){
         try {
             const [update] = await execute(`
                 UPDATE chinhanh
-                SET NGAY_CAP_NHAT = NOW() , NGAY_BAO_TRI=?, NGAY_XONG=?
+                SET NGAY_CAP_NHAT = ? 
                 WHERE ID_CHI_NHANH = ?
-                `,[NgayBatDau,NgayHoanThanh,IDCN]);
+                `,[ThoiGianApDung,IDCN]);
             return update.affectedRows>0?true:false;
         } catch (error) {
             throw new Error('Database query failed: ' + error.message);
@@ -133,29 +133,16 @@ LIMIT ? OFFSET ?;`,
     throw new Error("Database query failed: " + error.message);
   }
 }
-
-    static async khoa_chinhanh(){
+    static async ChuyenTrangThai(){
         try {
             const [update] = await execute(`
-                UPDATE chinhanh
-                SET TRANG_THAI = 2
-                WHERE TRANG_THAI = 1 AND NGAY_BAO_TRI <= NOW();
-                `);
-            return update.affectedRows? true : false;
+                UPDATE ChiNhanh
+                SET TRANG_THAI = IF(TRANG_THAI = 1, 0, 1),  NGAY_CAP_NHAT = NULL
+                WHERE NGAY_CAP_NHAT <= NOW() AND TRANG_THAI IN (0, 1);
+                `,[]);
+            return update.affectedRows>0
         } catch (error) {
-             throw new Error('Database query failed: ' + error.message);
-        }
-    }
-    static async MoChiNhanh(){
-        try {
-            const [update] = await execute(`
-                UPDATE chinhanh
-                SET TRANG_THAI = 1, NGAY_BAO_TRI = NULL, NGAY_XONG = NULL
-                WHERE TRANG_THAI = 2 AND NGAY_XONG <= NOW();
-                `);
-            return update.affectedRows>0 ? true : false;
-        } catch (error) {
-             throw new Error('Database query failed: ' + error.message);
+            throw new Error("Database query failed: " + error.message);
         }
     }
 }

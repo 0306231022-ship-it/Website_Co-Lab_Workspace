@@ -103,6 +103,7 @@ static async findByEmail(Email) {
       try {
         const [ketqua] = await execute(`
           SELECT*FROM nguoidung
+          WHERE LOAIND=0
           ORDER BY NGAY_TAO DESC 
           LIMIT ? OFFSET ?
           `,[limit,offset]);
@@ -119,14 +120,45 @@ static async findByEmail(Email) {
    }
    static async TimKiem(DuLieu){
       try {
-        const [TimKiem] = await execute(`
-          SELECT*FROM nguoidung
-          WHERE IDND = ?
-          `,[DuLieu]);
-        return TimKiem.length>0? TimKiem : null
+        const tuKhoaTimKiem = `%${DuLieu}%`;
+        const [DanhSachKetQua] = await execute(`
+          SELECT *, COUNT(*) OVER() as TongDanhSach 
+          FROM nguoidung
+          WHERE TENND LIKE ?
+        `, [tuKhoaTimKiem]);
+        return {
+          DanhSach: DanhSachKetQua, 
+          TongDanhSach: DanhSachKetQua[0]?.TongDanhSach ?? 0 
+        };
       } catch (error) {
          throw new Error('Database query failed: ' + error.message);
       }
+   }
+   static async ThongKeNguoiDung(){
+    try {
+      const [TongDS] = await execute(`
+        SELECT COUNT(IDND) AS TongSoNguoiDung 
+        FROM NguoiDung;
+        `,[]);
+        const [TongDS_ht] = await execute(`
+        SELECT COUNT(IDND) AS TongSoNguoiDung_ht
+        FROM NguoiDung
+        WHERE TRANG_THAI=1
+        `,[]);
+      const [ds_thang] = await execute(`
+        SELECT COUNT(IDND) AS TongNguoiDungTrongThang
+            FROM NguoiDung
+            WHERE MONTH(NGAY_TAO) = MONTH(NOW()) 
+            AND YEAR(NGAY_TAO) = YEAR(NOW());
+      `)
+      return {
+        TongDanhSach: TongDS[0].TongSoNguoiDung,
+        DanhSachHoatDong:TongDS_ht[0].TongSoNguoiDung_ht,
+        DanhSach_Thang: ds_thang[0].TongNguoiDungTrongThang
+      }
+    } catch (error) {
+      throw new Error('Database query failed: ' + error.message);
+    }
    }
 
 }

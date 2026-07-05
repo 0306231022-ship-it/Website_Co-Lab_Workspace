@@ -26,6 +26,7 @@ nguoidungRouter.get('/LayDanhSach', NguoiDungController.DanhSach_NguoiDung);
 nguoidungRouter.get('/TimKiem', NguoiDungController.TimKiem_Ten);
 nguoidungRouter.get('/lichsu_datlich', verifyToken, LichDatController.LichSuDat_theoIDND);
 nguoidungRouter.get('/lich-dat', verifyToken, LichDatController.ChiTiet_LichDat_theoIDDL);
+nguoidungRouter.get('/ThongTin' , NguoiDungController.ThongTin);
 //thoong bao
 nguoidungRouter.get('/layDS_thongbao', verifyToken , thongBaoController.getThongBaoByUser);
 nguoidungRouter.post('/XoaTheoid' , upload.none(), thongBaoController.deleteThongBao);

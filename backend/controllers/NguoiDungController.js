@@ -204,7 +204,7 @@ export default class NguoiDungController{
         }
       }
       static async ThongTin_NguoiDung(req, res) {
-          const userId = req.user.id;
+          const userId = req.user.id
           const LOAIND = req.body?.LoaiND || null;
           try {
             const ketqua= await NguoiDungModel.findByid(userId);
@@ -304,10 +304,6 @@ export default class NguoiDungController{
         }
       }
       static async ChinhSua_TrangThai_NguoiDung(req, res) {
-         /*{
-            IDND,
-            TrangThai
-         }*/
         const DuLieu = req.body;
         try {
             await Promise.all([
@@ -331,7 +327,7 @@ export default class NguoiDungController{
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                return res.status(400).json({
-                  success: false,
+                  validate:true,
                   message: 'Dữ liệu không hợp lệ!',
                   errors: errors.array().map(err => err.msg)
                });
@@ -486,11 +482,15 @@ export default class NguoiDungController{
           const limit = parseInt(req.query.limit) || 10;
          const offset = (page - 1) * limit;
          try {
-            const ketqua = await NguoiDungModel.DSND(limit,offset);
+            const [ketqua1,ketqua]  = await Promise.all([
+               NguoiDungModel.DSND(limit,offset),
+               NguoiDungModel.ThongKeNguoiDung()
+            ]);
             return res.status(200).json({
                success:true,
-               DanhSach:ketqua.DanhSach,
-               TongDanhSach:ketqua.TongDanhSach[0].total
+               DanhSach:ketqua1.DanhSach,
+               TongDanhSach:ketqua1.TongDanhSach[0].total,
+               ThongKe:ketqua
             })
          } catch (error) {
              return res.status(500).json({
@@ -513,12 +513,6 @@ export default class NguoiDungController{
                });
             };
             const TimKiemdl = await NguoiDungModel.TimKiem(DuLieu);
-            if(!TimKiemdl){
-               return res.status(500).json({
-                  success:false,
-                  message:'Không tìm thấy người dùng!'
-               })
-            }
             return res.status(200).json({
                success:true,
                dulieu:TimKiemdl
@@ -562,4 +556,26 @@ export default class NguoiDungController{
             message: 'Bạn đã đăng xuất thành công!'
          });
       }
+      static async ThongTin(req,res){
+         const id = req.query.id;
+         try {
+            const kiemtra = await NguoiDungModel.findByid(id);
+            if(!kiemtra){
+               return res.status(401).json({
+                  success:false,
+                  message:"Không tìm thấy id người dùng!"
+               })
+            }
+            return res.status(200).json({
+               success:true,
+               dulieu:kiemtra
+            })
+         } catch (error) {
+             return res.status(500).json({
+                success: false,
+                message: 'Thông tin người dùng thất bại: ' + error.message
+            });
+         }
+      }
+
 }
