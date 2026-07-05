@@ -3,10 +3,10 @@ import React, { useState } from "react";
 import * as ThongBao from '@/FUNCTION/ThongBao';
 import * as api from '@/API/API';
 import { useModalContext } from "@/context/QuanLiMoal";
-
-
-
-export default function VerifyEmailForm() {
+interface objXacThuc{
+    TrangThai: number
+}
+export default function VerifyEmailForm({DuLieu} : {DuLieu:objXacThuc}) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string[]>([]);
@@ -36,7 +36,12 @@ export default function VerifyEmailForm() {
       
       if (res && res.success) {
         ThongBao.ThongBao_ThanhCong(res.message);
-        OpenMoDal({ Email: email }, { TenTrang: 'formDangKy', TieuDe: 'Hoàn tất đăng ký' });
+        if(DuLieu.TrangThai===1){
+           OpenMoDal({ Email: email }, { TenTrang: 'formDangKy', TieuDe: 'Hoàn tất đăng ký' });
+        }else{
+          OpenMoDal({Email: email},{TenTrang:'QuenMatKhau'})
+        }
+       
       } else {
         ThongBao.ThongBao_Loi(res?.message || "Yêu cầu xác thực thất bại.");
         return;

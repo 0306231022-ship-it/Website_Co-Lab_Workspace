@@ -351,12 +351,7 @@ export default class NguoiDungController{
         }
       }
       static async QuenMatKhau(req, res) {
-         /*{
-            Email:'',
-            MatKhauMoi:'',
-            XacNhanMatKhau: '',
-            OTP:
-         }*/
+        
          const dulieu = req.body;
          try {
             await Promise.all([
@@ -392,7 +387,7 @@ export default class NguoiDungController{
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                return res.status(400).json({
-                  success: false,
+                  validate:true,
                   message: 'Dữ liệu không hợp lệ!',
                   errors: errors.array().map(err => err.msg)
                });

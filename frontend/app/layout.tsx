@@ -213,7 +213,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                 </button>
                 <button 
                   type="button"
-                  onClick={() => OpenMoDal(null, { TenTrang: 'DangKy', TieuDe: 'Đăng ký thành viên', icon: 'fa-solid fa-user-plus' })} 
+                  onClick={() => OpenMoDal({TrangThai:1}, { TenTrang: 'DangKy', TieuDe: 'Đăng ký thành viên', icon: 'fa-solid fa-user-plus' })} 
                   className="flex-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-semibold py-1.5 rounded-lg text-xs transition cursor-pointer"
                 >
                   Đăng ký

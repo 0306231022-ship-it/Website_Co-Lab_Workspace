@@ -2,7 +2,7 @@ import cron from 'node-cron';
 import ChiNhanhModel from './models/ChiNhanhModel.js';
 import KhongGianModel from './models/KhongGianModel.js';
 import thongBaoModel from './models/ThongBaoModels.js';
-
+import XacThucOTPModel from './models/XacThucOTPModel.js';
 
     //0 0 0 * * * 12h đêm mỗi ngày'
     // 5s 1 lần : '*/5 * * * * *'
@@ -20,6 +20,17 @@ cron.schedule('*/15 * * * *', async () => {
     } catch (error) {
         console.error('Lỗi thực thi tác vụ 15 phút:', error.message);
     }
+    // xóa mã OTP đã hết hạn
+    try {
+        const xoaOTP = await XacThucOTPModel.XoaOTP_HetHan();
+        if(!xoaOTP){
+            const thongbao=  thongBaoModel.create('Hệ thống xác thực OTP thất bại', 'Hệ thống không thể xóa OTP đã hết han!', 4, 1);
+            if(!thongbao) console.log('Vui lòng kiểm tra lại hệ thống!')
+        }
+    } catch (error) {
+         console.error('Lỗi thực thi tác vụ 15 phút:', error.message);
+    }
+
     
     
 
@@ -29,5 +40,4 @@ cron.schedule('*/15 * * * *', async () => {
 });
 
 console.log('Cron Job đã được kích hoạt...');
-// Chuyển trạng thái mã giảm giá đã hết hạn
-// Chuyển trạng thái banner đã hết hạn
+

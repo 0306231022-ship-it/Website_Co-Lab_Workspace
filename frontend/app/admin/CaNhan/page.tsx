@@ -158,9 +158,9 @@ export default function NguoiDung() {
             PhuongThuc: 1 
         });
         if (response.success) {
-            //Mở modal quên mất khẩu
-            OpenMoDal(undefined,{TenTrang:'QuenMatKhau'})
             ThongBao.ThongBao_ThanhCong(response.message || "Vui lòng kiểm tra email để đặt lại mật khẩu!");
+            OpenMoDal({Email: ThongTin.EMAIL},{TenTrang:'QuenMatKhau'})
+            
         } else {
             ThongBao.ThongBao_Loi(response.message || "Gửi yêu cầu thất bại!");
         }

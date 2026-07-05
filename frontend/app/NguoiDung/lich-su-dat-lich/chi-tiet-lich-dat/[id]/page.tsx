@@ -57,6 +57,7 @@ function ChiTietLichDat() {
       }
       try {
         const res = await api.CallAPI(undefined, { url: `/NguoiDung/LICHDAT?Id=${id}`, PhuongThuc: 2 });
+        alert(JSON.stringify(res))
         if (res && res.success) {
           setLichDat(res.lichDat);
         } else {

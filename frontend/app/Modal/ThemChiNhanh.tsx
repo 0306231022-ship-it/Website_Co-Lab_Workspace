@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import * as api from "@/API/API";
 import * as ThongBao from "@/FUNCTION/ThongBao";
 import Image from "next/image";
-import { useParams } from 'next/navigation';
 function ThemChiNhanh() {
   const [tenChiNhanh, setTenChiNhanh] = useState<string>("");
   const [diaChi, setDiaChi] = useState<string>("");

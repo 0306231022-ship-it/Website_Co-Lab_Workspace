@@ -3,16 +3,7 @@
 import { useEffect, useState } from "react";
 import { CallAPI } from "@/API/API";
 import Link from "next/link";
-interface LichDatItems {
-    ID_LICH_DAT: number;
-    KHUNG_BATDAU: string;
-    KHUNG_KETTHUC: string;
-    ID_KHONG_GIAN: number;
-    TEN_KHONG_GIAN: string;
-    TEN_CHI_NHANH: string;
-    ID_GHE: number | null;
-}
-
+import { LichDatItems } from "@/interface/LichDat";
 function LichSuLichDat() {
     const [danhSach, setDanhSach] = useState<LichDatItems[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -28,11 +19,11 @@ function LichSuLichDat() {
         const layDuLieuLichDat = async () => {
             try {
                 setLoading(true);
-                const res = await CallAPI(null, {
-                    url: `/NguoiDung/lichsu_datlich?page=${trangHienTai}&limit=${itemsPerPage}`, 
+                const res = await CallAPI(undefined, {
+                    url: `/NguoiDung/lichsu_datlich?page=${trangHienTai}&limit=${itemsPerPage}&LoaiND=0`, 
                     PhuongThuc: 2, 
                 });
-        
+    
                 if (res && res.success) {
                     setDanhSach(res.DanhSach || []); 
                     setTongSoDong(res.TongSo || 0);   

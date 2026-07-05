@@ -178,10 +178,10 @@ export default class LichDatController{
         }
     }
     static async LichSuDat_theoIDND(req,res){
-         const userId = req.user.id;
+        const userId = req.user?.id || req.query?.id;
         try {
             const page = parseInt(req.query.page) || 1;
-            const limit = parseInt(req.query.limit) || 10;
+            const limit = parseInt(req.query.limit) || 3;
             const offset = (page - 1) * limit;
             await Promise.all([
                 query('page')
