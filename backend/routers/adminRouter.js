@@ -62,6 +62,7 @@ adminRouter.get("/chitiethoadon",hoadonController.getHoaDonById);
 //Quản lý giá
 adminRouter.post("/themgiamoi",upload.none(),giaController.createGia);
 adminRouter.get("/layDS_Gia",giaController.getAllGia);
-
+adminRouter.post("/suagia",upload.none(),giaController.updateGia);
+adminRouter.get("/chitietgia",giaController.getGiaById);
 console.log("✅ adminRouter loaded");
 export default adminRouter;
