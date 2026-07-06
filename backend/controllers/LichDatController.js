@@ -253,4 +253,36 @@ export default class LichDatController{
             });
         }
     }
+    static async ChiTiet_LichDat_TheoID_phong(req,res){
+        const idkg= req.query.IDKG;
+        const page = req.query.page;
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = (page - 1) * limit;
+        try {
+            const kiemtra = await KhongGianModel.kiemtraid(idkg);
+            if(!kiemtra){
+                return res.status(401).json({
+                    success:false,
+                    message: 'Không tìm thấy ID không gian!'
+                })
+            }
+            if(page<0 || page === ''){
+                return res.status(401).json({
+                    success:false,
+                    message:'Vui lòng kiểm tra lại số trang!'
+                })
+            }
+            const DanhSach = await DatLichModel.ChiTiet_LichDat_TheoID_phong(idkg , limit , offset);
+            return res.status(200).json({
+                success:true,
+                DanhSach: DanhSach.DanhSach,
+                TongDanhSach:DanhSach.TongDanhSach
+            })
+        } catch (error) {
+             return res.status(401).json({
+                success: false,
+                message: 'Không tìm thấy lịch đặt: ' + error.message
+            });
+        }
+    }
 }

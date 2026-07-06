@@ -64,7 +64,7 @@ export default class KhongGianModel {
         try {
             const [update] = await execute(`
                 UPDATE khonggian
-                SET NGAY_CAP_NHAT = NOW() , NGAY_BAO_TRI=?, NGAY_XONG=?
+                SET NGAY_CAP_NHAT = NOW() , NGAY_BAO_TRI=?, NGAY_XONG=? 
                 WHERE ID_KHONG_GIAN = ?
                 `,[NgayBatDau,NgayHoanThanh,IDKG]);
             return update.affectedRows>0?true:false;
@@ -92,26 +92,44 @@ export default class KhongGianModel {
              throw new Error('Database query failed: ' + error.message);
         }
     }
-        static async khoa_khonggian(){
+    static async khoa_khonggian(){
         try {
-            const [update] = await execute(`
+            const [danhSachSapKhoa] = await execute(`
+                SELECT ID_KHONG_GIAN, TEN_KHONG_GIAN, TRANG_THAI 
+                FROM khonggian
+                WHERE TRANG_THAI = 1 AND NGAY_BAO_TRI <= NOW();
+            `,[]);
+            if (danhSachSapKhoa.length === 0) {
+                return [];
+            }
+            const listIds = danhSachSapKhoa.map(item => item.ID);
+            await execute(`
                 UPDATE khonggian
                 SET TRANG_THAI = 2
-                WHERE TRANG_THAI = 1 AND NGAY_BAO_TRI <= NOW();
-                `);
-            return update.affectedRows? true : false;
+                WHERE ID IN (${listIds.join(',')});
+            `,[]);
+            return danhSachSapKhoa;
         } catch (error) {
              throw new Error('Database query failed: ' + error.message);
         }
     }
     static async Mokhonggian(){
         try {
-            const [update] = await execute(`
+            const [danhSachSapMo] = await execute(`
+                SELECT ID_KHONG_GIAN, TEN_KHONG_GIAN, TRANG_THAI 
+                FROM khonggian
+                WHERE TRANG_THAI = 2 AND NGAY_XONG <= NOW();
+            `,[]);
+            if (danhSachSapMo.length === 0) {
+                return [];
+            }
+            const listIds = danhSachSapMo.map(item => item.ID);
+            await execute(`
                 UPDATE khonggian
                 SET TRANG_THAI = 1, NGAY_BAO_TRI = NULL, NGAY_XONG = NULL
-                WHERE TRANG_THAI = 2 AND NGAY_XONG <= NOW();
-                `);
-            return update.affectedRows>0 ? true : false;
+                WHERE ID IN (${listIds.join(',')});
+            `,[]);
+            return danhSachSapMo;
         } catch (error) {
              throw new Error('Database query failed: ' + error.message);
         }
@@ -175,5 +193,86 @@ export default class KhongGianModel {
             throw new Error('Database query failed: ' + error.message);
         }
     }
+   static async ThongKe(id) {
+    try {
+        // 1. Gộp tất cả các chỉ số thống kê vào 1 câu query duy nhất nhằm tăng tốc độ xử lý và tối ưu database
+        const [rows] = await execute(`
+            SELECT 
+                kg.ID_KHONG_GIAN,
+                kg.LOAI_KHONG_GIAN,
+                
+                -- Đơn giá: Lấy từ bảng giá bất kể loại không gian nào
+                COALESCE(bg.DON_GIA, 0) AS DONGIA,
+                
+                -- Tính tỷ lệ lấp đầy hiện tại
+                CASE 
+                    WHEN kg.LOAI_KHONG_GIAN = 2 THEN
+                        CASE 
+                            WHEN EXISTS (
+                                SELECT 1 FROM lichdat ld 
+                                WHERE ld.ID_KHONG_GIAN = kg.ID_KHONG_GIAN 
+                                  AND NOW() BETWEEN ld.KHUNG_BATDAU AND ld.KHUNG_KETTHUC
+                            ) THEN 100 ELSE 0
+                        END
+                    WHEN kg.LOAI_KHONG_GIAN = 1 THEN
+                        COALESCE(
+                            (SELECT COUNT(DISTINCT ld.ID_GHE) FROM lichdat ld 
+                             WHERE ld.ID_KHONG_GIAN = kg.ID_KHONG_GIAN 
+                               AND NOW() BETWEEN ld.KHUNG_BATDAU AND ld.KHUNG_KETTHUC 
+                               AND ld.ID_GHE IS NOT NULL
+                            ) * 100.0 / NULLIF((SELECT COUNT(*) FROM ghe g WHERE g.ID_KHONG_GIAN = kg.ID_KHONG_GIAN), 0), 
+                            0
+                        )
+                    ELSE 0
+                END AS TI_LE_LAP_DAY,
+
+                -- Tính tổng số giờ thuê (Chỉ tính lịch có trạng thái bằng 1)
+                COALESCE((
+                    SELECT SUM(TIMESTAMPDIFF(HOUR, ld_gio.KHUNG_BATDAU, ld_gio.KHUNG_KETTHUC))
+                    FROM lichdat ld_gio
+                    WHERE ld_gio.ID_KHONG_GIAN = kg.ID_KHONG_GIAN AND ld_gio.TRANG_THAI = 1
+                ), 0) AS TONG_SO_GIO_THUE,
+
+                -- Tính tổng số ghế (Nếu là không gian loại 1)
+                CASE 
+                    WHEN kg.LOAI_KHONG_GIAN = 1 THEN
+                        (SELECT COUNT(*) FROM ghe g WHERE g.ID_KHONG_GIAN = kg.ID_KHONG_GIAN)
+                    ELSE 0
+                END AS TONG_SO_GHE
+
+            FROM khonggian kg
+            LEFT JOIN banggia bg ON kg.ID_GIA = bg.ID_GIA
+            WHERE kg.ID_KHONG_GIAN = ?;
+        `, [id]);
+
+        // 2. Kiểm tra phòng thủ (Defensive Check) đề phòng trường hợp không tìm thấy phòng hợp lệ
+        // (Nếu sử dụng thư viện mysql2 thông thường, kết quả trả về nằm trực tiếp trong rows hoặc rows[0])
+        const data = Array.isArray(rows) ? rows[0] : rows;
+
+        if (!data) {
+            // Trả về dữ liệu mặc định an toàn nếu ID không gian không tồn tại trên hệ thống
+            return {
+                Tile_LapDay: 0,
+                DonGia: 0,
+                TongGioThue: 0,
+                TongSoGhe: 0
+            };
+        }
+
+        // 3. Trả kết quả chuẩn chỉnh ra ngoài controller phục vụ API
+        return {
+            Tile_LapDay: Number(data.TI_LE_LAP_DAY || 0),
+            DonGia: Number(data.DONGIA || 0),
+            TongGioThue: Number(data.TONG_SO_GIO_THUE || 0),
+            TongSoGhe: Number(data.TONG_SO_GHE || 0)
+        };
+
+    } catch (error) {
+        console.error("Lỗi ThongKe model:", error);
+        throw new Error('Database query failed: ' + error.message);
+    }
+}
+    
+
 
 }

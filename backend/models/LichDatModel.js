@@ -235,4 +235,48 @@ WHERE LD.ID_LICH_DAT = ?;
             throw new Error('Database query failed: ' + error.message);
         }
     }
+    static async LichDatCuoi_IDPHONG(id){
+        try {
+            const [truyvan] = await execute(
+                `
+                SELECT * FROM lichdat
+                WHERE ID_KHONG_GIAN = ?
+                ORDER BY KHUNG_KETTHUC DESC 
+                LIMIT 1;
+                `,[id]
+            );
+            return truyvan;
+        } catch (error) {
+            throw new Error('Database query failed: ' + error.message);
+        }
+    }
+    static async ChiTiet_LichDat_TheoID_phong(idkg , limit , offset){
+        try {
+            const [truyvanResult, tongResult] = await Promise.all([
+                execute(
+                    `
+                        SELECT * FROM lichdat
+                        WHERE ID_KHONG_GIAN = ?
+                        ORDER BY NGAY_TAO DESC
+                        LIMIT ? OFFSET ?
+                `, [idkg, limit, offset]),
+                execute(
+                    `
+                        SELECT COUNT(*) AS tong_so_luong 
+                        FROM lichdat 
+                        WHERE ID_KHONG_GIAN = ?
+                `, [idkg])
+                
+            ]);
+            const truyvan = truyvanResult[0]; 
+            const tongDanhSach = tongResult[0][0].tong_so_luong;
+            return {
+                DanhSach : truyvan,
+                TongDanhSach : tongDanhSach
+            }
+            
+        } catch (error) {
+            throw new Error('Database query failed: ' + error.message);
+        }
+    }
 }

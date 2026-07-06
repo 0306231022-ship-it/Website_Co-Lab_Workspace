@@ -238,7 +238,7 @@ function ChiTietKhachHang(){
                                                 <td className="py-3.5 px-4 text-slate-600 font-medium">
                                                     <div>{fun.formatDate(item.KHUNG_BATDAU)}</div>
                                                     <div className="text-[10px] text-slate-400 font-normal font-mono">
-                                                        {fun.formatTime(item.KHUNG_BATDAU)} - {item.KHUNG_KETTHUC}
+                                                        {fun.formatTime(item.KHUNG_BATDAU)} - {fun.formatTime(item.KHUNG_KETTHUC)}
                                                     </div>
                                                 </td>
                                                 <td className="py-3.5 px-4">

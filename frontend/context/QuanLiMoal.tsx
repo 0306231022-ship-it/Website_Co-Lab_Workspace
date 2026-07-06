@@ -8,6 +8,8 @@ import ThemGiaMoi from "@/app/Modal/ThemGia";
 import ThemChiNhanh from "@/app/Modal/ThemChiNhanh";
 import ThemKhongGian from "@/app/Modal/ThemKhongGian";
 import ChinhSuaChiNhanh from "@/app/Modal/ChinhSuaChiNhanh";
+import ChinhSuaKhongGian from "@/app/Modal/ChinhSuaKhongGian";
+import CapTrangThietBi from "@/app/Modal/CapTrangThietBi";
 const MODAL_REGISTRY = {
     'DangKy' : SignUpForm,
     'formDangKy' : DangKy,
@@ -16,7 +18,9 @@ const MODAL_REGISTRY = {
     'ThenGia' : ThemGiaMoi,
     'ThemChiNhanh' : ThemChiNhanh,
     'ThemKhongGian' : ThemKhongGian,
-    'ChinhSuaChiNhanh' : ChinhSuaChiNhanh
+    'ChinhSuaChiNhanh' : ChinhSuaChiNhanh,
+    'ChinhSuaKhongGian' : ChinhSuaKhongGian,
+    'CapThietBi' : CapTrangThietBi
 };
 
 // Khai báo kiểu dữ liệu cho các key (Tên trang) hợp lệ trong hệ thống

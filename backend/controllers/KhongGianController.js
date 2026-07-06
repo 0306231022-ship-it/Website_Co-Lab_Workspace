@@ -2,7 +2,9 @@
 import ChiNhanhModel from '../models/ChiNhanhModel.js';
 import ChiTietThietBiModel from '../models/ChiTiet_ThietBiModel.js';
 import KhongGianModel from '../models/KhongGianModel.js';
+import DatLichModel from '../models/LichDatModel.js';
 import GheModel from '../models/gheModel.js';
+import LichDatController from './LichDatController.js';
 import { body, query, validationResult } from 'express-validator';
 export default class KhongGianController{
     static async DanhSach_KhongGian(req, res) {
@@ -141,7 +143,7 @@ export default class KhongGianController{
              const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 return res.status(400).json({
-                    success: false,
+                    validate:true,
                     message: 'Dữ liệu không hợp lệ!',
                     errors: errors.array().map(err => err.msg)
                 });
@@ -167,15 +169,15 @@ export default class KhongGianController{
     static async ChinhAnh(req,res){
         try {
             const dulieu = req.body;
-       const files = req.files;
-       let pathFile = files[0].filename;
-       let DuongDan = 'uploads/KhongGian/' + pathFile;
-        if(!pathFile){
-            return res.json({
-                status:true,
-                message:'Lỗi tải ảnh!'
-            })
-        };
+            const files = req.files;
+            let pathFile = files[0].filename;
+            let DuongDan = 'uploads/KhongGian/' + pathFile;
+            if(!pathFile){
+                return res.json({
+                    status:true,
+                    message:'Lỗi tải ảnh!'
+                })
+            };
             const dd_db = await KhongGianModel.LayChiTiet(dulieu.IDKG);
             const dd = dd_db[0].HINHANH;
             const xoa = xoaFileCu(dd);
@@ -183,6 +185,13 @@ export default class KhongGianController{
                 return res.status(500).json({
                     success:false,
                     message:'lỗi khi thao tác hệ thống!'
+                })
+            }
+            const kiemtra = await KhongGianModel.kiemtraid(dulieu.IDKG);
+            if(!kiemtra){
+                return res.status(401).json({
+                    success:false,
+                    message:'ID không gian không tồn tại!'
                 })
             }
             const update = await KhongGianModel.CapNhatAnh(dulieu.IDKG,DuongDan);
@@ -349,13 +358,11 @@ export default class KhongGianController{
                     }
                 })
             }
-            //return thêm trạng thái ghế
-
         } catch (error) {
              return res.status(500).json({
-                        success: false,
-                        message: 'Chi tiết không gian thất bại: ' + error.message
-                    });
+                success: false,
+                message: 'Chi tiết không gian thất bại: ' + error.message
+            });
         }
     }
     static async TimKiem_KhongGian(req, res) {
@@ -383,6 +390,65 @@ export default class KhongGianController{
             })
         }
     }
+    static async thongTin_KhongGian(req,res){
+        const id = req.query.id;
+        try {
+            const kiemtra = await KhongGianModel.kiemtraid(id);
+            if(!kiemtra){
+                return res.status(401).json({
+                    validate:true,
+                    message:'Không tìm thấy id không gian!'
+                })
+            }
+            const [ketqua1 ,ketqua2 ] = await Promise.all([
+                KhongGianModel.LayChiTiet(id),
+                DatLichModel.LichDatCuoi_IDPHONG(id)
+            ]) 
+            if(!ketqua1){
+                return res.status(401).json({
+                    success:false,
+                    message:'Không tìm thấy thông tin không gian!'
+                })
+            }
+            return res.json({
+                success:true,
+                dulieu:{
+                    KhongGian:ketqua1,
+                    LichDatCuoi:ketqua2
+                }
+            })
+        } catch (error) {
+             return res.status(500).json({
+                success: false,
+                message: 'Thông tin chi tiêt không gian thất bại: ' + error.message
+            })
+        }
+    }
+    static async ThongKe(req,res){
+        const id = req.query.id;
+        try {
+            const kiemtra = await KhongGianModel.kiemtraid(id);
+            if(!kiemtra){
+                return res.status(401).json({
+                    success:false,
+                    message: 'ID không gian không tồn tại!'
+                })
+            }
+            const DoanhThu = await KhongGianModel.ThongKe(id);
+            return res.status(200).json({
+                success:true,
+                dulieu:DoanhThu
+            })
+
+
+        } catch (error) {
+             return res.status(500).json({
+                success: false,
+                message: 'Thông tin doanh thu không gian thất bại: ' + error.message
+            })
+        }
+    }
+    
     
 
 }

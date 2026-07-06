@@ -33,6 +33,8 @@ adminRouter.post('/ChinhSua_TrangThai_KhongGian' , upload.none(), KhongGianContr
 adminRouter.get('/laydanhsachkhonggian' , KhongGianController.DanhSach_KhongGian);
 adminRouter.get('/TimKiem_khonggian', KhongGianController.TimKiem_KhongGian);
 adminRouter.get('/ChiTiet_KhongGian', KhongGianController.ChiTiet_KhongGian);
+adminRouter.get('/ThongTin' , KhongGianController.thongTin_KhongGian);
+adminRouter.get('/thongke' , KhongGianController.ThongKe);
 // =========================================
 // QUẢN LÝ THIẾT BỊ
 adminRouter.post('/CapThietBi' , upload.none(), ChiTietThietBiController.CapThietBi);
@@ -41,6 +43,7 @@ adminRouter.get("/layid", thietbiController.getThietBiById);
 adminRouter.get('/DanhSachThietBi_theoKhongGian', ChiTietThietBiController.DanhSach_ThietBi);
 adminRouter.post("/thietbi",  upload.none(),thietbiController.createThietBi);
 adminRouter.post("/CapNhatThietBi", upload.none(), thietbiController.updateThietBi);
+adminRouter.post('/XoaTB_KG', upload.none(), ChiTietThietBiController.XoaCapThietBi);
 //==========================================
 //QUẢN LÝ DANH MỤC GHẾ
 adminRouter.post("/danhmucghe",  upload.none(),danhmucgheController.createDanhMucGhe);

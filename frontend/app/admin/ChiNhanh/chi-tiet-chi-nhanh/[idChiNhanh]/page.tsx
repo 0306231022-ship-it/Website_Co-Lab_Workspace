@@ -274,7 +274,7 @@ function ChiTietChiNhanh() {
                                                     </button>
                                                 ) : (
                                                     <Link
-                                                        href={`/chi-tiet-chi-nhanh/${idChiNhanh}/chi-tiet-khong-gian/${space.ID_KHONG_GIAN}`}
+                                                        href={`/admin/ChiNhanh/chi-tiet-chi-nhanh/${idChiNhanh}/chi-tiet-khong-gian/${space.ID_KHONG_GIAN}`}
                                                         className="bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white border border-indigo-100 font-bold py-2 px-3 rounded-xl text-xs transition-all duration-300"
                                                     >
                                                         Xem chi tiết
