@@ -8,12 +8,14 @@ import ThemGiaMoi from "@/app/Modal/ThemGia";
 import ThemChiNhanh from "@/app/Modal/ThemChiNhanh";
 import ThemKhongGian from "@/app/Modal/ThemKhongGian";
 import ChinhSuaChiNhanh from "@/app/Modal/ChinhSuaChiNhanh";
+import SuaGia from "@/app/Modal/SuaGia";
 const MODAL_REGISTRY = {
     'DangKy' : SignUpForm,
     'formDangKy' : DangKy,
     'DangNhap' : DangNhap,
     'QuenMatKhau' : QuenMatKhau,
     'ThenGia' : ThemGiaMoi,
+    'SuaGia':SuaGia,
     'ThemChiNhanh' : ThemChiNhanh,
     'ThemKhongGian' : ThemKhongGian,
     'ChinhSuaChiNhanh' : ChinhSuaChiNhanh

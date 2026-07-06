@@ -25,7 +25,7 @@ export interface GiaResponse {
 export default function ChiTietGia() {
   const router = useRouter();
   const params = useParams();
-  
+     const { OpenMoDal } = useModalContext();
   // Lấy ID chuẩn xác từ URL
   const id = params?.ID_GIA || params?.idGia || params?.id || "";
 
@@ -160,13 +160,14 @@ export default function ChiTietGia() {
         </div>
           
         <div className="flex items-center space-x-2 self-start sm:self-auto">
-          <button 
-            type="button" 
-            onClick={() => {/* Thêm logic mở modal chỉnh sửa ở đây */}}
-            className="px-4 py-2 bg-white hover:bg-gray-50 text-gray-600 text-xs font-bold rounded-xl border border-gray-200 transition-all shadow-3xs cursor-pointer flex items-center gap-1.5"
-          >
-            <i className="fa-solid fa-pen-to-square text-slate-400"></i> Chỉnh sửa
-          </button>
+<button 
+    // ĐÃ SỬA: Thay 'undefined' bằng biến 'gia' để truyền toàn bộ dữ liệu qua Modal
+    onClick={() => { OpenMoDal(gia, { TenTrang: 'SuaGia', TieuDe: 'Cập nhật giá', icon: 'fa-solid fa-pen-to-square' }) }}
+    className="w-full sm:w-auto px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer inline-flex items-center justify-center space-x-1.5" 
+>
+    <i className="fa-solid fa-pen-to-square text-[10px]"></i>
+    <span>Chỉnh sửa giá</span>
+</button>
           
           <button 
             type="button" 
