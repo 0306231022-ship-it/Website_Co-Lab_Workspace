@@ -2,7 +2,6 @@ import { execute } from "../config/db.js";
 
 export default class GheModel {
     
-    // 1. Lấy TẤT CẢ ghế trong hệ thống (Không phân trang, vẫn JOIN lấy tên không gian và danh mục)
     static async getIDkhongian(idkhongigan) {
         try {
             
@@ -21,7 +20,14 @@ export default class GheModel {
     static async getById(id) {
         try {
            const[rows]=await execute(`
-            SELECT * FROM ghe WHERE ID_GHE = ?
+           SELECT 
+                g.*, 
+                kg.TEN_KHONG_GIAN, 
+                dmg.TEN_DANHMUC
+             FROM ghe g
+            LEFT JOIN khonggian kg ON g.ID_KHONG_GIAN = kg.ID_KHONG_GIAN
+            LEFT JOIN danhmucghe dmg ON g.ID_DANH_MUC = dmg.ID_DANHMUC
+            WHERE g.ID_GHE = ?
             `,[id])
             return rows[0];
         } catch (error) {
@@ -76,6 +82,19 @@ export default class GheModel {
        try {
              const [test] = await execute("SELECT * FROM ghe WHERE ID_GHE = ?", [id]);
              return test.length>0 ? true : false;
+        } catch (error) {
+             console.error(` Lỗi Database (${id}):`, error.message);
+            throw new Error("Không thể truy vấn thông tin ghe!");
+        }
+    }
+    static async CapNhatToaDo(toax,toay,id){
+        try {
+            const [update] = await execute(`
+                 UPDATE ghe 
+                 SET TOA_X = ?, TOA_Y = ? 
+                WHERE ID_GHE = ?
+                `,[toax,toay,id])
+            return update.affectedRows>0
         } catch (error) {
              console.error(` Lỗi Database (${id}):`, error.message);
             throw new Error("Không thể truy vấn thông tin ghe!");

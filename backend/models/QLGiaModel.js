@@ -72,6 +72,18 @@ export default class giaModel {
             throw new Error("Không thể truy vấn thông tin GIA!");
         }
     }
+    static async LayBangGia_KhongGian(){
+        try {
+            const [kq] = await execute(`
+                SELECT ID_GIA, DON_GIA
+                FROM banggia
+                `,[]);
+            return kq;
+        } catch (error) {
+            console.error(` Lỗi Database:`, error.message);
+            throw new Error("Không thể truy vấn thông tin GIA!");
+        }
+    }
 
     
 };

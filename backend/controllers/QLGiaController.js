@@ -125,9 +125,6 @@ static async  createGia (req, res)  {
             return res.status(500).json({ success: false, message: error.message });
         }
 };
-
-
-
  static async updateGia(req, res) {
         try {
             const { ID_GIA, TEN_GIA, MOTA, DON_GIA, DANHMUC_GHE, NGAY_KET_THUC } = req.body;
@@ -194,6 +191,17 @@ static async  createGia (req, res)  {
             });
         } catch (error) {
             return res.status(500).json({ success: false, message: error.message });
+        }
+    }
+    static async LayBangGia_KhongGian(req,res){
+        try {
+            const giatri = await giaModel.LayBangGia_KhongGian();
+            return res.status(200).json({
+                success:true,
+                dulieu:giatri
+            })
+        } catch (error) {
+             return res.status(500).json({ success: false, message: error.message });
         }
     }
 }

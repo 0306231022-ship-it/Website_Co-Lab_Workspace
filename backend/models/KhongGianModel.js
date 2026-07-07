@@ -4,10 +4,10 @@ export default class KhongGianModel {
     static async ThemKG(dulieu,hinhanh){
         try {
             const [them] = await execute(`
-                 INSERT INTO khonggian(TEN_KHONG_GIAN,LOAI_KHONG_GIAN,ID_CHI_NHANH,HINHANH,TRANG_THAI)
-                 VALUE(?,?,?,?,1)
-                `,[dulieu.TenKhongGian,dulieu.LoaiKG,dulieu.IDCN,hinhanh]);
-            return them.affectedRows>0 ? true : false
+                 INSERT INTO khonggian(TEN_KHONG_GIAN,LOAI_KHONG_GIAN,ID_CHI_NHANH,HINHANH,TRANG_THAI, ID_GIA)
+                 VALUE(?,?,?,?,1,?)
+                `,[dulieu.TenKhongGian,dulieu.LoaiKG,dulieu.IDCN,hinhanh, dulieu.IDBangGia || null]);
+            return them.affectedRows>0
         } catch (error) {
             throw new Error('Database query failed: ' + error.message);
         }
@@ -272,6 +272,19 @@ export default class KhongGianModel {
         throw new Error('Database query failed: ' + error.message);
     }
 }
+    static async ChinhSua_Gia(IDKG,IDBangGia){
+        try {
+            const [update] = await execute(`
+                UPDATE khonggian
+                SET ID_GIA = ?
+                WHERE ID_KHONG_GIAN = ?
+                `,[IDBangGia,IDKG]);
+            return update.affectedRows > 0
+        } catch (error) {
+             console.error("Lỗi chỉnh sửa giá:", error);
+        throw new Error('Database query failed: ' + error.message);
+        }
+    }
     
 
 

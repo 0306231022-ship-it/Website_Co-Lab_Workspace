@@ -5,7 +5,7 @@ import dmGhe from "../models/danhmucgheModel.js";
 import { body, param, query, validationResult } from "express-validator";
 import ChiTietThietBiModel from "../models/ChiTiet_ThietBiModel.js";
 import DatLichModel from "../models/LichDatModel.js";
-
+import { io } from '../server.js';
 export default class gheController {
     
 
@@ -54,8 +54,7 @@ export default class gheController {
     static async createGhe(req, res) {
         try {
             const { TEN_GHE, TOA_X, TOA_Y, ID_KHONG_GIAN, ID_DANH_MUC } = req.body;
-            
-            // Validate toàn bộ các trường của bảng ghế bằng Promise.all giống hệt mẫu
+        
             await Promise.all([
                 body('TEN_GHE')
                     .notEmpty()
@@ -114,7 +113,10 @@ export default class gheController {
                     message: 'Thêm ghế thất bại!'
                 });
             }
-            res.status(200).json({ success: true, message: "Thêm ghế thành công!", id: insertId });
+            const Ghe = await GheModel.getIDkhongian(ID_KHONG_GIAN);
+            console.log(Ghe)
+            io.emit('ThemGhe', { ThongTinGhe: Ghe });
+            res.status(200).json({ success: true, message: "Thêm ghế thành công!" });
         } catch (error) {
             res.status(500).json({ success: false, message: error.message });
         }
@@ -199,4 +201,76 @@ export default class gheController {
             res.status(500).json({ success: false, message: error.message });
         }
     }
+    static async LayDanhSach_Theo_IDKG(req,res){
+        const id = req.query.id;
+        try {
+            if(!id || id<0){
+                return res.status(401).json({
+                    success:false,
+                    message:'Vui lòng kiểm tra lại thông tin!'
+                })
+            }
+            const kiemtra = await KhongGianModel.kiemtraid(id);
+            if(!kiemtra){
+                return res.status(401).json({
+                    success:false,
+                    message:'Không tìm thấy ID không gian!'
+                })
+            }
+            const Ghe = await GheModel.getIDkhongian(id);
+            return res.status(200).json({
+                success:true,
+                dulieu:Ghe
+            })
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+
+    static async CapNhat_TaoDo_Ghe(req, res){
+        try {
+            const stringDanhSachGhe = req.body.danhSachGhe;
+            if (!stringDanhSachGhe) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Không nhận được dữ liệu danh sách ghế."
+                });
+            }
+            const danhSachGhe = JSON.parse(stringDanhSachGhe);
+            if (!Array.isArray(danhSachGhe) || danhSachGhe.length === 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Dữ liệu ghế không đúng định dạng mảng hoặc bị rỗng."
+                });
+            }
+            let coLoiCapNhat = false;
+            await Promise.all(
+                danhSachGhe.map(async (ghe) => {
+                    const { ID_GHE, TOA_X, TOA_Y } = ghe;
+                    const CapNhat = await GheModel.CapNhatToaDo(TOA_X,TOA_Y,ID_GHE);
+                    if (!CapNhat) {
+                        coLoiCapNhat = true;
+                    }
+            })
+        );
+        if (coLoiCapNhat) {
+            return res.status(400).json({
+                success: false,
+                message: 'Có lỗi xảy ra, một số ghế cập nhật tọa độ thất bại!'
+            });
+        }
+        return res.status(200).json({
+            success: true,
+            message: "Cập nhật vị trí sơ đồ ghế thành công!"
+        });
+
+    } catch (error) {
+        console.error("Lỗi xử lý tại Controller cập nhật sơ đồ ghế:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi hệ thống, không thể lưu sơ đồ ghế.",
+            error: error.message
+        });
+    }
+};
 }

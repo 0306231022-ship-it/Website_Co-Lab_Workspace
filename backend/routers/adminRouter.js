@@ -30,6 +30,7 @@ adminRouter.post('/ThemKhongGian' , createUpload('KhongGian').any(), KhongGianCo
 adminRouter.post('/ChinhSuaTen_kg', upload.none() , KhongGianController.ChinhSua_TenKhongGian );
 adminRouter.post('/ChinhSuaAnh', createUpload('KhongGian').any(), KhongGianController.ChinhAnh);
 adminRouter.post('/ChinhSua_TrangThai_KhongGian' , upload.none(), KhongGianController.ChinhSua_TrangThai_KhongGian);
+adminRouter.post('/ChinhSuaGia_kg' , upload.none(), KhongGianController.ChinhSua_Gia);
 adminRouter.get('/laydanhsachkhonggian' , KhongGianController.DanhSach_KhongGian);
 adminRouter.get('/TimKiem_khonggian', KhongGianController.TimKiem_KhongGian);
 adminRouter.get('/ChiTiet_KhongGian', KhongGianController.ChiTiet_KhongGian);
@@ -48,6 +49,7 @@ adminRouter.post('/XoaTB_KG', upload.none(), ChiTietThietBiController.XoaCapThie
 //QUẢN LÝ DANH MỤC GHẾ
 adminRouter.post("/danhmucghe",  upload.none(),danhmucgheController.createDanhMucGhe);
 adminRouter.post("/capnhatdanhmucghe",upload.none(),danhmucgheController.updateDanhMucGhe);
+adminRouter.get('/loaidanhmuc', danhmucgheController.LayDL_DnhMuc);
 //============================================
 //QUẢN LÝ LỊCH ĐẶT
 adminRouter.get('/danhsach_lichdat', LichDatController.DanhSachDatLich);
@@ -58,6 +60,8 @@ adminRouter.get('/lichdat_hoatdong' , LichDatController.LichDat_HoatDong);
 adminRouter.post("/themghe",upload.none(),gheController.createGhe);
 adminRouter.get('/ChiTiet_ghe', gheController.getGheById);
 adminRouter.post("/capnhatghe",upload.none(),gheController.updateGhe);
+adminRouter.get('/danhsachghe_idkg' , gheController.LayDanhSach_Theo_IDKG);
+adminRouter.post('/CapNhat_ToaDo' , upload.none(), gheController.CapNhat_TaoDo_Ghe);
 //=========================================
 //QUẢN LÝ HÓA DƠN
 adminRouter.post("/themhoadon",upload.none(),hoadonController.createHoaDon);
@@ -65,6 +69,6 @@ adminRouter.get("/chitiethoadon",hoadonController.getHoaDonById);
 //Quản lý giá
 adminRouter.post("/themgiamoi",upload.none(),giaController.createGia);
 adminRouter.get("/layDS_Gia",giaController.getAllGia);
-
+adminRouter.get('/ChonGia' , giaController.LayBangGia_KhongGian);
 console.log("✅ adminRouter loaded");
 export default adminRouter;

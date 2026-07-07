@@ -6,6 +6,8 @@ export interface Ghe {
     TRANG_THAI: number;
     ID_KHONG_GIAN: number;
     ID_DANH_MUC: number;
+    TEN_KHONG_GIAN: string,
+    TEN_DANHMUC: string
 }
 export interface DanhSachThietBi {
     DanhSach: Ghe[];

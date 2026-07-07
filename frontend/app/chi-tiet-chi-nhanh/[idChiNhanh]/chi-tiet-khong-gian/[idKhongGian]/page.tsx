@@ -2,7 +2,7 @@
 import * as ThongBao from '@/FUNCTION/ThongBao';
 import * as api from '@/API/API';
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { objChiNhanh } from '@/interface/ChiNhanh';
 import { KhongGian } from '@/interface/KhongGian';
 import { ThietBi } from '@/interface/ThietBi';
@@ -40,6 +40,8 @@ function ChiTietKhongGian() {
       } catch (error) {
          console.error("Lỗi khi tải thông tin không gian:", error);
          ThongBao.ThongBao_CanhBao('Lỗi khi tải thông tin không gian');
+      } finally {
+        setloading(false)
       }
     }
     laydl();
@@ -97,6 +99,14 @@ function ChiTietKhongGian() {
     
     )
   }
+    if (loading) {
+        return (
+            <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
+                <div className="w-10 h-10 border-4 border-slate-200 border-t-brand-600 rounded-full animate-spin"></div>
+                <p className="font-medium text-slate-500 text-sm tracking-wide">Đang tải dữ liệu không gian...</p>
+            </div>
+        );
+    }
   return (
     <>
       {/* Thêm px-4 vào container chính */}
@@ -267,7 +277,7 @@ function ChiTietKhongGian() {
     </div>
 
     {/* Bản đồ ghế canvas hiển thị cố định kích thước */}
-    <SoDoGheCanvas danhSachGhe={ghe} onGheClick={handleGheSelect} />
+    <SoDoGheCanvas danhSachGhe={ghe} onGheClick={handleGheSelect}  isReadOnly={true} />
      <div className="mt-4 p-3 bg-gray-50 border border-gray-200 text-gray-400 rounded-xl text-center text-xs font-medium max-w-md mx-auto">Vui lòng chọn một ghế trống bất kỳ trên sơ đồ</div>
   </div>
 </div>

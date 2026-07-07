@@ -3,6 +3,7 @@ import ChiNhanhModel from '../models/ChiNhanhModel.js';
 import ChiTietThietBiModel from '../models/ChiTiet_ThietBiModel.js';
 import KhongGianModel from '../models/KhongGianModel.js';
 import DatLichModel from '../models/LichDatModel.js';
+import giaModel from '../models/QLGiaModel.js';
 import GheModel from '../models/gheModel.js';
 import LichDatController from './LichDatController.js';
 import { body, query, validationResult } from 'express-validator';
@@ -103,6 +104,22 @@ export default class KhongGianController{
                     errors: errors.array().map(err => err.msg)
                 });
             }
+            if(dulieu.IDBangGia){
+                if(dulieu.IDBangGia<0){
+                    return res.status(401).json({
+                        success:false,
+                        message:'Vui lòng kiểm tra thông tin giá!'
+                    })
+                }
+                const kiemtra = await giaModel.testid(dulieu.IDBangGia);
+                if(!kiemtra){
+                    return res.status(401).json({
+                        success:false,
+                        message:'Vui lòng kiểm tra thông tin giá!'
+                    })
+                }
+            }
+
             const themKG = await KhongGianModel.ThemKG(dulieu,DuongDan);
             if(!themKG){
                 return res.status(500).json({
@@ -445,6 +462,55 @@ export default class KhongGianController{
              return res.status(500).json({
                 success: false,
                 message: 'Thông tin doanh thu không gian thất bại: ' + error.message
+            })
+        }
+    }
+    static async ChinhSua_Gia(req,res){
+        const dulieu = req.body;
+        try {
+             await Promise.all([
+                body('IDKG')
+                    .notEmpty().withMessage('ID không gian là thông tin bắt buộc')
+                    .isInt({ min: 0 }).withMessage('Giá trị nhập vào phải là một số nguyên!')
+                    .custom(async (value) => {
+                         const kiemtra = await KhongGianModel.kiemtraid(value);
+                         if (!kiemtra) throw new Error('ID không gian không tồn tại!');
+                        return true;
+                    })
+                    .run(req),
+                body('IDBangGia')
+                    .notEmpty().withMessage('id bảng giá không được bỏ trống!')
+                    .isInt().withMessage('ID ghế phải là số nguyên')
+                    .custom(async (value) => {
+                        const check = await giaModel.testid(value)
+                        if (!check) throw new Error('ID không tồn tại!');
+                        return true;
+                    })
+                    .run(req),
+            ])
+            const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                validate: true,
+                message: 'Dữ liệu không hợp lệ!',
+                errors: errors.array().map(err => err.msg)
+            });
+        }
+            const chinhsua = await KhongGianModel.ChinhSua_Gia(dulieu.IDKG,dulieu.IDBangGia);
+            if(!chinhsua){
+                return res.status(401).json({
+                    success:true,
+                    message:'Cập nhật thông tin thất bại!'
+                })
+            }
+            return res.status(200).json({
+                success:true,
+                message:'Cập nhật thông tin thành công!'
+            })
+        } catch (error) {
+              return res.status(500).json({
+                success: false,
+                message: 'Cập nhật thông tin không gian thất bại: ' + error.message
             })
         }
     }

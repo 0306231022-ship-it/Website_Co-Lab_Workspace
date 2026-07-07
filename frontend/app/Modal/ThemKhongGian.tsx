@@ -4,20 +4,45 @@ import { useParams, useRouter } from 'next/navigation';
 import Image from "next/image";
 import * as api from "@/API/API";
 import * as ThongBao from "@/FUNCTION/ThongBao";
+import * as fun from '@/FUNCTION/function';
+// Định nghĩa interface dữ liệu bảng giá nhận về từ API
+interface BangGia {
+  ID_GIA: number;
+  DON_GIA: number;
+}
 
 function ThemKhongGian() {
   const router = useRouter();
-const { idChiNhanh } = useParams();
+  const { idChiNhanh } = useParams();
+  
   // --- 1. KHỞI TẠO CÁC BIẾN STATE ---
   const [tenKhongGian, setTenKhongGian] = useState<string>("");
   const [loaiKhongGian, setLoaiKhongGian] = useState<number>(1); // 1: Không gian chung, 0: Phòng cho thuê
   const [anhKhongGian, setAnhKhongGian] = useState<File | null>(null);
   
+  // Các State phục vụ phần đơn giá phòng cho thuê
+  const [danhSachGia, setDanhSachGia] = useState<BangGia[]>([]); 
+  const [idBangGia, setIdBangGia] = useState<string>(""); 
+
   const [previewUrl, setPreviewUrl] = useState<string>(""); // Xem trước ảnh
   const [errors, setErrors] = useState<string[]>([]); // Mảng quản lý lỗi validate
   const [loading, setLoading] = useState<boolean>(false);
 
-  // --- 2. XỬ LÝ XEM TRƯỚC VÀ THAY ĐỔI ẢNH ---
+  useEffect(() => {
+    const layDanhSachGia = async () => {
+      try {
+        const res = await api.CallAPI(undefined, { url: "/admin/ChonGia", PhuongThuc: 2 });
+        if (res.success) {
+          setDanhSachGia(res.dulieu || []);
+        }
+      } catch (error) {
+        console.error("Lỗi lấy danh sách bảng giá:", error);
+      }
+    };
+    if (loaiKhongGian === 0) {
+      layDanhSachGia();
+    }
+  }, [loaiKhongGian]);
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
@@ -37,7 +62,7 @@ const { idChiNhanh } = useParams();
     };
   }, [previewUrl]);
 
-  // --- 3. HÀM KIỂM TRA VALIDATE DỮ LIỆU ĐẦU VÀO ---
+  // --- 4. HÀM KIỂM TRA VALIDATE DỮ LIỆU ĐẦU VÀO ---
   const validateForm = (): boolean => {
     const listErrors: string[] = [];
 
@@ -45,6 +70,10 @@ const { idChiNhanh } = useParams();
       listErrors.push("Tên không gian không được phép bỏ trống!");
     } else if (tenKhongGian.trim().length < 3) {
       listErrors.push("Tên không gian phải nhập tối thiểu từ 3 ký tự trở lên!");
+    }
+
+    if (loaiKhongGian === 0 && !idBangGia) {
+      listErrors.push("Vui lòng chọn cấu hình đơn giá áp dụng cho phòng cho thuê!");
     }
 
     if (!anhKhongGian) {
@@ -59,26 +88,31 @@ const { idChiNhanh } = useParams();
     return listErrors.length === 0;
   };
 
-  // --- 4. HÀM GỬI DỮ LIỆU LÊN SERVER DB (GỌI QUA EVENT CLICK) ---
+  // --- 5. HÀM GỬI DỮ LIỆU LÊN SERVER ---
   const handleActionSubmit = async () => {
-   if (!validateForm()) {
+    if (!validateForm()) {
       ThongBao.ThongBao_CanhBao("Vui lòng kiểm tra lại các thông tin nhập lỗi!");
       return;
     }
     try {
-      setErrors([])
+      setErrors([]);
       setLoading(true);
       const formData = new FormData();
       formData.append("TenKhongGian", tenKhongGian.trim());
       formData.append("LoaiKG", loaiKhongGian.toString());
       formData.append("IDCN", String(idChiNhanh));
       formData.append("file", anhKhongGian!);
+      
+      // Nếu là phòng cho thuê thì đính kèm thêm ID bảng giá đã chọn
+      if (loaiKhongGian === 0) {
+        formData.append("IDBangGia", idBangGia);
+      }
 
       const res = await api.CallAPI(formData, {
         url: "/admin/ThemKhongGian",
         PhuongThuc: 1 
       });
-       if(res.validate){
+      if (res.validate) {
         setErrors(res.errors);
       }
       if (res.success) {
@@ -87,8 +121,8 @@ const { idChiNhanh } = useParams();
         setLoaiKhongGian(1);
         setAnhKhongGian(null);
         setPreviewUrl("");
+        setIdBangGia("");
         setErrors([]);
-        
       } else {
         ThongBao.ThongBao_Loi(res.message || "Tạo không gian thất bại.");
       }
@@ -199,6 +233,42 @@ const { idChiNhanh } = useParams();
             </div>
           </div>
         </div>
+
+        {/* 🌟 PHẦN THÊM MỚI: CHỌN ĐƠN GIÁ (CHỈ HIỆN KHI LÀ PHÒNG CHO THUÊ) */}
+        {loaiKhongGian === 0 && (
+          <div className="space-y-2 p-4 bg-purple-50/40 border border-purple-100 rounded-2xl transition-all animate-fadeIn">
+            <label className="block text-xs font-black text-purple-700 uppercase tracking-widest">
+              Đơn giá phòng cho thuê <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-purple-500">
+                <i className="fa-solid fa-tags text-sm"></i>
+              </span>
+              <select
+                value={idBangGia}
+                onChange={(e) => {
+                  setIdBangGia(e.target.value);
+                  setErrors(prev => prev.filter(err => !err.includes("đơn giá")));
+                }}
+                className={`w-full pl-11 pr-10 py-3 bg-white border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all text-gray-900 font-semibold appearance-none cursor-pointer ${
+                  errors.some(err => err.includes("đơn giá"))
+                    ? "border-red-500 focus:ring-red-500/20 focus:border-red-500"
+                    : "border-gray-200 focus:ring-purple-500/20 focus:border-purple-600"
+                }`}
+              >
+                <option value="" className="text-gray-400 font-normal">-- Chọn cấu hình giá phòng áp dụng --</option>
+                {danhSachGia.map((item) => (
+                  <option key={item.ID_GIA} value={item.ID_GIA} className="text-gray-800">
+                     ({fun.formatCurrency(item.DON_GIA)} / giờ)
+                  </option>
+                ))}
+              </select>
+              <span className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-gray-400">
+                <i className="fa-solid fa-chevron-down text-xs"></i>
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Input: Hình ảnh + Khu vực Preview */}
         <div className="space-y-2">

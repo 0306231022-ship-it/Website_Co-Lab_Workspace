@@ -71,6 +71,19 @@ import { execute,beginTransaction, rollbackTransaction, commitTransaction } from
             throw new Error("Không thể truy vấn thông tin danh mục ghế!");
         }
     }
+    static async LayDL_DnhMuc(){
+        try {
+            const [ketqua] = await execute(`
+                SELECT ID_DANHMUC, TEN_DANHMUC
+                FROM danhmucghe
+                WHERE TRANG_THAI=?
+                `,[1]);
+            return ketqua;
+        } catch (error) {
+             console.error(` Lỗi Database (${id}):`, error.message);
+             throw new Error("Không thể truy vấn thông tin danh mục ghế!");
+        }
+    }
 
 
 
