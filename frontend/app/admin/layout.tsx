@@ -143,17 +143,20 @@ export default function AdminLayout({
                     <i className="fa-solid fa-tags w-5 text-center text-base transition-transform duration-300 group-hover:scale-110"></i>
                     <span className="text-sm">Quản lý đơn giá</span>
                  </NavLink>
-                  <NavLink href={`/admin/QuanLyDanhMucGhe`}
+
+               <NavLink href={`/admin/QuanLyDanhMucGhe`}
                         activeClassName="bg-indigo-600"
                         className="flex items-center space-x-3  text-white px-4 py-2.5 rounded-xl transition-all font-semibold shadow-md">
-                    <i className="fa-solid fa-tags w-5 text-center text-base transition-transform duration-300 group-hover:scale-110"></i>
+                    <i className="fa-solid fa-chair w-5 text-center text-base transition-transform duration-300 group-hover:scale-110"></i>
                     <span className="text-sm">Quản lý danh mục ghế</span>
-                 </NavLink>
-                
-                  <a href="#" className="flex items-center space-x-3 text-slate-400 hover:bg-slate-800/50 hover:text-indigo-400 hover:translate-x-1 px-4 py-2.5 rounded-xl transition-all duration-300 font-medium group">
+                  </NavLink>
+                  
+                   <NavLink href={`/admin/QuanLyThietBi`}
+                        activeClassName="bg-indigo-600"
+                        className="flex items-center space-x-3  text-white px-4 py-2.5 rounded-xl transition-all font-semibold shadow-md">
                     <i className="fa-solid fa-laptop-house w-5 text-center text-base transition-transform duration-300 group-hover:scale-110"></i>
                     <span className="text-sm">Quản lý trang thiết bị</span>
-                  </a>
+                  </NavLink>
                 </div>
               </div>
             </nav>

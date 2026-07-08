@@ -36,7 +36,7 @@ adminRouter.get('/ChiTiet_KhongGian', KhongGianController.ChiTiet_KhongGian);
 // =========================================
 // QUẢN LÝ THIẾT BỊ
 adminRouter.post('/CapThietBi' , upload.none(), ChiTietThietBiController.CapThietBi);
-adminRouter.get("/thietbi", thietbiController.getAllThietBi);
+adminRouter.get("/danhsachthietbi", thietbiController.getAllThietBi);
 adminRouter.get("/layid", thietbiController.getThietBiById);
 adminRouter.get('/DanhSachThietBi_theoKhongGian', ChiTietThietBiController.DanhSach_ThietBi);
 adminRouter.post("/thietbi",  upload.none(),thietbiController.createThietBi);

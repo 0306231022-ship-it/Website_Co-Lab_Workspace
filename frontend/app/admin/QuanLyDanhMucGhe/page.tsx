@@ -51,8 +51,8 @@ export default function DanhMucGhe() {
                         setPagination(response.pagination);
                     }
                 }
-            } catch (error) {
-                console.error("Lỗi khi lấy danh sách danh mục:", error);
+            } catch  {
+                ThongBao.ThongBao_Loi("Lỗi khi lấy danh sách danh mục:");
             } finally {
                 setIsLoading(false);
             }
