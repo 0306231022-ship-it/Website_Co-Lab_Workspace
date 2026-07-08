@@ -33,10 +33,11 @@ function ThongTin({DuLieu} : { DuLieu : LichDat}) {
   useEffect(()=>{
     const layGT = async()=>{
         setloading(true)
+        ///ThongTin_ghe_datdon
         try {
-            const data = await api.CallAPI(undefined,{url: `/admin/DanhSach_lichDat_theoidghe_Hientai?ID_GHE=${DuLieu.thongTinGhe.ID_GHE}`, PhuongThuc:2 });
-            if (data && data.success) {
-                setLichDaDat(data.dulieu || []);
+            const data1 = await api.CallAPI(undefined,{url: `/admin/DanhSach_lichDat_theoidghe_Hientai?ID_GHE=${DuLieu.thongTinGhe.ID_GHE}`, PhuongThuc:2 });
+            if (data1 && data1.success) {
+                setLichDaDat(data1.dulieu || []);
             } else {
                 setLichDaDat([]);
             }
@@ -81,7 +82,6 @@ function ThongTin({DuLieu} : { DuLieu : LichDat}) {
         dataToSend.append('KHUNG_KETTHUC' , String(fun.formatToBackendDateTime(gioKetThuc)));
         dataToSend.append("LoaiND", String(0));
         const DatLich = await api.CallAPI(dataToSend,{url:'/nguoiDung/LichDat', PhuongThuc:1});
-        alert(JSON.stringify(DatLich))
          if(DatLich.validate){
             setErr(DatLich.errors);
             ThongBao.ThongBao_CanhBao(DatLich.message)
@@ -134,7 +134,7 @@ function ThongTin({DuLieu} : { DuLieu : LichDat}) {
           <div className="flex items-center justify-between mt-5 pt-4 border-t border-slate-100">
     
             <div className="text-right">
-              <span className="text-2xl font-black text-blue-600">{DuLieu.thongTinGhe.ID_GHE}</span>
+              <span className="text-2xl font-black text-blue-600">35.000 đ</span>
               <span className="text-xs font-bold text-slate-400"> / giờ</span>
             </div>
           </div>
@@ -187,7 +187,70 @@ function ThongTin({DuLieu} : { DuLieu : LichDat}) {
           </div>
 
           {/* Hàng 3: DANH SÁCH LỊCH ĐÃ ĐẶT (Được load dựa theo Ngày ở trên) */}
-         
+             <div>
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <i className="fa-solid fa-calendar-xmark text-slate-400"></i> Lịch kín ngày : {fun.formatDate(ngayDat)}
+              </h4>
+            </div>
+            
+            <div className="space-y-2 max-h-32 overflow-y-auto pr-1">
+                    {
+                      loading ? (
+                        <>
+                            <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
+                <div className="w-10 h-10 border-4 border-slate-200 border-t-brand-600 rounded-full animate-spin"></div>
+                <p className="font-medium text-slate-500 text-sm tracking-wide">Đang tải dữ liệu không gian...</p>
+            </div>
+                        </>
+                      ): (
+                      
+                            lichDaDat && lichDaDat.length > 0 ? (
+                            <div className="space-y-2 max-h-48 pr-1 scrollbar-thin scrollbar-thumb-rose-200">
+                              {lichDaDat.map((item, index) => (
+                                <div
+                                  key={ index} // Sử dụng ID nếu có, nếu không dùng index trực tiếp tại thẻ ngoài cùng
+                                  className="flex items-center justify-between border border-rose-100 bg-gradient-to-r from-rose-50/50 to-transparent px-4 py-3 rounded-xl hover:border-rose-200 transition-all duration-200"
+                                >
+                                  {/* Thời gian */}
+                                  <div className="flex items-center gap-2.5">
+                                    <div className="w-7 h-7 rounded-lg bg-rose-100/60 flex items-center justify-center text-rose-500">
+                                      <i className="fa-regular fa-clock text-xs"></i>
+                                    </div>
+                                    <div className="flex flex-col">
+                                      <span className="text-xs font-bold text-slate-800">
+                                        {fun.formatDate(item.KHUNG_BATDAU)} - {fun.formatDate(item.KHUNG_KETTHUC)}
+                                      </span>
+                                      <span className="text-[10px] text-slate-400">Thời gian cố định</span>
+                                    </div>
+                                  </div>
+                        
+                                  {/* Trạng thái */}
+                                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+                                    Đã đặt
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            /* Giao diện trống (Empty State) tinh tế hơn */
+                            <div className="flex flex-col items-center justify-center py-8 px-4 text-center border border-dashed border-slate-200 rounded-xl bg-slate-50/50">
+                              <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
+                                <i className="fa-regular fa-calendar-xmark text-sm"></i>
+                              </div>
+                              <p className="text-xs font-medium text-slate-500">
+                                Không có lịch đặt nào trong ngày hôm nay
+                              </p>
+                            </div>
+                          )
+                      )
+                    }
+     
+
+            </div>
+            
+          </div>
 
           <div className="border-t border-slate-200 border-dashed my-2"></div>
 
@@ -196,7 +259,7 @@ function ThongTin({DuLieu} : { DuLieu : LichDat}) {
             <div className="flex justify-between items-end mb-4 px-1">
               <div>
                 <span className="text-xs font-bold text-slate-400 block mb-0.5">Vui lòng kiểm tra lại giờ đặt</span>
-                <span className="text-sm font-bold text-slate-800">Tạm tính:</span>
+                <span className="text-sm font-bold text-slate-800">Tạm tính: {tongGio || 0} giờ</span>
               </div>
               <span className="text-3xl font-black text-blue-600 tracking-tight">30.000đ</span>
             </div>

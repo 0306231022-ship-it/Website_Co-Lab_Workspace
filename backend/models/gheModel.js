@@ -100,4 +100,24 @@ export default class GheModel {
             throw new Error("Không thể truy vấn thông tin ghe!");
         }
     }
+    static async laythongtin(dulieu){
+        try {
+            const [truyvan] = await execute(`
+                SELECT g.ID_GHE, 
+                       g.TEN_GHE, 
+                       kg.TEN_KHONG_GIAN, 
+                       bg.DON_GIA
+                FROM ghe g 
+                INNER JOIN khonggian kg ON g.ID_KHONG_GIAN = kg.ID_KHONG_GIAN 
+                INNER JOIN danhmucghe dmg ON g.ID_DANH_MUC = dmg.ID_DANHMUC
+                INNER JOIN banggia bg ON dmg.ID_DANHMUC = bg.DANHMUC_GHE 
+                WHERE g.ID_GHE =?;
+                LIMIT 1
+                `,[dulieu]);
+            return truyvan[0];
+        } catch (error) {
+             console.error(` Lỗi Database:`, error.message);
+            throw new Error("Không thể truy vấn thông tin ghe!");
+        }
+    }
 }

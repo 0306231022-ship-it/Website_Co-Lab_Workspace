@@ -273,4 +273,42 @@ export default class gheController {
         });
     }
 };
+    static async ThonhTin_Ghe_DatDon(req,res){
+        const dulieu = req.query.ID_GHE;
+        try {
+            if(!dulieu){
+                return res.status(401).json({
+                    success:false,
+                    message:'Không tìm thấy ghế cần tìm!'
+                })
+            }
+            const kiemtra = await GheModel.testId(dulieu);
+            if(!kiemtra){
+                return res.status(401).json({
+                    success:false,
+                    message:'Không tồn ghế!'
+                })
+            }
+            const kq = await GheModel.laythongtin(dulieu);
+            if(!kq){
+                return res.status(401).json({
+                    success:false,
+                    message:'Không thể truy vấn ghế!'
+                })
+            }
+            return res.status(200).json({
+                success:true,
+                dulieu : kq
+            })
+
+        } catch (error) {
+            console.error("Lỗi xử lý tại Controller chi tiết ghế:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Lỗi hệ thống, không thể lấy thông tin chi tiết của ghế.",
+                error: error.message
+            });
+    
+        }
+    }
 }

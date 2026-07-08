@@ -307,7 +307,6 @@ export default class LichDatController{
     }
     static async LichDatGhe_TheoNgay(req,res){
         try {
-            console.log(req.query.THOIGIAN)
              await Promise.all([
                 query('THOIGIAN')
                     .notEmpty().withMessage('Thời gian bắt đầu không được để trống.')
@@ -338,7 +337,7 @@ export default class LichDatController{
                     errors: errors.array().map(err => err.msg)
                 });
             }
-            const kq = await DatLichModel.LichDatGhe_TheoNgay(req.query.ID_GHE,new Date(req.query.THOIGIAN));
+            const kq = await DatLichModel.LichDatGhe_TheoNgay(req.query.ID_GHE,req.query.THOIGIAN);
             return res.status(200).json({
                 success:true,
                 dulieu:kq
@@ -350,4 +349,78 @@ export default class LichDatController{
             });
         }
     }
+    static async DanhSachLichDat_HienTai_KhongGian(req,res){
+        const dulieu = req.query.IDKG;
+
+        try {
+            if(!dulieu){
+                return res.status(401).json({
+                    success:false,
+                    message:'không tìm thấy ID không gian!'
+                })
+            }
+            const kiemtra = await KhongGianModel.kiemtraid(dulieu);
+            if(!kiemtra){
+                return res.status(401).json({
+                    success:false,
+                    message: 'ID không tồn tại!'
+                })
+            }
+            const ketqua = await DatLichModel.LichDatKhongGian_HienTai(dulieu);
+            return res.status(200).json({
+                success:true,
+                dulieu:ketqua
+            })
+        } catch (error) {
+             return res.status(401).json({
+                success: false,
+                message: 'Không tìm thấy lịch đặt: ' + error.message
+            });
+        }
+    }
+      static async LichDatKhongGian_TheoNgay(req,res){
+        try {
+             await Promise.all([
+                query('THOIGIAN')
+                    .notEmpty().withMessage('Thời gian bắt đầu không được để trống.')
+                    .isISO8601().withMessage('Thời gian bắt đầu không đúng định dạng ngày tháng.')
+                    .custom((value) => {
+                        if (new Date(value) < new Date()) throw new Error('Không thể đặt lịch cho thời gian trong quá khứ.');
+                        const formats = ['YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DDTHH:mm:ss', 'YYYY-MM-DD'];
+                        const dateCheck = moment(value, formats, true);
+                        if (!dateCheck.isValid()) throw new Error('thời gian bắt đầu không hợp lệ!');
+                        return true;
+                    })
+                    .run(req),
+                query('IDKG')
+                    .notEmpty().withMessage('id không gian không được để trống.')
+                    .isInt({ min: 1 }).withMessage('id không gian phải là một số nguyên hợp lệ.')
+                    .custom(async (value, { req }) => {
+                        const kiemtra = await KhongGianModel.kiemtraid(value)
+                        if(!kiemtra) throw new Error('không gian không tồn tại!');
+                        return true;
+                    })
+                    .run(req),
+            ])
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({
+                    validate:true,
+                    message: 'Dữ liệu không hợp lệ!',
+                    errors: errors.array().map(err => err.msg)
+                });
+            }
+            const kq = await DatLichModel.LichDatKhongGian_TheoNgay(req.query.IDKG,req.query.THOIGIAN);
+            return res.status(200).json({
+                success:true,
+                dulieu:kq
+            })
+        } catch (error) {
+             return res.status(401).json({
+                success: false,
+                message: 'Không tìm thấy lịch đặt: ' + error.message
+            });
+        }
+    }
+
 }

@@ -329,9 +329,38 @@ WHERE LD.ID_LICH_DAT = ?;
                 AND DATE(KHUNG_BATDAU) = ?
                 AND KHUNG_KETTHUC > NOW()
                 ORDER BY KHUNG_BATDAU ASC;
-                `,[ID_GHE,THOIGIAN])
+                `,[ID_GHE,THOIGIAN]);
+            return kq;
         } catch (error) {
-            
+            throw new Error('Database query failed: ' + error.message);
+        }
+    }
+    static async LichDatKhongGian_HienTai(dulieu){
+        try {
+             const [kq] = await execute(`
+                SELECT KHUNG_BATDAU, KHUNG_KETTHUC 
+                FROM lichdat
+                WHERE ID_KHONG_GIAN = ? AND DATE(KHUNG_BATDAU) = CURDATE() AND KHUNG_KETTHUC > NOW()
+                ORDER BY KHUNG_BATDAU ASC;
+                `,[dulieu]);
+            return kq;
+        } catch (error) {
+             throw new Error('Database query failed: ' + error.message);
+        }
+    }
+     static async LichDatKhongGian_TheoNgay(IDkg,THOIGIAN){
+        try {
+            const [kq] = await execute(`
+                 SELECT KHUNG_BATDAU, KHUNG_KETTHUC 
+                FROM lichdat
+                WHERE ID_KHONG_GIAN = ? 
+                AND DATE(KHUNG_BATDAU) = ?
+                AND KHUNG_KETTHUC > NOW()
+                ORDER BY KHUNG_BATDAU ASC;
+                `,[IDkg,THOIGIAN]);
+            return kq;
+        } catch (error) {
+            throw new Error('Database query failed: ' + error.message);
         }
     }
 }
