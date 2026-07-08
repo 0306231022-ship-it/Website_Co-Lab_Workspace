@@ -46,6 +46,7 @@ adminRouter.post("/CapNhatThietBi", upload.none(), thietbiController.updateThiet
 adminRouter.post("/themdanhmucghe",  upload.none(),danhmucgheController.createDanhMucGhe);
 adminRouter.get("/danhsachdanhmucghe",danhmucgheController.getAllDanhMucGhe)
 adminRouter.post("/capnhatdanhmucghe",upload.none(),danhmucgheController.updateDanhMucGhe);
+adminRouter.get("/chitietdanhmucghe",danhmucgheController.getChiTietDanhMuc);
 //============================================
 //QUẢN LÝ LỊCH ĐẶT
 adminRouter.get('/danhsach_lichdat', LichDatController.DanhSachDatLich);

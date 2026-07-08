@@ -230,7 +230,8 @@ export default function DanhMucGhe() {
                                         </td>
                                         <td className="px-6 py-4 text-center">
                                             <div className="flex items-center justify-center gap-1.5">
-                                                <button title="Sửa danh mục" className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all cursor-pointer">
+                                                
+                                                <button  onClick={()=>{OpenMoDal(undefined,{TenTrang:'ChinhSuaDMGhe'})}} title="Sửa danh mục" className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all cursor-pointer">
                                                     <i className="fa-solid fa-pen text-xs"></i>
                                                 </button>
                                                 {item.TRANG_THAI === 1 ? (

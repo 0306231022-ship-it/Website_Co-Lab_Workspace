@@ -32,7 +32,49 @@ static async getAllDanhMucGhe(req, res) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+// =================================================================
+    // CONTROLLER: Lấy chi tiết 1 danh mục ghế để phục vụ trang Chỉnh sửa
+    // =================================================================
+    static async getChiTietDanhMuc(req, res) {
+        try {
+            // 1. Lấy ID từ query (?id=1) hoặc từ params (/1) hoặc body (phòng hờ)
+            const id = req.query.id || req.params.id || req.body.id;
 
+            // 2. Kiểm tra tính hợp lệ của ID phía Controller
+            if (!id || isNaN(Number(id))) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Vui lòng cung cấp mã ID danh mục ghế hợp lệ!"
+                });
+            }
+
+            // 3. Gọi xuống hàm getById vừa tối ưu trong Model
+            // (Lưu ý: Thay DanhMucGheModel bằng tên Class Model thực tế của bạn)
+            const data = await dmGhe.getById(id);
+
+            // 4. Nếu không tìm thấy trong DB (Model trả về null) ➔ Báo lỗi 404
+            if (!data) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Không tìm thấy danh mục ghế này trong hệ thống!"
+                });
+            }
+
+            // 5. Nếu thành công ➔ Trả về JSON đúng cấu trúc Frontend yêu cầu
+            return res.status(200).json({
+                success: true,
+                message: "Lấy thông tin danh mục thành công!",
+                data: data // Trả về object: { ID_DANHMUC: 1, TEN_DANHMUC: "...", TRANG_THAI: 1 }
+            });
+
+        } catch (error) {
+            console.error("❌ Lỗi tại DanhMucGheController.getChiTietDanhMuc:", error.message);
+            return res.status(500).json({
+                success: false,
+                message: "Lỗi máy chủ: Không thể lấy chi tiết danh mục!"
+            });
+        }
+    }
 // [POST] /api/admin/danh mục ghế
 static async createDanhMucGhe (req, res){
     try {
