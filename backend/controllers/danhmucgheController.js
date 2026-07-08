@@ -32,42 +32,6 @@ static async getAllDanhMucGhe(req, res) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
-// [GET] /api/admin/danh mục ghế/:id
-static async getDanhMucGheById (req, res) {
-    try {
-        await Promise.all([
-            body('ID_DANHMUC')
-              .notEmpty().withMessage('id danh mục ghế không được bỏ trống!')
-              .isInt().withMessage('ID danh mục ghế phải là số nguyên')
-              .custom(async (value)=>{
-                const check = await ThietBi.testid(value);
-                if(!check) throw new Error('ID không tồn tại!')
-                return true;
-              })
-            .run(req),
-          
-        ]);
-
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({
-                success: false,
-                message: 'Dữ liệu không hợp lệ!',
-                errors: errors.array().map(err => err.msg)
-            });
-        }
-    
-        const { id } = req.params;
-        const item = await dmGhe.getById(id);
-        //trả về danh sách các danh mục ghế đc cấp phát
-        if (!item) {
-            return res.status(404).json({ success: false, message: "Không tìm thấy danh mục ghế!" });
-        }
-        res.status(200).json({ success: true, data: item });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-};
 
 // [POST] /api/admin/danh mục ghế
 static async createDanhMucGhe (req, res){

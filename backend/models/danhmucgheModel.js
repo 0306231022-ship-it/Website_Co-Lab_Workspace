@@ -2,24 +2,21 @@ import { execute,beginTransaction, rollbackTransaction, commitTransaction } from
  export default class dmGhe{
     static async getAll(offset , limit)  {
         try {
-    
-            // Truy vấn lấy dữ liệu phân trang
             const [rows] = await execute(
-                "SELECT * FROM danhmucghe LIMIT ? OFFSET ?", 
+           `SELECT d.ID_DANHMUC, d.TEN_DANHMUC, d.TRANG_THAI, g.DON_GIA 
+                FROM danhmucghe d
+                LEFT JOIN banggia g ON d.ID_DANHMUC = g.DANHMUC_GHE
+                LIMIT ? OFFSET ?`,
                 [limit, offset]
             );
-
-            // Tính tổng số bản ghi để Frontend biết đường chia trang (Rất quan trọng cho đồ án)
             const [totalRows] = await execute("SELECT COUNT(*) as total FROM danhmucghe");
             const total = totalRows[0]?.total || 0;
-
             return {
                 data: rows,
                 pagination: {
-                    currentPage: p,
-                    limit: l,
+                    
                     totalItems: total,
-                    totalPages: Math.ceil(total / l)
+                    totalPages: Math.ceil(total / limit)
                 }
             };
         } catch (error) {
@@ -27,15 +24,7 @@ import { execute,beginTransaction, rollbackTransaction, commitTransaction } from
             throw new Error("Không thể kết nối đến cơ sở dữ liệu để lấy danh sách!");
         }
     }
-    //  static async getById (id) => {
-    //     try {
-    //         const [rows] = await execute("SELECT * FROM danhmucghe WHERE ID_DANHMUC = ?", [id]);
-    //         return rows[0];
-    //     } catch (error) {
-    //         console.error(` Lỗi Database trong getById (${id}):`, error.message);
-    //         throw new Error("Không thể kết nối đến cơ sở dữ liệu để lấy chi tiết danh mục ghế!");
-    //     }
-    // }
+
     static async create(tenDanhMuc) {
         try {
             const [result] = await execute(
