@@ -105,9 +105,7 @@ function ThongTinGhe({DuLieu} : {DuLieu : dulieu}){
         </div>
 
         <div className="w-full md:w-3/5 p-6 flex flex-col justify-between relative">
-            
-    
-
+        
             <div className="space-y-5">
                 <span className="block text-xs font-black text-gray-400 uppercase tracking-widest">Tình trạng sử dụng hiện tại</span>
 

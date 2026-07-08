@@ -7,6 +7,7 @@ import moment from 'moment'
 export default class LichDatController{
     static async DatLich(req,res){
         const dulieu = req.body;
+        const userId = req.user.id
         try {
             await Promise.all([
                 body('KHUNG_BATDAU')
@@ -31,15 +32,6 @@ export default class LichDatController{
                         return true;
                     })
                     .run(req),
-                body('IDND')
-                    .notEmpty().withMessage('Mã người dùng không được để trống.')
-                    .isInt({ min: 1 }).withMessage('Mã người dùng phải là một số nguyên hợp lệ.')
-                    .custom(async (value, { req }) => {
-                        const kiemtra = await NguoiDungModel.findByid(value);
-                        if(!kiemtra) throw new Error('Người dùng không tồn tại!');
-                        return true;
-                    })
-                    .run(req),
                 body().custom(async (body) => {
                     const { ID_KHONG_GIAN, ID_GHE } = body;
                     if (!ID_KHONG_GIAN && !ID_GHE) throw new Error('Vui lòng chọn Phòng họp hoặc Ghế ngồi.');
@@ -58,12 +50,12 @@ export default class LichDatController{
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 return res.status(400).json({
-                    success: false,
+                    validate:true,
                     message: 'Dữ liệu không hợp lệ!',
                     errors: errors.array().map(err => err.msg)
                 });
             }
-            const DatLich = await DatLichModel.DatLich(dulieu);
+            const DatLich = await DatLichModel.DatLich(dulieu,userId);
             
             if(!DatLich){
                 return res.status(409).json({
@@ -277,6 +269,79 @@ export default class LichDatController{
                 success:true,
                 DanhSach: DanhSach.DanhSach,
                 TongDanhSach:DanhSach.TongDanhSach
+            })
+        } catch (error) {
+             return res.status(401).json({
+                success: false,
+                message: 'Không tìm thấy lịch đặt: ' + error.message
+            });
+        }
+    }
+    static async DanhSach_IDGHE_Ngay_HienTai(req,res){
+        const id= req.query.ID_GHE;
+        try {
+            if(!id){
+                return res.status(401).json({
+                    success:false,
+                    message:'Không tìm thấy id ghế!'
+                })
+            }
+            const kiemtra = await GheModel.testId(id);
+            if(!kiemtra){
+                return res.status(401).json({
+                    success:false,
+                    message:'id ghế không tồn tại!'
+                })
+            }
+            const laykq= await DatLichModel.DanhSach_IDGHE_Ngay_HienTai(id);
+            return res.status(200).json({
+                success:true,
+                dulieu:laykq
+            })
+        } catch (error) {
+            return res.status(401).json({
+                success: false,
+                message: 'Không tìm thấy lịch đặt: ' + error.message
+            });
+        }
+    }
+    static async LichDatGhe_TheoNgay(req,res){
+        try {
+            console.log(req.query.THOIGIAN)
+             await Promise.all([
+                query('THOIGIAN')
+                    .notEmpty().withMessage('Thời gian bắt đầu không được để trống.')
+                    .isISO8601().withMessage('Thời gian bắt đầu không đúng định dạng ngày tháng.')
+                    .custom((value) => {
+                        if (new Date(value) < new Date()) throw new Error('Không thể đặt lịch cho thời gian trong quá khứ.');
+                        const formats = ['YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DDTHH:mm:ss', 'YYYY-MM-DD'];
+                        const dateCheck = moment(value, formats, true);
+                        if (!dateCheck.isValid()) throw new Error('thời gian bắt đầu không hợp lệ!');
+                        return true;
+                    })
+                    .run(req),
+                query('ID_GHE')
+                    .notEmpty().withMessage('id ghế không được để trống.')
+                    .isInt({ min: 1 }).withMessage('id ghế phải là một số nguyên hợp lệ.')
+                    .custom(async (value, { req }) => {
+                        const kiemtra = await GheModel.testId(value);
+                        if(!kiemtra) throw new Error('ghế không tồn tại!');
+                        return true;
+                    })
+                    .run(req),
+            ])
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({
+                    validate:true,
+                    message: 'Dữ liệu không hợp lệ!',
+                    errors: errors.array().map(err => err.msg)
+                });
+            }
+            const kq = await DatLichModel.LichDatGhe_TheoNgay(req.query.ID_GHE,new Date(req.query.THOIGIAN));
+            return res.status(200).json({
+                success:true,
+                dulieu:kq
             })
         } catch (error) {
              return res.status(401).json({

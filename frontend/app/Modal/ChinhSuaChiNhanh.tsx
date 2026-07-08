@@ -16,9 +16,18 @@ function ChinhSuaChiNhanh({ DuLieu }: { DuLieu: objChiNhanh }) {
   );
 
   const [trangThai, setTrangThai] = useState<number>(DuLieu?.TRANG_THAI ?? 1);
-  // Khởi tạo thời gian áp dụng từ database (nếu có)
+  
+  // Định dạng lại thời gian ban đầu từ DB sang dạng YYYY-MM-DDTHH:mm để hiển thị trên HTML5 input
+  const formatDateTimeLocal = (dateStr: string | undefined | null) => {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "";
+    const tzOffset = d.getTimezoneOffset() * 60000;
+    return new Date(d.getTime() - tzOffset).toISOString().slice(0, 16);
+  };
+
   const [thoiGianApDung, setThoiGianApDung] = useState<string>(
-    String(DuLieu?.NGAY_CAP_NHAT)|| "" 
+    formatDateTimeLocal(String(DuLieu?.NGAY_CAP_NHAT))
   );
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -36,6 +45,16 @@ function ChinhSuaChiNhanh({ DuLieu }: { DuLieu: objChiNhanh }) {
     const interval = setInterval(updateMinTime, 60000); // Cập nhật mỗi phút
     return () => clearInterval(interval);
   }, []);
+
+  // Hàm xử lý khi click đổi trạng thái: Xóa trắng giờ cũ để ép nhập giờ mới
+  const handleTrangThaiChange = (status: number) => {
+    setTrangThai(status);
+    if (status !== DuLieu.TRANG_THAI) {
+      setThoiGianApDung(""); // Ép buộc chọn thời gian mới hoàn toàn
+    } else {
+      setThoiGianApDung(formatDateTimeLocal(String(DuLieu?.NGAY_CAP_NHAT))); // Trả về ban đầu nếu đổi ý quay lại trạng thái gốc
+    }
+  };
 
   // Xử lý khi chọn ảnh mới
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -111,22 +130,22 @@ function ChinhSuaChiNhanh({ DuLieu }: { DuLieu: objChiNhanh }) {
         coCapNhat = true;
       }
 
-      // 🟨 NHÓM 3: Cập nhật Trạng thái vận hành & Thời gian bắt đầu áp dụng
-      const thoiGianCu = DuLieu.NGAY_CAP_NHAT ? String(DuLieu.NGAY_CAP_NHAT) : "";
-
-      if (trangThai !== DuLieu.TRANG_THAI || thoiGianApDung !== thoiGianCu) {
+      // 🟨 NHÓM 3: Cập nhật Trạng thái vận hành (Bắt buộc kiểm tra thời gian nếu thay đổi trạng thái)
+      if (trangThai !== DuLieu.TRANG_THAI) {
         // 1. Kiểm tra bắt buộc điền
         if (!thoiGianApDung) {
-          ThongBao.ThongBao_CanhBao("Vui lòng thiết lập thời gian bắt đầu thực hiện trạng thái!");
+          ThongBao.ThongBao_CanhBao("Vui lòng thiết lập thời gian áp dụng cho trạng thái mới!");
           setLoading(false);
           return;
         }
 
-        // 2. Validate cứng: Thời gian thiết lập không được nhỏ hơn thời gian hiện tại
+        // 2. Kiểm tra thời gian không được nhỏ hơn thời gian hiện tại
         const selectedTime = new Date(thoiGianApDung).getTime();
         const currentTime = new Date().getTime();
-        if (selectedTime < currentTime) {
-          ThongBao.ThongBao_CanhBao("Thời gian áp dụng không được nhỏ hơn thời gian hiện tại!");
+        
+        // Thêm biên độ sai số nhỏ (khoảng 5-10 giây) để tránh lỗi lệch giây khi bấm nút gửi
+        if (selectedTime < currentTime - 10000) {
+          ThongBao.ThongBao_CanhBao("Thời gian áp dụng lệnh không được nhỏ hơn thời gian hiện tại!");
           setLoading(false);
           return;
         }
@@ -237,15 +256,14 @@ function ChinhSuaChiNhanh({ DuLieu }: { DuLieu: objChiNhanh }) {
         </div>
       </div>
 
-  
-    {/* 🟨 NHÓM 3: TRẠNG THÁI VẬN HÀNH */}
+      {/* 🟨 NHÓM 3: TRẠNG THÁI VẬN HÀNH */}
       <div className="space-y-4">
         <div>
           <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Trạng thái chi nhánh</label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Hoạt động */}
             <div
-              onClick={() => setTrangThai(1)}
+              onClick={() => handleTrangThaiChange(1)}
               className={`p-3 rounded-xl border-2 cursor-pointer transition-all flex items-center justify-between ${
                 trangThai === 1 ? "border-emerald-500 bg-emerald-50/10" : "border-slate-200 bg-white"
               }`}
@@ -259,7 +277,7 @@ function ChinhSuaChiNhanh({ DuLieu }: { DuLieu: objChiNhanh }) {
 
             {/* Ngưng hoạt động */}
             <div
-              onClick={() => setTrangThai(0)}
+              onClick={() => handleTrangThaiChange(0)}
               className={`p-3 rounded-xl border-2 cursor-pointer transition-all flex items-center justify-between ${
                 trangThai === 0 ? "border-red-500 bg-red-50/10" : "border-slate-200 bg-white"
               }`}
@@ -293,7 +311,7 @@ function ChinhSuaChiNhanh({ DuLieu }: { DuLieu: objChiNhanh }) {
               <input
                 type="datetime-local"
                 value={thoiGianApDung}
-                min={minDateTime} // Chặn không cho chọn ngày quá khứ
+                min={minDateTime}
                 onChange={(e) => setThoiGianApDung(e.target.value)}
                 className={`w-full pl-9 pr-3 py-2.5 bg-white border rounded-lg text-xs font-bold text-gray-800 focus:outline-none transition-all ${
                   trangThai === 1 ? "border-emerald-200 focus:border-emerald-500" : "border-red-200 focus:border-red-500"
@@ -310,6 +328,7 @@ function ChinhSuaChiNhanh({ DuLieu }: { DuLieu: objChiNhanh }) {
           </div>
         )}
       </div>
+
       {/* THÔNG TIN AUDIT LOG */}
       <div className="p-3 bg-slate-50 border border-slate-100 rounded-xl flex items-center space-x-3">
         <i className="fa-solid fa-clock-rotate-left text-slate-400 text-sm"></i>

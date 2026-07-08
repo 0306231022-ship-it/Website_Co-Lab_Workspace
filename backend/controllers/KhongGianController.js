@@ -191,11 +191,17 @@ export default class KhongGianController{
             let DuongDan = 'uploads/KhongGian/' + pathFile;
             if(!pathFile){
                 return res.json({
-                    status:true,
+                    success:false,
                     message:'Lỗi tải ảnh!'
                 })
             };
-            const dd_db = await KhongGianModel.LayChiTiet(dulieu.IDKG);
+            if(!dulieu.IDKG){
+                return res.status(401).json({
+                    success:false,
+                    message:'Không tìm thấy ID không gian để cập nhật!'
+                })
+            }
+            /*const dd_db = await KhongGianModel.LayChiTiet(dulieu.IDKG);
             const dd = dd_db[0].HINHANH;
             const xoa = xoaFileCu(dd);
             if(!xoa){
@@ -203,7 +209,7 @@ export default class KhongGianController{
                     success:false,
                     message:'lỗi khi thao tác hệ thống!'
                 })
-            }
+            }*/
             const kiemtra = await KhongGianModel.kiemtraid(dulieu.IDKG);
             if(!kiemtra){
                 return res.status(401).json({
@@ -211,6 +217,7 @@ export default class KhongGianController{
                     message:'ID không gian không tồn tại!'
                 })
             }
+            
             const update = await KhongGianModel.CapNhatAnh(dulieu.IDKG,DuongDan);
             if(!update){
                 return res.status(500).json({
@@ -244,7 +251,13 @@ export default class KhongGianController{
                                  throw new Error('Ngày chỉnh sửa không gian phải lớn hơn hoặc bằng ngày hiện tại!');
                             }
                             //Trường hợp 2: lớn hơn thời gian cuối cùng mà khách thuê
-        
+                            const kiemtra_lich = await DatLichModel.LichDatCuoi_IDPHONG(req.body.IDKG);
+                            if(kiemtra_lich.length>0){
+                                const thoigian_ketthuc =  new Date(kiemtra_lich.KHUNG_KETTHUC);
+                                if(startDate<thoigian_ketthuc){
+                                    throw new Error('Ngày bắt đầu chỉnh sửa phải lớn hơn lịch đặt cuối cùng tại phòng đó!');
+                                }
+                            }
                             return true;
                           }).run(req),
                           body('NgayHoanThanh')

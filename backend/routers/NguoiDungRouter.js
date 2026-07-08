@@ -21,7 +21,7 @@ nguoidungRouter.post('/ChinhSua_Anh', createUpload('DaiDien').any(),verifyToken,
 nguoidungRouter.post('/kiemtra_dangnhap' , upload.none(), verifyToken , NguoiDungController.ThongTin_NguoiDung);
 nguoidungRouter.post('/dangxuat' ,  upload.none(), verifyToken, NguoiDungController.DangXuat);
 //=========================================
-nguoidungRouter.post('/LichDat', upload.none(), LichDatController.DatLich);
+nguoidungRouter.post('/LichDat', upload.none(), verifyToken, LichDatController.DatLich);
 nguoidungRouter.get('/LayDanhSach', NguoiDungController.DanhSach_NguoiDung);
 nguoidungRouter.get('/TimKiem', NguoiDungController.TimKiem_Ten);
 nguoidungRouter.get('/lichsu_datlich', verifyToken, LichDatController.LichSuDat_theoIDND);

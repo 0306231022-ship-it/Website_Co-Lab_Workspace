@@ -9,6 +9,7 @@
   HINHANH: string;
   TongLoai1:number;
   TongLoai2: number;
+  DiaChi:string;
 }
 export interface Chinhanh{
     DuLieu:objChiNhanh

@@ -75,9 +75,14 @@ export default class KhongGianModel {
     static async LayDanhSach(limit,offset,ID){
         try {
             const [DanhSach] = await execute(`
-                SELECT*FROM khonggian
-                WHERE ID_CHI_NHANH = ?
-                 LIMIT ? OFFSET ?
+                SELECT 
+                    kg.*,
+                    bg.DON_GIA 
+                FROM khonggian kg
+                LEFT JOIN banggia bg 
+                ON kg.ID_GIA = bg.ID_GIA AND kg.LOAI_KHONG_GIAN = 2
+                WHERE kg.ID_CHI_NHANH = ?
+                LIMIT ? OFFSET ?
                 `,[ID,limit,offset]);
             const [TongSo] = await execute(`
                  SELECT COUNT(*) AS total FROM khonggian
@@ -102,11 +107,11 @@ export default class KhongGianModel {
             if (danhSachSapKhoa.length === 0) {
                 return [];
             }
-            const listIds = danhSachSapKhoa.map(item => item.ID);
+            const listIds = danhSachSapKhoa.map(item => item.ID_KHONG_GIAN);
             await execute(`
                 UPDATE khonggian
                 SET TRANG_THAI = 2
-                WHERE ID IN (${listIds.join(',')});
+                WHERE ID_KHONG_GIAN IN (${listIds.join(',')});
             `,[]);
             return danhSachSapKhoa;
         } catch (error) {
@@ -123,11 +128,11 @@ export default class KhongGianModel {
             if (danhSachSapMo.length === 0) {
                 return [];
             }
-            const listIds = danhSachSapMo.map(item => item.ID);
+            const listIds = danhSachSapMo.map(item => item.ID_KHONG_GIAN);
             await execute(`
                 UPDATE khonggian
                 SET TRANG_THAI = 1, NGAY_BAO_TRI = NULL, NGAY_XONG = NULL
-                WHERE ID IN (${listIds.join(',')});
+                WHERE ID_KHONG_GIAN IN (${listIds.join(',')});
             `,[]);
             return danhSachSapMo;
         } catch (error) {
@@ -200,11 +205,7 @@ export default class KhongGianModel {
             SELECT 
                 kg.ID_KHONG_GIAN,
                 kg.LOAI_KHONG_GIAN,
-                
-                -- Đơn giá: Lấy từ bảng giá bất kể loại không gian nào
                 COALESCE(bg.DON_GIA, 0) AS DONGIA,
-                
-                -- Tính tỷ lệ lấp đầy hiện tại
                 CASE 
                     WHEN kg.LOAI_KHONG_GIAN = 2 THEN
                         CASE 
@@ -225,15 +226,11 @@ export default class KhongGianModel {
                         )
                     ELSE 0
                 END AS TI_LE_LAP_DAY,
-
-                -- Tính tổng số giờ thuê (Chỉ tính lịch có trạng thái bằng 1)
                 COALESCE((
                     SELECT SUM(TIMESTAMPDIFF(HOUR, ld_gio.KHUNG_BATDAU, ld_gio.KHUNG_KETTHUC))
                     FROM lichdat ld_gio
                     WHERE ld_gio.ID_KHONG_GIAN = kg.ID_KHONG_GIAN AND ld_gio.TRANG_THAI = 1
                 ), 0) AS TONG_SO_GIO_THUE,
-
-                -- Tính tổng số ghế (Nếu là không gian loại 1)
                 CASE 
                     WHEN kg.LOAI_KHONG_GIAN = 1 THEN
                         (SELECT COUNT(*) FROM ghe g WHERE g.ID_KHONG_GIAN = kg.ID_KHONG_GIAN)
@@ -244,9 +241,6 @@ export default class KhongGianModel {
             LEFT JOIN banggia bg ON kg.ID_GIA = bg.ID_GIA
             WHERE kg.ID_KHONG_GIAN = ?;
         `, [id]);
-
-        // 2. Kiểm tra phòng thủ (Defensive Check) đề phòng trường hợp không tìm thấy phòng hợp lệ
-        // (Nếu sử dụng thư viện mysql2 thông thường, kết quả trả về nằm trực tiếp trong rows hoặc rows[0])
         const data = Array.isArray(rows) ? rows[0] : rows;
 
         if (!data) {

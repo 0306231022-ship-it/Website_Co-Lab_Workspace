@@ -1,11 +1,11 @@
 import { execute, beginTransaction, rollbackTransaction, commitTransaction } from '../config/db.js';
 export default class DatLichModel{
-    static async DatLich(dulieu){
+    static async DatLich(dulieu, id){
         try {
             
           const [result] = await execute(`
             CALL sp_CreateBooking(?, ?, ?, ?, ?, @bookingID)
-            `,[dulieu.ID_KHONG_GIAN || null,dulieu.ID_GHE || null,dulieu.KHUNG_BATDAU,dulieu.KHUNG_KETTHUC, dulieu.IDND]);
+            `,[dulieu.ID_KHONG_GIAN || null,dulieu.ID_GHE || null,dulieu.KHUNG_BATDAU,dulieu.KHUNG_KETTHUC, id]);
             console.log('Result from stored procedure:', result);
             const [rows] = await execute(`SELECT @bookingID AS newBookingID`);
             return !!(rows && rows.length > 0 && rows[0].newBookingID > 0);
@@ -236,16 +236,44 @@ WHERE LD.ID_LICH_DAT = ?;
         }
     }
     static async LichDatCuoi_IDPHONG(id){
+        /* -- Sắp xếp thời gian giảm dần ;*/
         try {
-            const [truyvan] = await execute(
-                `
-                SELECT * FROM lichdat
-                WHERE ID_KHONG_GIAN = ?
-                ORDER BY KHUNG_KETTHUC DESC 
-                LIMIT 1;
-                `,[id]
-            );
-            return truyvan;
+            const [rows] = await execute(`
+        SELECT LOAI_KHONG_GIAN
+        FROM khonggian
+        WHERE ID_KHONG_GIAN = ?
+    `, [id]);
+
+    // Kiểm tra nếu không tìm thấy phòng với ID yêu cầu
+    if (rows.length === 0) {
+        return null; 
+    }
+
+    const soLoaiPhong = Number(rows[0].LOAI_KHONG_GIAN);
+    let danhSachKetQua = [];
+
+    // 2. Phân nhánh xử lý theo loại phòng bằng if-else (dễ đọc và an toàn hơn toán tử 3 ngôi)
+    if (soLoaiPhong === 1) {
+        // Loại phòng 1: Lấy theo ID_KHONG_GIAN trực tiếp từ lịch đặt
+        [danhSachKetQua] = await execute(`
+            SELECT * FROM lichdat
+            WHERE ID_KHONG_GIAN = ?
+            ORDER BY KHUNG_KETTHUC DESC 
+            LIMIT 1;
+        `, [id]);
+    } else {
+        // Các loại phòng khác: JOIN qua bảng ghế và truyền dynamic tham số [id] vào dấu ?
+        [danhSachKetQua] = await execute(`
+            SELECT ld.* FROM lichdat ld 
+            INNER JOIN ghe g ON ld.ID_GHE = g.ID_GHE 
+            WHERE g.ID_KHONG_GIAN = ? 
+            ORDER BY ld.KHUNG_BATDAU DESC
+            LIMIT 1;
+        `, [id]);
+    }
+
+    // Trả về bản ghi đầu tiên tìm được, hoặc null nếu không gian đó chưa có ai đặt
+    return danhSachKetQua.length > 0 ? danhSachKetQua[0] : null;
         } catch (error) {
             throw new Error('Database query failed: ' + error.message);
         }
@@ -277,6 +305,33 @@ WHERE LD.ID_LICH_DAT = ?;
             
         } catch (error) {
             throw new Error('Database query failed: ' + error.message);
+        }
+    }
+    static async DanhSach_IDGHE_Ngay_HienTai(id){
+        try {
+            const [kq] = await execute(`
+                SELECT KHUNG_BATDAU, KHUNG_KETTHUC 
+                FROM lichdat
+                WHERE ID_GHE = ? AND DATE(KHUNG_BATDAU) = CURDATE() AND KHUNG_KETTHUC > NOW()
+                ORDER BY KHUNG_BATDAU ASC;
+                `,[id]);
+            return kq;
+        } catch (error) {
+            throw new Error('Database query failed: ' + error.message);
+        }
+    }
+    static async LichDatGhe_TheoNgay(ID_GHE,THOIGIAN){
+        try {
+            const [kq] = await execute(`
+                 SELECT KHUNG_BATDAU, KHUNG_KETTHUC 
+                FROM lichdat
+                WHERE ID_GHE = ? 
+                AND DATE(KHUNG_BATDAU) = ?
+                AND KHUNG_KETTHUC > NOW()
+                ORDER BY KHUNG_BATDAU ASC;
+                `,[ID_GHE,THOIGIAN])
+        } catch (error) {
+            
         }
     }
 }

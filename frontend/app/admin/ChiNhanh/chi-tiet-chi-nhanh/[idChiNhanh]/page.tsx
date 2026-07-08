@@ -2,16 +2,16 @@
 import * as ThongBao from '@/FUNCTION/ThongBao';
 import * as api from '@/API/API';
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import { objChiNhanh } from '@/interface/ChiNhanh';
 import { ChiTietKhongGian } from '@/interface/KhongGian';
 import {useModalContext } from "@/context/QuanLiMoal";
 import Link from 'next/link';
+import * as fun from '@/FUNCTION/function';
 
 function ChiTietChiNhanh() {
     const { idChiNhanh } = useParams();
-    const router = useRouter();
     const { OpenMoDal } = useModalContext();
     const [chitiet1, setChiTiet1] = useState<objChiNhanh | null>(null);
     const [chitiet2, setChiTiet2] = useState<ChiTietKhongGian | null>(null);
@@ -197,14 +197,12 @@ function ChiTietChiNhanh() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {danhSachKhongGian.map((space) => {
-                            const isBaoTri = space.TRANG_THAI === 0 || space.NGAY_BAO_TRI !== null;
                             const isLoaiChung = space.LOAI_KHONG_GIAN === 1;
-
+                            const isBaoTri = space.TRANG_THAI === 2;
                             return (
                                 <div 
                                     key={space.ID_KHONG_GIAN}
-                                    className={`bg-white border rounded-2xl overflow-hidden transition-all duration-300 flex flex-col h-full border-slate-200/80 shadow-sm relative z-10
-                                        ${isBaoTri ? 'bg-slate-50/60 opacity-80' : 'hover:shadow-md hover:-translate-y-0.5'}`}
+                                    className={`bg-white border rounded-2xl overflow-hidden transition-all duration-300 flex flex-col h-full border-slate-200/80 shadow-sm relative z-10 hover:shadow-md hover:-translate-y-0.5}`}
                                 >
                                     {/* Ảnh không gian */}
                                     <div className="w-full h-44 relative bg-slate-100 overflow-hidden">
@@ -246,7 +244,7 @@ function ChiTietChiNhanh() {
                                             {isLoaiChung ? (
                                                 <><i className="fa-solid fa-chair text-slate-400 w-4"></i> Ghế tự do, full tiện ích</>
                                             ) : (
-                                                <><i className="fa-solid fa-users text-slate-400 w-4"></i> Cách âm, có máy chiếu</>
+                                                <><i className="fa-solid fa-users text-slate-400 w-4"></i> Dầy đủ phụ kiện</>
                                             )}
                                         </p>
                                         
@@ -261,25 +259,21 @@ function ChiTietChiNhanh() {
                                                         <span className="text-xs text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">Membership</span>
                                                     ) : (
                                                         <span className="font-black text-sm md:text-base text-slate-900">
-                                                            {space.ID_GIA?.toLocaleString('vi-VN')}đ<span className="text-[11px] font-normal text-slate-400">/g</span>
+                                                            {
+                                                                                                                               space.ID_GIA !== null && `${fun.formatCurrency(String(space.DON_GIA))}`
+                                                                                                                           }<span className="text-[11px] font-normal text-slate-400">/giờ</span>
                                                         </span>
                                                     )}
                                                 </div>
                                             </div>
 
                                             <div className="relative z-40">
-                                                {isBaoTri ? (
-                                                    <button className="bg-slate-100 text-slate-400 text-xs font-bold px-4 py-2.5 rounded-xl cursor-not-allowed border border-slate-200/50" disabled>
-                                                        Tạm đóng
-                                                    </button>
-                                                ) : (
                                                     <Link
                                                         href={`/admin/ChiNhanh/chi-tiet-chi-nhanh/${idChiNhanh}/chi-tiet-khong-gian/${space.ID_KHONG_GIAN}`}
                                                         className="bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white border border-indigo-100 font-bold py-2 px-3 rounded-xl text-xs transition-all duration-300"
                                                     >
                                                         Xem chi tiết
                                                     </Link>
-                                                )}
                                             </div>
                                         </div>
                                     </div>

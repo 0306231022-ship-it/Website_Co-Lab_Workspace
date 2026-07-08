@@ -113,7 +113,7 @@ export function DangNhap() {
         </label>
         <button 
           type="button"
-          onClick={()=>{ OpenMoDal({TrangThai:1}, { TenTrang: 'DangKy', TieuDe: 'Quên mật khẩu', icon: 'fa-solid fa-user-plus'})}}
+          onClick={()=>{ OpenMoDal({TrangThai:2}, { TenTrang: 'DangKy', TieuDe: 'Quên mật khẩu', icon: 'fa-solid fa-user-plus'})}}
           className="text-blue-600 hover:text-blue-700 font-semibold bg-transparent border-none cursor-pointer outline-none"
         >
           Quên mật khẩu?

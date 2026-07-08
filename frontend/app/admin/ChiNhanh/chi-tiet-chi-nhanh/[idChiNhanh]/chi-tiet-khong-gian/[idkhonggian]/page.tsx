@@ -13,6 +13,7 @@ import Image from "next/image";
 import * as fun from '@/FUNCTION/function';
 import Link from 'next/link';
 
+
 function ChiTietKhongGian() {
     const { OpenMoDal } = useModalContext();
     const [page1, setpage1] = useState<number>(1);
@@ -33,6 +34,7 @@ function ChiTietKhongGian() {
 
     // Effect 1: Tải danh sách thiết bị khi chuyển trang (Phân trang)
     useEffect(() => {
+        if (page1 === 1) return;
         const loaddl = async () => {
             setloading1(true);
             try {
@@ -63,7 +65,6 @@ function ChiTietKhongGian() {
                     api.CallAPI(undefined, { url: `/admin/ChiTiet_KhongGian?IDKG=${idkhonggian}&IDCN=${idChiNhanh}`, PhuongThuc: 2 }),
                     api.CallAPI(undefined, { url: `/admin/thongke?id=${idkhonggian}`, PhuongThuc: 2 })
                 ]);
-                
                 if (dulieu1.validate) {
                     setErr(dulieu1.errors);
                     return;
@@ -103,8 +104,7 @@ function ChiTietKhongGian() {
             formData.append("ID_THIET_BI", String(idThietBi));
             const ketqua = await api.CallAPI(formData, { url: '/admin/XoaTB_KG', PhuongThuc: 1 });
             if (ketqua.success) {
-                ThongBao.ThongBao_ThanhCong(ketqua.message || "Đã gỡ thiết bị khỏi không gian!");
-                setThietBi(prev => prev.filter(item => item.ID_THIET_BI !== idThietBi));
+                ThongBao.ThongBao_ThanhCong(ketqua.message || "Đã gỡ thiết bị khỏi không gian!")
                 setTongDanhSach1(prev => prev - 1);
             } else {
                 ThongBao.ThongBao_Loi(ketqua.message || "Xóa thiết bị thất bại!");
@@ -124,7 +124,7 @@ function ChiTietKhongGian() {
 
     const soGheDangThue = ghe.filter(g => g.TRANG_THAI === 2).length;
     const phanTramMatDo = tongghe > 0 ? (soGheDangThue / tongghe) * 100 : (ghe.length > 0 ? (soGheDangThue / ghe.length) * 100 : 0);
-
+    
     return (
         <>
             <div className="max-w-7xl mx-auto space-y-6">
@@ -144,7 +144,7 @@ function ChiTietKhongGian() {
                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span> {khonggian?.TRANG_THAI === 1 ? 'Hoạt động' : 'Ngưng hoạt động'}
                                 </span>
                             </div>
-                            <p className="text-xs text-gray-400 font-medium mt-1"><i className="fa-solid fa-location-dot mr-1 text-gray-300"></i> {chinhanh?.DIA_CHI}</p>
+                            <p className="text-xs text-gray-400 font-medium mt-1"><i className="fa-solid fa-location-dot mr-1 text-gray-300"></i> {chinhanh?.DIA_CHI || chinhanh?.DiaChi}</p>
                         </div>
                     </div>
                     
@@ -354,23 +354,44 @@ function ChiTietKhongGian() {
 
                     {/* CỘT PHẢI: BÁO CÁO THỜI GIAN THỰC VÀ HIỆU SUẤT */}
                     <div className="space-y-6">
-                        {/* TRẠNG THÁI THỜI GIAN THỰC */}
-                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
-                            <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest"><i className="fa-solid fa-bolt mr-1 text-amber-500"></i> Trạng thái thời gian thực</h3>
-                            <div className="p-3.5 bg-indigo-50/40 border border-indigo-100 rounded-xl space-y-2">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-xs font-bold text-indigo-900">Mật độ khách hiện tại:</span>
-                                    <span className="text-xs font-mono font-black text-indigo-700">{soGheDangThue} / {tongghe || ghe.length} Ghế</span>
+                     
+                    
+                    {/* LIVE DENSITY STATUS */}
+                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-4">
+                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center">
+                            <span className="w-2 h-2 rounded-full bg-rose-500 mr-2 animate-ping"></span> Live Status
+                        </h3>
+                        
+                        <div className="p-4 bg-slate-50/70 border border-slate-100 rounded-xl space-y-4 shadow-3xs">
+                            {khonggian?.LOAI_KHONG_GIAN === 1 ? (
+                                <>
+                                    <div className="flex items-center justify-between border-b border-slate-200/60 pb-2">
+                                        <span className="text-xs font-bold text-slate-600">Mật độ ghế hiện tại:</span>
+                                        <span className="text-xs font-mono font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">
+                                            {soGheDangThue} / {tongghe || ghe.length} Ghế
+                                        </span>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <div className="w-full bg-slate-200/80 rounded-full h-2.5 overflow-hidden shadow-inner">
+                                            <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 h-full rounded-full transition-all duration-700" style={{ width: `${phanTramMatDo}%` }}></div>
+                                        </div>
+                                        <div className="text-right text-[10px] font-bold text-indigo-600/80">{phanTramMatDo.toFixed(1)}% Đang sử dụng</div>
+                                    </div>
+                                    <div className="p-3 bg-white border border-slate-100 rounded-lg flex items-center justify-between text-[11px] font-bold shadow-3xs">
+                                        <span className="text-slate-500"><i className="fa-regular fa-calendar-check mr-2 text-indigo-500"></i>Khung giờ kế tiếp:</span>
+                                        <span className="font-mono text-slate-700">18:00 - 21:00</span>
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="flex items-center justify-between p-1">
+                                    <span className="text-xs font-bold text-slate-600">Trạng thái sử dụng phòng:</span>
+                                    <span className="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-lg animate-pulse">
+                                        Đang có lịch họp
+                                    </span>
                                 </div>
-                                <div className="w-full bg-indigo-100 rounded-full h-2 overflow-hidden">
-                                    <div className="bg-indigo-600 h-2 rounded-full transition-all duration-500" style={{ width: `${phanTramMatDo}%` }}></div>
-                                </div>
-                            </div>
-                            <div className="p-3 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-between text-xs font-medium">
-                                <span className="text-gray-500"><i className="fa-regular fa-calendar-check mr-1.5 text-gray-400"></i> Lịch tiếp theo trong ngày:</span>
-                                <span className="font-mono font-bold text-gray-800">18:00 - 21:00</span>
-                            </div>
+                            )}
                         </div>
+                    </div>
 
                         {/* HIỆU SUẤT HOẠT ĐỘNG (DỮ LIỆU ĐỘNG) */}
                         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">

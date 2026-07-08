@@ -158,7 +158,8 @@ function ChinhSuaKhongGian() {
                 ThongBao.ThongBao_ThanhCong(resNhom2.message);
                 coCapNhat = true;
             }
-            if (idBangGia !== (khonggian?.ID_GIA ? String(khonggian.ID_GIA) : "")) {
+            const idGiaGoc = khonggian?.ID_GIA ? String(khonggian.ID_GIA) : "";
+            if (idBangGia && idBangGia.trim() !== "" && idBangGia !== String(idGiaGoc)) {
                 const formData = new FormData();
                 formData.append('IDKG', String(idkhonggian));
                 formData.append('IDBangGia', idBangGia); // Giá trị ID bảng giá mới được chọn
@@ -181,8 +182,8 @@ function ChinhSuaKhongGian() {
             // URL 3: Cập nhật Hình ảnh
             if(anhChiNhanh !== null){
                 const formData = new FormData();
-                formData.append("id", String(idkhonggian));
-                formData.append("anhKhongGian", anhChiNhanh);
+                formData.append("IDKG", String(idkhonggian));
+                formData.append("file", anhChiNhanh);
                 const resNhom3 = await api.CallAPI(formData, { url: `/admin/ChinhSuaAnh`, PhuongThuc: 1 });
                 if (!resNhom3.success) {
                     ThongBao.ThongBao_Loi("Lỗi cập nhật hình ảnh: " + resNhom3.message);

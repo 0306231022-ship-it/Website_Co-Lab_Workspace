@@ -35,10 +35,20 @@ export default function ChiNhanh({DuLieu} : Chinhanh){
                         <div className="flex items-center gap-1.5" title="Phòng họp"><i className="fa-solid fa-people-roof text-emerald-500"></i> <span>{DuLieu.TongLoai2} phòng họp</span></div>
                       </div>
                     </div>
-                    <Link href={`/chi-tiet-chi-nhanh/${DuLieu.ID_CHI_NHANH}`}  className="w-full mt-5 bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white border border-blue-100 font-bold py-2.5 rounded-xl text-sm transition-all duration-300 flex items-center justify-center gap-2">
+                    {
+                      DuLieu.TRANG_THAI === 1 ? (
+                         <Link href={`/chi-tiet-chi-nhanh/${DuLieu.ID_CHI_NHANH}`}  className="w-full mt-5 bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white border border-blue-100 font-bold py-2.5 rounded-xl text-sm transition-all duration-300 flex items-center justify-center gap-2">
                       <span>Xem chi tiết không gian</span>
                       <i className="fa-solid fa-arrow-right text-xs"></i>
                     </Link>
+                      ) : (
+                        <div className="w-full mt-5 bg-gray-100 text-gray-400 border border-gray-200 font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 cursor-not-allowed opacity-60" title="Chi nhánh này hiện tại không cho phép xem không gian">
+                          <span>Không gian tạm đóng</span>
+                          <i className="fa-solid fa-lock text-xs"></i>
+                        </div>
+                      )
+                    } 
+                   
                   </div>
                 </div>
                    </div>

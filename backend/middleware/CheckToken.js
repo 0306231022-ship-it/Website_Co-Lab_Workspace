@@ -6,7 +6,7 @@ export const verifyToken = (req, res, next) => {
     if (!token) {
         return res.status(401).json({ 
             success: false, 
-            message: "Không tìm thấy Token. Bạn chưa đăng nhập!" 
+            message: "Bạn chưa đăng nhập!" 
         });
     }
     try {
