@@ -3,20 +3,21 @@ import { execute,beginTransaction, rollbackTransaction, commitTransaction } from
     static async getAll(offset , limit)  {
         try {
             const [rows] = await execute(
-           `SELECT d.ID_DANHMUC, d.TEN_DANHMUC, d.TRANG_THAI, g.DON_GIA 
+               `SELECT d.ID_DANHMUC, d.TEN_DANHMUC, d.TRANG_THAI, MAX(g.DON_GIA) as DON_GIA 
                 FROM danhmucghe d
                 LEFT JOIN banggia g ON d.ID_DANHMUC = g.DANHMUC_GHE
+                GROUP BY d.ID_DANHMUC, d.TEN_DANHMUC, d.TRANG_THAI
+                ORDER BY d.ID_DANHMUC ASC
                 LIMIT ? OFFSET ?`,
-                [limit, offset]
+                [limit,offset] // <-- Ép kiểu số để MySQL không bị lỗi chuỗi
             );
             const [totalRows] = await execute("SELECT COUNT(*) as total FROM danhmucghe");
             const total = totalRows[0]?.total || 0;
             return {
                 data: rows,
                 pagination: {
-                    
                     totalItems: total,
-                    totalPages: Math.ceil(total / limit)
+                    totalPages: Math.ceil(total / (Number(limit) || 10))
                 }
             };
         } catch (error) {

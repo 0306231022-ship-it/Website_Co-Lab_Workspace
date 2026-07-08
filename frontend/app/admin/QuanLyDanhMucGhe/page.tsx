@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from "react";
 import * as api from '@/API/API';
 import * as ThongBao from '@/FUNCTION/ThongBao';
 import * as fun from '@/FUNCTION/function';
-
+import {useModalContext } from "@/context/QuanLiMoal";
 export interface DanhMuc {
     ID_DANHMUC: number;
     TEN_DANHMUC: string;
@@ -24,6 +24,7 @@ export interface DanhMucResponse {
 
 export default function DanhMucGhe() {
     // 1. Khai báo các State quản lý dữ liệu
+     const { OpenMoDal } = useModalContext();
     const [danhSachs, setDanhSachs] = useState<DanhMuc[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [page, setPage] = useState<number>(1);
@@ -93,9 +94,12 @@ export default function DanhMucGhe() {
                         <p className="text-xs font-medium text-slate-400 mt-0.5">Cấu hình phân loại chỗ ngồi và thiết lập đơn giá tuyến tính theo giờ</p>
                     </div>
                 </div>
-                <button type="button" className="sm:self-center px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-100 transition-all cursor-pointer flex items-center justify-center gap-2 h-fit">
-                    <i className="fa-solid fa-plus text-sm"></i> Thêm danh mục mới
-                </button>
+                  <button 
+               onClick={()=>{OpenMoDal(undefined,{TenTrang:'ThemDanhMucGhe'})}}
+                className="w-full sm:w-auto px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer inline-flex items-center justify-center space-x-1.5" >
+                <i className="fa-solid fa-plus text-[10px]"></i>
+                <span>Tạo gói giá mới</span>
+            </button>
             </div>
 
             {/* Thẻ thống kê (Metrics) */}

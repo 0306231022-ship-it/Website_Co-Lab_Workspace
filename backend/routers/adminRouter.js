@@ -43,7 +43,7 @@ adminRouter.post("/thietbi",  upload.none(),thietbiController.createThietBi);
 adminRouter.post("/CapNhatThietBi", upload.none(), thietbiController.updateThietBi);
 //==========================================
 //QUẢN LÝ DANH MỤC GHẾ
-adminRouter.post("/danhmucghe",  upload.none(),danhmucgheController.createDanhMucGhe);
+adminRouter.post("/themdanhmucghe",  upload.none(),danhmucgheController.createDanhMucGhe);
 adminRouter.get("/danhsachdanhmucghe",danhmucgheController.getAllDanhMucGhe)
 adminRouter.post("/capnhatdanhmucghe",upload.none(),danhmucgheController.updateDanhMucGhe);
 //============================================
