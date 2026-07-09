@@ -376,9 +376,9 @@ export default class KhongGianController{
                     success:true,
                     DanhSach : {
                         ChiNhanh: {
-                            TenChiNhanh:ThongTin_ChiNhanh.TEN_CHI_NHANH,
-                            TrangThai: ThongTin_ChiNhanh.TRANG_THAI,
-                            DiaChi:ThongTin_ChiNhanh.DIA_CHI
+                            TEN_CHI_NHANH:ThongTin_ChiNhanh.TEN_CHI_NHANH,
+                            TRANG_THAI: ThongTin_ChiNhanh.TRANG_THAI,
+                            DIA_CHI:ThongTin_ChiNhanh.DIA_CHI
                         },
                         KhongGian : thongTin_KhongGian,
                         ThietBi: {

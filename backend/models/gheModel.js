@@ -111,8 +111,8 @@ export default class GheModel {
                 INNER JOIN khonggian kg ON g.ID_KHONG_GIAN = kg.ID_KHONG_GIAN 
                 INNER JOIN danhmucghe dmg ON g.ID_DANH_MUC = dmg.ID_DANHMUC
                 INNER JOIN banggia bg ON dmg.ID_DANHMUC = bg.DANHMUC_GHE 
-                WHERE g.ID_GHE =?;
-                LIMIT 1
+                WHERE g.ID_GHE =?
+                LIMIT 1;
                 `,[dulieu]);
             return truyvan[0];
         } catch (error) {

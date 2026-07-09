@@ -6,9 +6,10 @@ export default class DatLichModel{
           const [result] = await execute(`
             CALL sp_CreateBooking(?, ?, ?, ?, ?, @bookingID)
             `,[dulieu.ID_KHONG_GIAN || null,dulieu.ID_GHE || null,dulieu.KHUNG_BATDAU,dulieu.KHUNG_KETTHUC, id]);
-            console.log('Result from stored procedure:', result);
             const [rows] = await execute(`SELECT @bookingID AS newBookingID`);
-            return !!(rows && rows.length > 0 && rows[0].newBookingID > 0);
+            if (rows && rows.length > 0 && rows[0].newBookingID > 0) {
+                return rows[0].newBookingID; 
+            }
         } catch (error) {
             throw error;
         }

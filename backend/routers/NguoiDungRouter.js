@@ -7,6 +7,7 @@ import LichDatController from "../controllers/LichDatController.js";
 import thongBaoController from "../controllers/ThongBaoController.js";
 import multer from "multer";
 import hoadonController from "../controllers/hoadonController.js";
+import ThanhToanController from "../controllers/ThanhToanController.js";
 const upload = multer();
 const nguoidungRouter = Router();
 //==========================================
@@ -34,5 +35,6 @@ nguoidungRouter.get('/layDS_thongbao', verifyToken , thongBaoController.getThong
 nguoidungRouter.post('/XoaTheoid' , upload.none(), thongBaoController.deleteThongBao);
 nguoidungRouter.post('/XoaTatCa' , upload.none() , verifyToken , thongBaoController.deleteAllThongBaoByUserId);
 // hóa đơn
+nguoidungRouter.get('/ThanhToan', verifyToken, ThanhToanController.ThanhToan);
 nguoidungRouter.get('/chitiethoadon',hoadonController.getHoaDonById);
 export default nguoidungRouter;

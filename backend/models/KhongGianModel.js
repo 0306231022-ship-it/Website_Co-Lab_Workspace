@@ -39,9 +39,11 @@ export default class KhongGianModel {
     static async LayChiTiet(id){
         try {
            const [kiemtra] = await execute(`
-                SELECT*FROM khonggian
-                WHERE ID_KHONG_GIAN =?
-                LIMIT 1
+               SELECT kg.*, bg.DON_GIA
+            FROM khonggian kg
+            LEFT JOIN banggia bg ON kg.ID_GIA = bg.ID_GIA
+            WHERE kg.ID_KHONG_GIAN = ?
+            LIMIT 1;
                 `,[id]);
             return kiemtra.length>0 ? kiemtra : null
         } catch (error) {
