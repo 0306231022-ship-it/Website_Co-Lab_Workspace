@@ -9,6 +9,7 @@ export default class thongBaoController {
     // ========================================================
     static async getThongBaoByUser(req, res) {
         const userId = req.user.id;
+
         try {
     
             const page = parseInt(req.query.page, 10) || 1;

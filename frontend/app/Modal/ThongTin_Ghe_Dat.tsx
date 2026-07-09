@@ -219,7 +219,7 @@ function ThongTin({DuLieu} : { DuLieu : LichDat}) {
                                     </div>
                                     <div className="flex flex-col">
                                       <span className="text-xs font-bold text-slate-800">
-                                        {fun.formatDate(item.KHUNG_BATDAU)} - {fun.formatDate(item.KHUNG_KETTHUC)}
+                                        {fun.formatTime(item.KHUNG_BATDAU)} - {fun.formatTime(item.KHUNG_KETTHUC)}
                                       </span>
                                       <span className="text-[10px] text-slate-400">Thời gian cố định</span>
                                     </div>

@@ -20,6 +20,7 @@ nguoidungRouter.post('/ChinhSua_thongTin' , upload.none(), verifyToken, NguoiDun
 nguoidungRouter.post('/ChinhSua_Anh', createUpload('DaiDien').any(),verifyToken, NguoiDungController.CapNhat_anhDaiDien);
 nguoidungRouter.post('/kiemtra_dangnhap' , upload.none(), verifyToken , NguoiDungController.ThongTin_NguoiDung);
 nguoidungRouter.post('/dangxuat' ,  upload.none(), verifyToken, NguoiDungController.DangXuat);
+nguoidungRouter.get('/thongke' ,verifyToken, NguoiDungController.ThongKe);
 //=========================================
 nguoidungRouter.post('/LichDat', upload.none(), verifyToken, LichDatController.DatLich);
 nguoidungRouter.get('/LayDanhSach', NguoiDungController.DanhSach_NguoiDung);

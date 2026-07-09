@@ -23,13 +23,12 @@ function ThongBaoComponent() {
         const laydl = async () => {
             setIsLoading(true);
             try {
-                  const formData = new FormData();
-                formData.append("LoaiND", String(0));
-                const response = await api.CallAPI(formData, { 
-                    url: `/NguoiDung/layDS_thongbao?page=${page}`, 
+
+                const response = await api.CallAPI(undefined, { 
+                   url: `/NguoiDung/layDS_thongbao?page=${page}&LoaiND=1`, 
                     PhuongThuc: 2 
                 });
-                // Kiểm tra response từ API (sửa lỗi laydl.success của code cũ)
+            
                 if (response && response.success) {
                     const data: ThongBao[] = response.data || [];
                     
@@ -59,7 +58,7 @@ function ThongBaoComponent() {
         try {
             const formData = new FormData();
             formData.append("ID_THONGBAO", String(id));
-            const xoa = await api.CallAPI(formData,{url:'/NguoiDung/XoaTheoid' , PhuongThuc:1});
+            const xoa = await api.CallAPI(formData,{url:`/NguoiDung/XoaTheoid?&LoaiND=1` , PhuongThuc:1});
             if(xoa.success){
                  setThongBao(prev => prev.filter(item => item.ID_THONGBAO !== id));
                 Thongbao.ThongBao_ThanhCong(xoa.message)
@@ -75,7 +74,7 @@ function ThongBaoComponent() {
         const XacNhan = await Thongbao.ThongBao_XacNhanTT('Bạn có chắc chắn muốn xóa tất cả thông báo không?')
         if(!XacNhan) return;
         try {
-            const xoa = await api.CallAPI(undefined,{url:'/NguoiDung/XoaTatCa', PhuongThuc:1});
+            const xoa = await api.CallAPI(undefined,{url:'/NguoiDung/XoaTatCa?&LoaiND=1', PhuongThuc:1});
             if(xoa.success){
                 setThongBao([]);
                 setHasMore(false);

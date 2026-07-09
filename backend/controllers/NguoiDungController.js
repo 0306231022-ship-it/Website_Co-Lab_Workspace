@@ -572,5 +572,23 @@ export default class NguoiDungController{
             });
          }
       }
+      static async ThongKe(req,res){
+         try {
+              const id = parseInt(req.user.id);
+             const thongke = await NguoiDungModel.thongke(id);
+             return res.status(200).json({
+               success: true,
+               dulieu : {
+                  ThongBao : thongke.ThongBao,
+                  DonHang:thongke.DonHang
+               }
+             })
+         } catch (error) {
+             return res.status(500).json({
+                success: false,
+                message: 'Thông tin thống kê thất bại: ' + error.message
+            });
+         }
+      }
 
 }

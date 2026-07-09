@@ -22,11 +22,7 @@ cron.schedule('*/15 * * * *', async () => {
     }
     // xóa mã OTP đã hết hạn
     try {
-        const xoaOTP = await XacThucOTPModel.XoaOTP_HetHan();
-        if(!xoaOTP){
-            const thongbao=  thongBaoModel.create('Hệ thống xác thực OTP thất bại', 'Hệ thống không thể xóa OTP đã hết han!', 4, 1);
-            if(!thongbao) console.log('Vui lòng kiểm tra lại hệ thống!')
-        }
+        await XacThucOTPModel.XoaOTP_HetHan();
     } catch (error) {
          console.error('Lỗi thực thi tác vụ 15 phút:', error.message);
     }

@@ -67,7 +67,6 @@ export default class XacThucOTPModel {
                 DELETE FROM xacthucotp 
                 WHERE NGAY_HET_HAN < NOW();
                 `,[]);
-            return otp.affectedRows>0;
         } catch (error) {
              throw new Error('Database query failed: ' + error.message);
         }

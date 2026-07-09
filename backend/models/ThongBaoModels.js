@@ -43,6 +43,8 @@ export default class thongBaoModel {
                  LIMIT ? OFFSET ?`,
                 [idnd, limit,offset]
             );
+           
+           
 
 
             const [totalRows] = await execute("SELECT COUNT(*) as total FROM thongbao WHERE IDND = ?", [idnd]);
