@@ -40,7 +40,9 @@ function ChiTietKhongGian() {
   const [ngayDat, setNgayDat] = useState(todayDate);
   const [gioBatDau, setGioBatDau] = useState<string>('');
  const [gioKetThuc, setGioKetThuc] = useState<string>('');
-
+ const batDau = new Date(gioBatDau);
+  const ketThuc = new Date(gioKetThuc);
+   const tongGio = (ketThuc.getTime() - batDau.getTime()) / (1000 * 60 * 60);
   useEffect(()=>{
     const laydl = async()=>{
        setloading(true)
@@ -49,7 +51,6 @@ function ChiTietKhongGian() {
           api.CallAPI(undefined,{url:`/admin/ChiTiet_KhongGian?IDKG=${idKhongGian}&IDCN=${idChiNhanh}`,PhuongThuc:2}),
           api.CallAPI(undefined,{url:`/admin/DanhSach_theo_khonggian?IDKG=${idKhongGian}`, PhuongThuc:2})
         ])
-    
         if(dulieu1.validate){
           setErr(dulieu1.errors);
           return;
@@ -112,7 +113,7 @@ function ChiTietKhongGian() {
       setloading(true)
       try {
           const data = await api.CallAPI(undefined,{url:`/admin/lichdatkhonggian_theothoigian?THOIGIAN=${fun.formatToBackendDateTime(selectedDate)}&IDKG=${idKhongGian}` , PhuongThuc:2});
-          alert(JSON.stringify(data))
+      
           if(data.validate){
               setErr(data.errors);
               ThongBao.ThongBao_CanhBao(data.message)
@@ -377,7 +378,10 @@ function ChiTietKhongGian() {
           <h3 className="text-sm font-bold text-gray-800">Thông tin đặt phòng họp</h3>
           <p className="text-[11px] text-gray-400">Vui lòng điền đầy đủ thông tin để tiến hành đặt không gian họp</p>
         </div>
-
+                    <div className="text-right">
+                              <span className="text-2xl font-black text-blue-600">{fun.formatCurrency(String(khonggian?.DON_GIA))}</span>
+                              <span className="text-xs font-bold text-slate-400"> / giờ</span>
+                            </div>
         {/* Các trường nhập liệu */}
         <div className="space-y-4">
     
@@ -437,7 +441,7 @@ function ChiTietKhongGian() {
             </div>
             <div className="flex flex-col">
               <span className="text-xs font-bold text-slate-800">
-                {fun.formatDate(item.KHUNG_BATDAU)} - {fun.formatDate(item.KHUNG_KETTHUC)}
+                {fun.formatTime(item.KHUNG_BATDAU)} - {fun.formatTime(item.KHUNG_KETTHUC)}
               </span>
               <span className="text-[10px] text-slate-400">Thời gian cố định</span>
             </div>
@@ -468,7 +472,13 @@ function ChiTietKhongGian() {
           </div>
         </div>
       </div>
-      
+       <div className="flex justify-between items-end mb-4 px-1">
+                    <div>
+                      <span className="text-xs font-bold text-slate-400 block mb-0.5">Vui lòng kiểm tra lại giờ đặt</span>
+                      <span className="text-sm font-bold text-slate-800">Tạm tính: {tongGio || 0} giờ</span>
+                    </div>
+                    <span className="text-3xl font-black text-blue-600 tracking-tight">{fun.formatCurrency(((tongGio * Number(khonggian?.DON_GIA)) || 0))}</span>
+                  </div>
       {/* Nút hành động */}
       <div className="mt-5 border-t border-gray-100 pt-4">
         <button onClick={()=>{handleDatCho()}} className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm rounded-xl transition-all shadow-sm shadow-indigo-100">

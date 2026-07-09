@@ -63,10 +63,12 @@ adminRouter.get('/lichdatkhonggian_theothoigian',LichDatController.LichDatKhongG
 //QUẢN LÝ GHẾ
 adminRouter.post("/themghe",upload.none(),gheController.createGhe);
 adminRouter.get('/ChiTiet_ghe', gheController.getGheById);
-adminRouter.post("/capnhatghe",upload.none(),gheController.updateGhe);
+adminRouter.post("/CapNhatTen_ghe",upload.none(),gheController.updatetenGhe);
+adminRouter.post('/CapNhatDanhMuc_ghe' , upload.none(), gheController.CapNhatDanhMuc_ghe);
 adminRouter.get('/danhsachghe_idkg' , gheController.LayDanhSach_Theo_IDKG);
 adminRouter.post('/CapNhat_ToaDo' , upload.none(), gheController.CapNhat_TaoDo_Ghe);
 adminRouter.get('/ThongTin_ghe_datdon' , gheController.ThonhTin_Ghe_DatDon);
+adminRouter.post('/CapNhatTrangThai_ghe', upload.none(), gheController.CapNhatTrangThai_ghe);
 //=========================================
 //QUẢN LÝ HÓA DƠN
 adminRouter.post("/themhoadon",upload.none(),hoadonController.createHoaDon);

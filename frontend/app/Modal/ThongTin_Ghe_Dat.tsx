@@ -4,7 +4,7 @@ import * as ThongBao from "@/FUNCTION/ThongBao";
 import * as fun from '@/FUNCTION/function';
 import { Ghe } from '@/interface/ghe';
 import { LichDat} from '@/interface/LichDat';
-
+import { useModalContext } from "@/context/QuanLiMoal";
 
 interface LichDaDat{
     KHUNG_BATDAU:string,
@@ -19,7 +19,7 @@ function ThongTin({DuLieu} : { DuLieu : LichDat}) {
     const day = String(now.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
-
+   const { OpenMoDal } = useModalContext();
   const todayDate = getTodayString();
   const [ngayDat, setNgayDat] = useState(todayDate);
   const [gioBatDau, setGioBatDau] = useState<string>('');
@@ -27,20 +27,27 @@ function ThongTin({DuLieu} : { DuLieu : LichDat}) {
   const [lichDaDat, setLichDaDat] = useState<LichDaDat[]>([]);
   const [loading,setloading] = useState<boolean>(false);
   const [err, setErr] = useState<string[]>([]);
-  const batDau = new Date(gioBatDau);
+  const [ThongTinGhe,setThongTin] = useState<Ghe | null>(null)
+   const batDau = new Date(gioBatDau);
   const ketThuc = new Date(gioKetThuc);
  const tongGio = (ketThuc.getTime() - batDau.getTime()) / (1000 * 60 * 60);
   useEffect(()=>{
     const layGT = async()=>{
         setloading(true)
-        ///ThongTin_ghe_datdon
         try {
-            const data1 = await api.CallAPI(undefined,{url: `/admin/DanhSach_lichDat_theoidghe_Hientai?ID_GHE=${DuLieu.thongTinGhe.ID_GHE}`, PhuongThuc:2 });
+            const [data1,data2] = await Promise.all([
+              api.CallAPI(undefined,{url: `/admin/DanhSach_lichDat_theoidghe_Hientai?ID_GHE=${DuLieu.thongTinGhe.ID_GHE}`, PhuongThuc:2 }),
+              api.CallAPI(undefined,{url:`/admin/ThongTin_ghe_datdon?ID_GHE=${DuLieu.thongTinGhe.ID_GHE}` , PhuongThuc:2})
+            ]) 
             if (data1 && data1.success) {
                 setLichDaDat(data1.dulieu || []);
             } else {
                 setLichDaDat([]);
             }
+            if(data2){
+              setThongTin(data2.dulieu)
+            }
+
         } catch (error) {
             console.error("Lỗi lấy danh sách lịch đặt hiện tại theo ghế:", error);
         } finally{
@@ -89,6 +96,7 @@ function ThongTin({DuLieu} : { DuLieu : LichDat}) {
         }
         if(DatLich.success){
             ThongBao.ThongBao_ThanhCong(DatLich.message)
+            OpenMoDal({id:DatLich.ID_DATLICH, TongTien: tongGio * Number(String(ThongTinGhe?.DON_GIA)) },{TenTrang:'ThanhToan'})
         }
         if(DatLich.success===false){
             ThongBao.ThongBao_Loi(DatLich.message)
@@ -121,12 +129,12 @@ function ThongTin({DuLieu} : { DuLieu : LichDat}) {
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 bg-blue-600 text-white rounded-2xl flex flex-col items-center justify-center font-black shadow-md shadow-blue-500/20 ring-4 ring-blue-100">
               <span className="text-[10px] uppercase tracking-widest text-blue-200 -mb-0.5">Ghế</span>
-              <span id="modalSeatName" className="text-xl">A-06</span>
+              <span id="modalSeatName" className="text-xl">A-{ThongTinGhe?.ID_GHE}</span>
             </div>
             <div>
-              <h3 className="text-xl font-extrabold text-slate-900 tracking-tight">Ghế cá nhân</h3>
+              <h3 className="text-xl font-extrabold text-slate-900 tracking-tight">{ThongTinGhe?.TEN_GHE}</h3>
               <p className="text-xs font-semibold text-slate-500 mt-1 flex items-center gap-1">
-                <i className="fa-solid fa-location-dot text-blue-500"></i> Dãy A — Khu Zone A
+                <i className="fa-solid fa-location-dot text-blue-500"></i> {ThongTinGhe?.TEN_KHONG_GIAN}
               </p>
             </div>
           </div>
@@ -134,7 +142,7 @@ function ThongTin({DuLieu} : { DuLieu : LichDat}) {
           <div className="flex items-center justify-between mt-5 pt-4 border-t border-slate-100">
     
             <div className="text-right">
-              <span className="text-2xl font-black text-blue-600">35.000 đ</span>
+              <span className="text-2xl font-black text-blue-600">{fun.formatCurrency(ThongTinGhe?.DON_GIA)}</span>
               <span className="text-xs font-bold text-slate-400"> / giờ</span>
             </div>
           </div>
@@ -261,7 +269,7 @@ function ThongTin({DuLieu} : { DuLieu : LichDat}) {
                 <span className="text-xs font-bold text-slate-400 block mb-0.5">Vui lòng kiểm tra lại giờ đặt</span>
                 <span className="text-sm font-bold text-slate-800">Tạm tính: {tongGio || 0} giờ</span>
               </div>
-              <span className="text-3xl font-black text-blue-600 tracking-tight">30.000đ</span>
+              <span className="text-3xl font-black text-blue-600 tracking-tight">{fun.formatCurrency(((tongGio * Number(ThongTinGhe?.DON_GIA)) || 0))}</span>
             </div>
 
             <button 

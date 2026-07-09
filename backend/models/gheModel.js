@@ -23,10 +23,12 @@ export default class GheModel {
            SELECT 
                 g.*, 
                 kg.TEN_KHONG_GIAN, 
-                dmg.TEN_DANHMUC
+                dmg.TEN_DANHMUC,
+                bg.DON_GIA
              FROM ghe g
             LEFT JOIN khonggian kg ON g.ID_KHONG_GIAN = kg.ID_KHONG_GIAN
             LEFT JOIN danhmucghe dmg ON g.ID_DANH_MUC = dmg.ID_DANHMUC
+            LEFT JOIN banggia bg ON dmg.ID_DANHMUC = bg.DANHMUC_GHE
             WHERE g.ID_GHE = ?
             `,[id])
             return rows[0];
@@ -56,8 +58,8 @@ export default class GheModel {
         try {
             const[update]=await execute(`
                 UPDATE ghe 
-                SET TEN_GHE=?, TOA_X=?, TOA_Y=?, TRANG_THAI=?, ID_KHONG_GIAN=?, ID_DANH_MUC=? WHERE ID_GHE=?`,
-                [data.TEN_GHE,data.TOA_X,data.TOA_Y,data.TRANG_THAI,data.ID_KHONG_GIAN,data.ID_DANH_MUC,id]
+                SET TEN_GHE=? WHERE ID_GHE=?`,
+                [data.TEN_GHE,id]
             );
              return update.affectedRows>0 ? true : false;
         } catch (error) {
@@ -118,6 +120,32 @@ export default class GheModel {
         } catch (error) {
              console.error(` Lỗi Database:`, error.message);
             throw new Error("Không thể truy vấn thông tin ghe!");
+        }
+    }
+    static async CapNhatDanhMuc_ghe(id,iddm){
+        try {
+            const [capnhat] = await execute(`
+                UPDATE ghe
+                SET ID_DANH_MUC = ?
+                WHERE ID_GHE = ?
+                `,[iddm,id]);
+            return capnhat.affectedRows>0
+        } catch (error) {
+            console.error(` Lỗi Database:`, error.message);
+            throw new Error("Không thể truy vấn cập nhật danh mục ghe!");
+        }
+    }
+    static async CapNhatTrangThai(id, trangthai){
+        try {
+            const [Capnhat] = await execute(`
+               UPDATE ghe
+               SET TRANG_THAI = ? 
+               WHERE ID_GHE = ? 
+                `,[trangthai,id]);
+            return Capnhat.affectedRows>0
+        } catch (error) {
+             console.error(` Lỗi Database:`, error.message);
+            throw new Error("Không thể truy vấn cập nhật trạng thái ghe!");
         }
     }
 }

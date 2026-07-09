@@ -123,7 +123,7 @@ export default class gheController {
     }
 
     // [PUT] /api/admin/ghe/:id
-   static async updateGhe(req, res) {
+   static async updatetenGhe(req, res) {
         try {
             await Promise.all([
                 body('ID_GHE')
@@ -140,36 +140,6 @@ export default class gheController {
                     .isString().withMessage('Tên ghế phải là chuỗi ký tự')
                     .isLength({ max: 255 }).withMessage('Tên ghế không được vượt quá 255 ký tự!')
                     .run(req),
-                body('TOA_X')
-                    .notEmpty().withMessage('Tọa độ X không được để trống!')
-                    .isInt().withMessage('Tọa độ X phải là dạng số')
-                    .run(req),
-                body('TOA_Y')
-                    .notEmpty().withMessage('Tọa độ Y không được để trống!')
-                    .isInt().withMessage('Tọa độ Y phải là dạng số')
-                    .run(req),
-                body('TRANG_THAI')
-                    .notEmpty().withMessage('Trạng thái không được để trống!')
-                    .isInt().withMessage('Trạng thái phải là số nguyên')
-                    .run(req),
-                body('ID_KHONG_GIAN')
-                    .notEmpty().withMessage('ID không gian không được để trống!')
-                    .isInt().withMessage('ID không gian phải là số nguyên')
-                    .custom(async (value, { req }) => {
-                        const checkid = await KhongGianModel.kiemtraid(value);
-                        if(!checkid) throw new Error('ID không gian không tồn tại!');
-                        return true;
-                    })
-                    .run(req),
-                body('ID_DANH_MUC')
-                    .notEmpty().withMessage('ID danh mục không được để trống!')
-                    .isInt().withMessage('ID danh mục phải là số nguyên')
-                    .custom(async (value, { req }) => {
-                        const testid = await dmGhe.testid(value);
-                        if(!testid)  throw new Error('ID không tồn tại!');
-                        return true;
-                    })
-                    .run(req)
             ]);
 
             const errors = validationResult(req);
@@ -182,15 +152,10 @@ export default class gheController {
             }
 
             // Lấy ID_GHE từ body ra cùng các trường khác giống hệt create
-            const { ID_GHE, TEN_GHE, TOA_X, TOA_Y, TRANG_THAI, ID_KHONG_GIAN, ID_DANH_MUC } = req.body;
+            const { ID_GHE, TEN_GHE } = req.body;
 
             const updated = await GheModel.update(ID_GHE, {
                 TEN_GHE: TEN_GHE.trim(),
-                TOA_X,
-                TOA_Y,
-                TRANG_THAI,
-                ID_KHONG_GIAN,
-                ID_DANH_MUC
             });
 
             if (!updated) {
@@ -309,6 +274,87 @@ export default class gheController {
                 error: error.message
             });
     
+        }
+    }
+    static async CapNhatDanhMuc_ghe(req,res){
+        const id = req.body.ID_GHE;
+        const id_danh_muc = req.body.ID_DANH_MUC;
+        try {
+                if(!id || !id_danh_muc){
+                    return res.status(401).json({
+                        success:false,
+                        message:'Không tìm thấy id cần chỉnh sửa!'
+                    })
+                }
+                const kiemtra1 =await GheModel.testId(id);
+                if(!kiemtra1){
+                    return res.status(401).json({
+                        success: false,
+                        message:'không tìm thấy ghế cần sửa!'
+                    })
+                }
+                const kiemtra2 = await dmGhe.testid(id_danh_muc);
+                if(!kiemtra2){
+                    return res.status(401).json({
+                        success:false,
+                        message:'Không tìm thấy danh mục cần sửa!'
+                    })
+                }
+                const capnhat = await GheModel.CapNhatDanhMuc_ghe(id,id_danh_muc);
+                if(!capnhat){
+                    return res.status(401).json({
+                        success: false,
+                        message:'Cập nhật danh mục ghế thất bại! '
+                    })
+                }
+                return res.status(200).json({
+                    success:true,
+                    message:'Cập nhật danh mục ghế thành công!'
+                })
+        } catch (error) {
+             console.error("Lỗi xử lý tại Controller cập nhật danh mục ghế:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Lỗi hệ thống, không thể cập nhật thông tin ghế.",
+                error: error.message
+            });
+        }
+    }
+    static async CapNhatTrangThai_ghe(req,res){
+        const id = req.body.ID_GHE;
+        const trangthai = req.body.TRANG_THAI;
+        try {
+             const kiemtra1 =await GheModel.testId(id);
+                if(!kiemtra1){
+                    return res.status(401).json({
+                        success: false,
+                        message:'không tìm thấy ghế cần sửa!'
+                    })
+                }
+                if(trangthai !== '1' && trangthai !=='2'){
+                    return res.status(401).json({
+                        success:false,
+                        message: 'Không tìm thấy trạng thái cần sửa!'
+                    })
+                }
+                const capnhat = await GheModel.CapNhatTrangThai(id,trangthai);
+                if(!trangthai){
+                    return res.status(401).json({
+                        success:false,
+                        message:'Cập nhật thông tin thất bại!'
+                    })
+                }
+                return res.status(200).json({
+                    success:true,
+                    message: 'Cập nhật thông tin thành công!'
+                })
+        } catch (error) {
+              console.error("Lỗi xử lý tại Controller cập nhật trạng thái ghế:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Lỗi hệ thống, không thể cập nhật thông tin ghế.",
+                error: error.message
+            });
         }
     }
 }

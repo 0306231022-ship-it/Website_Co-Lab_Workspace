@@ -14,6 +14,7 @@ import ThemGhe from "@/app/Modal/ThemGhe";
 import ThongTinGhe from "@/app/Modal/ThongTinGhe";
 import ChinhSuaGhe from "@/app/Modal/ChinhSuaGhe";
 import ThongTin from "@/app/Modal/ThongTin_Ghe_Dat";
+import ThanhToan from "@/app/Modal/ThanhToan";
 const MODAL_REGISTRY = {
     'DangKy' : SignUpForm,
     'formDangKy' : DangKy,
@@ -28,7 +29,8 @@ const MODAL_REGISTRY = {
     'ThemGhe' : ThemGhe,
     'ThongTinGhe' : ThongTinGhe,
     'ChinhSuaGhe' : ChinhSuaGhe,
-    'ThongTin_ghe' : ThongTin
+    'ThongTin_ghe' : ThongTin,
+    'ThanhToan' : ThanhToan,
 };
 
 // Khai báo kiểu dữ liệu cho các key (Tên trang) hợp lệ trong hệ thống

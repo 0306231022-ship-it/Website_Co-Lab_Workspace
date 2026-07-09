@@ -279,6 +279,7 @@ WHERE LD.ID_LICH_DAT = ?;
             throw new Error('Database query failed: ' + error.message);
         }
     }
+   
     static async ChiTiet_LichDat_TheoID_phong(idkg , limit , offset){
         try {
             const [truyvanResult, tongResult] = await Promise.all([
