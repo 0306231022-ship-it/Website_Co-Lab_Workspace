@@ -2,7 +2,7 @@
 import * as ThongBao from '@/FUNCTION/ThongBao';
 import * as api from '@/API/API';
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { objChiNhanh } from '@/interface/ChiNhanh';
 import { KhongGian } from '@/interface/KhongGian';
 import { ThietBi } from '@/interface/ThietBi';
@@ -10,7 +10,14 @@ import Image from "next/image";
 import * as fun from '@/FUNCTION/function';
 import { Ghe } from '@/interface/ghe';
 import SoDoGheCanvas from '@/component/Ghe';
+import { useModalContext } from "@/context/QuanLiMoal";
+import {  useRouter } from 'next/navigation';
+interface LichDaDat{
+    KHUNG_BATDAU:string,
+    KHUNG_KETTHUC: string
+}
 function ChiTietKhongGian() {
+  const { OpenMoDal } = useModalContext();
   const { idChiNhanh , idKhongGian } = useParams();
   const [loading,setloading] = useState<boolean>(false);
   const [err, setErr] = useState<string[]>([]);
@@ -19,31 +26,57 @@ function ChiTietKhongGian() {
   const [ThietBi,setThietBi] =  useState<ThietBi[]>([]); 
   const [page,setpage] = useState<number>(1);
   const [TongDanhSach,setTongDanhSach] = useState<number>(1);
-  const [ghe,setghe] = useState<Ghe[]>([])
+  const [ghe,setghe] = useState<Ghe[]>([]);
+  const [lichDaDat, setLichDaDat] = useState<LichDaDat[]>([]);
+  const router = useRouter();
+     const getTodayString = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  const todayDate = getTodayString();
+  const [ngayDat, setNgayDat] = useState(todayDate);
+  const [gioBatDau, setGioBatDau] = useState<string>('');
+ const [gioKetThuc, setGioKetThuc] = useState<string>('');
+ const batDau = new Date(gioBatDau);
+  const ketThuc = new Date(gioKetThuc);
+   const tongGio = (ketThuc.getTime() - batDau.getTime()) / (1000 * 60 * 60);
   useEffect(()=>{
     const laydl = async()=>{
        setloading(true)
       try {
-        const dulieu = await api.CallAPI(undefined,{url:`/admin/ChiTiet_KhongGian?IDKG=${idKhongGian}&IDCN=${idChiNhanh}`,PhuongThuc:2})
-        if(dulieu.validate){
-          setErr(dulieu.errors);
+        const [dulieu1,dulieu2] = await Promise.all([
+          api.CallAPI(undefined,{url:`/admin/ChiTiet_KhongGian?IDKG=${idKhongGian}&IDCN=${idChiNhanh}`,PhuongThuc:2}),
+          api.CallAPI(undefined,{url:`/admin/DanhSach_theo_khonggian?IDKG=${idKhongGian}`, PhuongThuc:2})
+        ])
+        if(dulieu1.validate){
+          setErr(dulieu1.errors);
           return;
         }
-        if(dulieu.success){
-          setchinhanh(dulieu.DanhSach.ChiNhanh);
-          setkhonggian(dulieu.DanhSach.KhongGian[0]);
-          setThietBi(dulieu.DanhSach.ThietBi.DanhSach);
-          setTongDanhSach(dulieu.DanhSach.ThietBi.TongDanhSach);
-          setghe(dulieu.DanhSach.Ghe)
+        if(dulieu1.success){
+          setchinhanh(dulieu1.DanhSach.ChiNhanh);
+          setkhonggian(dulieu1.DanhSach.KhongGian[0]);
+          setThietBi(dulieu1.DanhSach.ThietBi.DanhSach);
+          setTongDanhSach(dulieu1.DanhSach.ThietBi.TongDanhSach);
+          setghe(dulieu1.DanhSach.Ghe)
         }
-
+        if (dulieu2 && dulieu2.success) {
+                setLichDaDat(dulieu2.dulieu || []);
+            } else {
+                setLichDaDat([]);
+            }
       } catch (error) {
          console.error("Lỗi khi tải thông tin không gian:", error);
          ThongBao.ThongBao_CanhBao('Lỗi khi tải thông tin không gian');
+      } finally {
+        setloading(false)
       }
     }
     laydl();
   },[idChiNhanh,idKhongGian])
+
   const getTrangThaiConfig = (trangThai: number) => {
   switch (trangThai) {
     case 1:
@@ -74,10 +107,60 @@ function ChiTietKhongGian() {
     }
   }
  const handleGheSelect = (thongTinGhe: Ghe) => {
-   alert(JSON.stringify(thongTinGhe.TEN_GHE))
-    
-
+    OpenMoDal({thongTinGhe},{TenTrang:'ThongTin_ghe'});
   };
+   const fetchLichDaDat = async(selectedDate : string) => {
+      setloading(true)
+      try {
+          const data = await api.CallAPI(undefined,{url:`/admin/lichdatkhonggian_theothoigian?THOIGIAN=${fun.formatToBackendDateTime(selectedDate)}&IDKG=${idKhongGian}` , PhuongThuc:2});
+      
+          if(data.validate){
+              setErr(data.errors);
+              ThongBao.ThongBao_CanhBao(data.message)
+              return;
+          }
+           if (data && data.success) {
+              setLichDaDat(data.dulieu || []);
+          } else {
+              setLichDaDat([]);
+          }
+      } catch (error) {
+           console.error("Lỗi lấy danh sách lịch đặt hiện tại theo ghế:", error);
+      } finally {
+          setloading(false)
+      }
+    };
+      const handleDatCho = async() => {
+        if (gioKetThuc <= gioBatDau) {
+          ThongBao.ThongBao_CanhBao("Giờ kết thúc phải lớn hơn giờ bắt đầu!");
+          return;
+        }
+        try {
+             const dataToSend = new FormData();
+            dataToSend.append('ID_KHONG_GIAN' , String(idKhongGian));
+            dataToSend.append('KHUNG_BATDAU', String(fun.formatToBackendDateTime(gioBatDau)));
+            dataToSend.append('KHUNG_KETTHUC' , String(fun.formatToBackendDateTime(gioKetThuc)));
+            dataToSend.append("LoaiND", String(0));
+            const DatLich = await api.CallAPI(dataToSend,{url:'/nguoiDung/LichDat', PhuongThuc:1});
+           
+             if(DatLich.validate){
+                setErr(DatLich.errors);
+                ThongBao.ThongBao_CanhBao(DatLich.message)
+                return;
+            }
+            if(DatLich.success){
+                ThongBao.ThongBao_ThanhCong(DatLich.message)
+            }
+            if(DatLich.success===false){
+                ThongBao.ThongBao_Loi(DatLich.message)
+            }
+        } catch (error) {
+            console.error("Lỗi đặt lịch:", error);
+            ThongBao.ThongBao_CanhBao('Có lỗi sảy ra!')
+        }
+      };
+
+
 
   if(err && err.length>0){
     return (
@@ -97,6 +180,14 @@ function ChiTietKhongGian() {
     
     )
   }
+    if (loading) {
+        return (
+            <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
+                <div className="w-10 h-10 border-4 border-slate-200 border-t-brand-600 rounded-full animate-spin"></div>
+                <p className="font-medium text-slate-500 text-sm tracking-wide">Đang tải dữ liệu không gian...</p>
+            </div>
+        );
+    }
   return (
     <>
       {/* Thêm px-4 vào container chính */}
@@ -111,7 +202,7 @@ function ChiTietKhongGian() {
 
           {/* NÚT QUAY LẠI */}
           <button 
-        
+             onClick={() => router.back()} 
             className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 hover:text-emerald-600 bg-white hover:bg-emerald-50 px-3 py-1.5 rounded-lg border border-gray-200 hover:border-emerald-200 shadow-sm transition dynamic-btn"
           >
             ⬅ <span>Quay lại</span>
@@ -146,10 +237,10 @@ function ChiTietKhongGian() {
               </div>
               <div className="space-y-2 mt-4 text-sm text-gray-600">
                 <p className="flex items-center gap-2">
-                  📍 <span className="font-medium text-gray-800">{chinhanh?.TEN_CHI_NHANH}</span>
+                  📍 <span className="font-medium text-gray-800">{chinhanh?.TEN_CHI_NHANH || chinhanh?.TenChiNhanh}</span>
                 </p>
                 <p className="flex items-center gap-2 text-gray-500">
-                  {chinhanh?.DIA_CHI}
+                  {chinhanh?.DIA_CHI || chinhanh?.DiaChi}
                 </p>
               </div>
             </div>
@@ -161,16 +252,23 @@ function ChiTietKhongGian() {
               <div className="w-10 h-10 bg-blue-50 text-blue-500 rounded-lg flex items-center justify-center text-lg">🏢</div>
               <div>
                 <p className="text-[11px] text-gray-400 font-medium uppercase">Loại không gian</p>
-                <p className="text-sm font-bold text-gray-800">{khonggian?.LOAI_KHONG_GIAN === 1 ? 'không gian chung' : 'phogf họp cá nhân'}</p>
+                <p className="text-sm font-bold text-gray-800">{khonggian?.LOAI_KHONG_GIAN === 1 ? 'không gian chung' : ' Phòng họp cá nhân'}</p>
               </div>
             </div>
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-3">
+            {
+              khonggian?.LOAI_KHONG_GIAN === 1 && (
+                     <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-3">
+              
               <div className="w-10 h-10 bg-emerald-50 text-emerald-500 rounded-lg flex items-center justify-center text-lg">🪑</div>
               <div>
                 <p className="text-[11px] text-gray-400 font-medium uppercase">Số ghế</p>
-                <p className="text-sm font-bold text-gray-800">4 ghế</p>
+                <p className="text-sm font-bold text-gray-800">{ghe.length} ghế</p>
               </div>
+
             </div>
+              )
+            }
+       
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-3">
               <div className="w-10 h-10 bg-purple-50 text-purple-500 rounded-lg flex items-center justify-center text-lg">📦</div>
               <div>
@@ -250,27 +348,146 @@ function ChiTietKhongGian() {
             </div>
 
           {/* SƠ ĐỒ GHẾ TRỰC QUAN */}
-<div className="md:col-span-7 bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
+            {
+              khonggian?.LOAI_KHONG_GIAN === 1 ? (
+                <div className="md:col-span-7 bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
   <div>
+
+
     <div className="flex flex-wrap justify-between items-center gap-2 mb-4">
       <div>
         <h3 className="text-sm font-bold text-gray-800">Sơ đồ vị trí chỗ ngồi</h3>
         <p className="text-[11px] text-gray-400">Nhấp vào vị trí ghế trống trên sơ đồ để tiến hành lựa chọn</p>
       </div>
-      
-      {/* Chú thích màu sắc tương ứng trực quan cho khách hàng */}
       <div className="flex gap-3 text-[10px] text-gray-500 font-medium">
         <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-emerald-500"></span> Trống</span>
         <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-red-500"></span> Đang có người</span>
         <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-amber-500"></span> Đang chọn</span>
       </div>
     </div>
-
-    {/* Bản đồ ghế canvas hiển thị cố định kích thước */}
-    <SoDoGheCanvas danhSachGhe={ghe} onGheClick={handleGheSelect} />
+    <SoDoGheCanvas danhSachGhe={ghe} onGheClick={handleGheSelect}  isReadOnly={true} />
      <div className="mt-4 p-3 bg-gray-50 border border-gray-200 text-gray-400 rounded-xl text-center text-xs font-medium max-w-md mx-auto">Vui lòng chọn một ghế trống bất kỳ trên sơ đồ</div>
+     
   </div>
 </div>
+              ) : (
+                <div className="md:col-span-7 bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
+      <div>
+        {/* Tiêu đề góc */}
+        <div className="mb-4">
+          <h3 className="text-sm font-bold text-gray-800">Thông tin đặt phòng họp</h3>
+          <p className="text-[11px] text-gray-400">Vui lòng điền đầy đủ thông tin để tiến hành đặt không gian họp</p>
+        </div>
+                    <div className="text-right">
+                              <span className="text-2xl font-black text-blue-600">{fun.formatCurrency(String(khonggian?.DON_GIA))}</span>
+                              <span className="text-xs font-bold text-slate-400"> / giờ</span>
+                            </div>
+        {/* Các trường nhập liệu */}
+        <div className="space-y-4">
+    
+          <div className="grid grid-cols-2 gap-3">
+           
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1">Giờ bắt đầu</label>
+              <input 
+                type="datetime-local"
+                  value={gioBatDau}
+                    min={todayDate}
+                    onChange={(e) =>{
+                        setGioBatDau(e.target.value);
+                        fetchLichDaDat(e.target.value);
+                        setNgayDat(e.target.value);
+                    }}
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-gray-700"
+              />
+            </div>
+            {/* Giờ kết thúc */}
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1">Giờ kết thúc</label>
+              <input 
+                type="datetime-local"
+                value={gioKetThuc}
+                min={gioBatDau}
+                onChange={(e) => setGioKetThuc(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-gray-700"
+              />
+            </div>
+          </div>
+
+    
+      
+
+       <div>
+              <div className="flex items-center justify-between mb-3">
+              <h4 className="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <i className="fa-solid fa-calendar-xmark text-slate-400"></i> Lịch kín ngày : { fun.formatDate(ngayDat) }
+              </h4>
+            </div>
+       <div className="w-full max-w-md mx-auto p-4 bg-white rounded-2xl shadow-sm border border-slate-100">
+
+
+  {/* Khung chứa danh sách - Hỗ trợ cuộn chuẩn UX */}
+  {lichDaDat && lichDaDat.length > 0 ? (
+    <div className="space-y-2 max-h-48 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-rose-200">
+      {lichDaDat.map((item, index) => (
+        <div
+          key={ index} // Sử dụng ID nếu có, nếu không dùng index trực tiếp tại thẻ ngoài cùng
+          className="flex items-center justify-between border border-rose-100 bg-gradient-to-r from-rose-50/50 to-transparent px-4 py-3 rounded-xl hover:border-rose-200 transition-all duration-200"
+        >
+          {/* Thời gian */}
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-rose-100/60 flex items-center justify-center text-rose-500">
+              <i className="fa-regular fa-clock text-xs"></i>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xs font-bold text-slate-800">
+                {fun.formatTime(item.KHUNG_BATDAU)} - {fun.formatTime(item.KHUNG_KETTHUC)}
+              </span>
+              <span className="text-[10px] text-slate-400">Thời gian cố định</span>
+            </div>
+          </div>
+
+          {/* Trạng thái */}
+          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100">
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+            Đã đặt
+          </span>
+        </div>
+      ))}
+    </div>
+  ) : (
+    /* Giao diện trống (Empty State) tinh tế hơn */
+    <div className="flex flex-col items-center justify-center py-8 px-4 text-center border border-dashed border-slate-200 rounded-xl bg-slate-50/50">
+      <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
+        <i className="fa-regular fa-calendar-xmark text-sm"></i>
+      </div>
+      <p className="text-xs font-medium text-slate-500">
+        Không có lịch đặt nào trong ngày hôm nay
+      </p>
+    </div>
+  )}
+</div>
+        
+            
+          </div>
+        </div>
+      </div>
+       <div className="flex justify-between items-end mb-4 px-1">
+                    <div>
+                      <span className="text-xs font-bold text-slate-400 block mb-0.5">Vui lòng kiểm tra lại giờ đặt</span>
+                      <span className="text-sm font-bold text-slate-800">Tạm tính: {tongGio || 0} giờ</span>
+                    </div>
+                    <span className="text-3xl font-black text-blue-600 tracking-tight">{fun.formatCurrency(((tongGio * Number(khonggian?.DON_GIA)) || 0))}</span>
+                  </div>
+      {/* Nút hành động */}
+      <div className="mt-5 border-t border-gray-100 pt-4">
+        <button onClick={()=>{handleDatCho()}} className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm rounded-xl transition-all shadow-sm shadow-indigo-100">
+          Xác nhận thông tin phòng họp
+        </button>
+      </div>
+    </div>
+              )
+            }
          
           </div>
 
@@ -278,7 +495,7 @@ function ChiTietKhongGian() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
             <div className="bg-emerald-50/50 border border-emerald-100 p-4 rounded-xl text-xs text-gray-600 space-y-1.5">
               <p className="font-bold text-emerald-800 flex items-center gap-1.5">💡 Lưu ý sử dụng không gian</p>
-              <p className="pl-2">• Vui lòng ngồi đúng vị trí ghế đã chọn để tránh ảnh hưởng tới thành viên khác.</p>
+              <p className="pl-2">• Vui lòng ngồi đúng vị trí ghế hoặc không gian đã chọn để tránh ảnh hưởng tới thành viên khác.</p>
               <p className="pl-2">• Giữ gìn vệ sinh chung tại khu vực OpenSpace, không đem đồ ăn nặng mùi vào phòng.</p>
             </div>
             <div className="bg-white border border-gray-100 p-4 rounded-xl flex items-center gap-4">

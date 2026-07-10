@@ -15,7 +15,8 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   const { OpenMoDal } = useModalContext();
   const [DangNhap, setDangNhap] = useState<boolean>(false);
   const [ThongTin, setThongTin] = useState<NguoiDung | null>(null);
-
+    const [TongThongBao,setTongThongBao] = useState<number>(0);
+    const [TongDonHang,setTongDonHang] = useState<number>(0)
   // 1. Kiểm tra xem người dùng có đang truy cập vào trang Admin hay không
   const pathname = usePathname();
   const isAdminPage = pathname.startsWith('/admin');
@@ -24,13 +25,20 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   const KiemTra = async () => {
     try {
        
-      const kiemtra = await api.CallAPI(formdata, { url: '/NguoiDung/kiemtra_dangnhap', PhuongThuc: 1 });
+      const [kiemtra, thongke] = await Promise.all([
+        api.CallAPI(formdata, { url: '/NguoiDung/kiemtra_dangnhap', PhuongThuc: 1 }),
+        api.CallAPI(formdata,{url:`/NguoiDung/thongke`, PhuongThuc:2})
+      ]) 
       if (kiemtra.success) {
         setDangNhap(true);
         setThongTin(kiemtra.dulieu);
       } else {
         setDangNhap(false);
         setThongTin(null);
+      }
+      if(thongke.success){
+        setTongThongBao(thongke.dulieu.ThongBao);
+        setTongDonHang(thongke.dulieu.DonHang)
       }
     } catch (error) {
       console.error("Lỗi xảy ra:", error);
@@ -149,7 +157,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                       <span>Lịch sử đặt lịch</span>
                     </div>
                     <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-                      12
+                      {TongDonHang}
                     </span>
                   </NavLink>
 
@@ -162,7 +170,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                       <span>Thông báo</span>
                     </div>
                     <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-                      12
+                      {TongThongBao}
                     </span>
                   </NavLink>
                 </nav>

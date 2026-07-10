@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { objChiNhanh } from '@/interface/ChiNhanh';
 import { ChiTietKhongGian } from '@/interface/KhongGian';
 import Link from 'next/link';
+import * as fun from '@/FUNCTION/function';
 
 function ChiTietChiNhanh() {
     const { idChiNhanh } = useParams();
@@ -48,7 +49,7 @@ function ChiTietChiNhanh() {
         else if (HanhDong === 'prev') trangMoi = Math.max(page - 1, 1);
         else if (HanhDong === 'search') trangMoi = 1; // Tìm kiếm thì reset về trang 1
         if (trangChiDinh) trangMoi = trangChiDinh;
-        
+    
         setPage(trangMoi);
 
         try {
@@ -84,13 +85,7 @@ function ChiTietChiNhanh() {
         );
     }
 
-    const thongTinChiNhanh = chitiet1 || {
-        ID_CHI_NHANH: 0,
-        TEN_CHI_NHANH: "Không rõ chi nhánh",
-        DIA_CHI: "Chưa có địa chỉ",
-        TRANG_THAI: 0,
-        HINHANH: ""
-    };
+
 
     // Định nghĩa an toàn biến danhSachKhongGian từ dữ liệu state chitiet2
     const danhSachKhongGian = chitiet2?.DanhSach || [];
@@ -111,18 +106,19 @@ function ChiTietChiNhanh() {
                     </button>
                     <span className="hover:text-brand-600 transition cursor-pointer" onClick={() => router.push('/admin/chi-nhanh')}>Hệ thống chi nhánh</span>
                     <i className="fa-solid fa-chevron-right text-[9px] text-slate-300"></i>
-                    <span className="text-slate-900 font-semibold max-w-[200px] truncate">{thongTinChiNhanh.TEN_CHI_NHANH}</span>
+                    <span className="text-slate-900 font-semibold max-w-[200px] truncate">{chitiet1?.TEN_CHI_NHANH}</span>
                 </nav>
 
                 {/* Banner Chi Nhánh */}
                 <div className="bg-white rounded-3xl border border-slate-200/80 overflow-hidden shadow-sm flex flex-col md:flex-row min-h-[200px]">
                     <div className="md:w-1/3 min-h-[200px] md:min-h-auto relative overflow-hidden group">
-                        {thongTinChiNhanh.HINHANH && (
+                        {chitiet1?.HINHANH && (
                             <Image
-                                src={`http://localhost:3001/${thongTinChiNhanh.HINHANH}`} 
-                                alt={thongTinChiNhanh.TEN_CHI_NHANH}
+                                src={`http://localhost:3001/${chitiet1?.HINHANH}`} 
+                                alt={chitiet1?.TEN_CHI_NHANH}
                                 width={500}
                                 height={300}
+                                unoptimized
                                 className="w-full h-full object-cover transition duration-500 group-hover:scale-105" 
                             />
                         )}
@@ -131,9 +127,9 @@ function ChiTietChiNhanh() {
                     <div className="p-6 md:p-8 md:w-2/3 flex flex-col justify-center bg-gradient-to-br from-white to-slate-50/40">
                         <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
                             <span className="bg-slate-100 text-slate-700 text-[10px] uppercase font-bold tracking-wider px-3 py-1 rounded-xl border border-slate-200">
-                                {thongTinChiNhanh.ID_CHI_NHANH === 1 ? "🌟 Trụ sở chính" : "🏢 Chi nhánh"}
+                                {chitiet1?.ID_CHI_NHANH === 1 ? "🌟 Trụ sở chính" : "🏢 Chi nhánh"}
                             </span>
-                            {thongTinChiNhanh.TRANG_THAI === 1 ? (
+                            {chitiet1?.TRANG_THAI === 1 ? (
                                 <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-xl flex items-center gap-1.5">
                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Hoạt động
                                 </span>
@@ -143,9 +139,9 @@ function ChiTietChiNhanh() {
                                 </span>
                             )}
                         </div>
-                        <h1 className="text-xl md:text-2xl font-black text-slate-900 mb-2 tracking-tight leading-tight">{thongTinChiNhanh.TEN_CHI_NHANH}</h1>
+                        <h1 className="text-xl md:text-2xl font-black text-slate-900 mb-2 tracking-tight leading-tight">{chitiet1?.TEN_CHI_NHANH}</h1>
                         <p className="text-sm text-slate-500 flex items-start gap-2 max-w-2xl leading-relaxed">
-                            <i className="fa-solid fa-location-dot text-rose-500 mt-1 shrink-0"></i> <span>{thongTinChiNhanh.DIA_CHI}</span>
+                            <i className="fa-solid fa-location-dot text-rose-500 mt-1 shrink-0"></i> <span>{chitiet1?.DIA_CHI}</span>
                         </p>
                     </div>
                 </div>
@@ -208,7 +204,7 @@ function ChiTietChiNhanh() {
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {danhSachKhongGian.map((space) => {
-                                const isBaoTri = space.TRANG_THAI === 0 || space.NGAY_BAO_TRI !== null;
+                                const isBaoTri = space.TRANG_THAI === 2;
                                 const isLoaiChung = space.LOAI_KHONG_GIAN === 1;
 
                                 return (
@@ -225,6 +221,7 @@ function ChiTietChiNhanh() {
                                                     alt={space.TEN_KHONG_GIAN}
                                                     width={500}
                                                     height={300}
+                                                    unoptimized
                                                     className="w-full h-full object-cover"
                                                 />
                                             )}
@@ -256,7 +253,7 @@ function ChiTietChiNhanh() {
                                                 {isLoaiChung ? (
                                                     <><i className="fa-solid fa-chair text-slate-400 w-4"></i> Ghế tự do, full tiện ích</>
                                                 ) : (
-                                                    <><i className="fa-solid fa-users text-slate-400 w-4"></i> Cách âm, có máy chiếu</>
+                                                    <><i className="fa-solid fa-users text-slate-400 w-4"></i> Đầy đủ phụ kiện </>
                                                 )}
                                             </p>
                                             
@@ -271,7 +268,9 @@ function ChiTietChiNhanh() {
                                                             <span className="text-xs text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">Membership</span>
                                                         ) : (
                                                             <span className="font-black text-sm md:text-base text-slate-900">
-                                                                {space.ID_GIA?.toLocaleString('vi-VN')}đ<span className="text-[11px] font-normal text-slate-400">/g</span>
+                                                                {
+                                                                    space.ID_GIA !== null && `${fun.formatCurrency(String(space.DON_GIA))}`
+                                                                }<span className="text-[11px] font-normal text-slate-400">/giờ</span>
                                                             </span>
                                                         )}
                                                     </div>

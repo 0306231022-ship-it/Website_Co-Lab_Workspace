@@ -4,6 +4,7 @@ import * as api from "@/API/API";
 import * as ThongBao from "@/FUNCTION/ThongBao";
 import * as fun from "@/FUNCTION/function";
 import Link from "next/link";
+import { useModalContext } from "@/context/QuanLiMoal";
 export interface ThietBi {
   ID_THIET_BI: number;
   TEN_THIET_BI: string;
@@ -37,6 +38,7 @@ export default function QuanLyThietBi() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [page, setPage] = useState<number>(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const { OpenMoDal } = useModalContext();
 
   // 2. Gọi API lấy dữ liệu từ Backend
   useEffect(() => {
@@ -94,12 +96,7 @@ export default function QuanLyThietBi() {
         <div className="flex items-center space-x-3">
           <button
             type="button"
-            className="px-4 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-bold rounded-xl shadow-3xs transition-all cursor-pointer flex items-center"
-          >
-            <i className="fa-solid fa-cloud-arrow-down mr-2"></i> Xuất Excel
-          </button>
-          <button
-            type="button"
+            onClick={()=>{OpenMoDal(undefined,{TenTrang:'ThemThietBi'})}}
             className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer flex items-center"
           >
             <i className="fa-solid fa-plus mr-2"></i> Nhập thiết bị mới
@@ -166,18 +163,7 @@ export default function QuanLyThietBi() {
             className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all placeholder:font-normal"
           />
         </div>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <select className="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 cursor-pointer focus:outline-none focus:border-indigo-500 min-w-[160px]">
-            <option value="">Tất cả danh mục</option>
-            <option value="it">Thiết bị IT</option>
-            <option value="furniture">Nội thất</option>
-          </select>
-          <select className="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 cursor-pointer focus:outline-none focus:border-indigo-500 min-w-[150px]">
-            <option value="">Tất cả trạng thái</option>
-            <option value="active">Đang sử dụng</option>
-            <option value="maintenance">Đang bảo trì</option>
-          </select>
-        </div>
+       
       </div>
 
       {/* --- BẢNG DỮ LIỆU --- */}
@@ -223,17 +209,7 @@ export default function QuanLyThietBi() {
                     <td className="p-4 pl-6">
                       <div className="flex items-center space-x-3">
                         {/* Kiểm tra hình ảnh, nếu có thì hiện ảnh, không thì hiện icon */}
-                        {item.HINH_ANH ? (
-                          <img
-                            src={item.HINH_ANH}
-                            alt={item.TEN_THIET_BI}
-                            className="w-10 h-10 rounded-xl object-cover border border-gray-200 shrink-0"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 font-bold">
-                            <i className="fa-solid fa-desktop text-lg"></i>
-                          </div>
-                        )}
+                      <i className={`${item.HINH_ANH}`}></i>
                         <div>
                           <p className="font-black text-gray-900">
                             {item.TEN_THIET_BI}

@@ -130,4 +130,18 @@ export default class danhmucgheController {
       res.status(500).json({ success: false, message: error.message });
     }
   }
+
+
+    static async LayDL_DnhMuc(req,res){
+        try {
+            const ketqua = await dmGhe.LayDL_DnhMuc();
+            return res.status(200).json({
+                success:true,
+                dulieu:ketqua
+            })
+        } catch (error) {
+             res.status(500).json({ success: false, message: error.message });
+        }
+    }
 }
+

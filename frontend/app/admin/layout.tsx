@@ -15,7 +15,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const [isOpenNotification, setIsOpenNotification] = useState(false);
+ 
   const [isOpenProfile, setIsOpenProfile] = useState(false);
    const [ThongTin, setThongTin] = useState<NguoiDung | null>(null);
   useEffect(() => {
@@ -58,9 +58,6 @@ export default function AdminLayout({
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      if (!target.closest("#notification-dropdown-container")) {
-        setIsOpenNotification(false);
-      }
       if (!target.closest("#profile-dropdown-container")) {
         setIsOpenProfile(false);
       }
@@ -85,6 +82,7 @@ export default function AdminLayout({
             console.error("Lỗi đăng xuất:", error);
           }
   }
+
 
   return (
     <>
@@ -119,13 +117,14 @@ export default function AdminLayout({
                     <i className="fa-solid fa-map-location-dot w-5 text-center text-base transition-transform duration-300 group-hover:scale-110"></i>
                     <span className="text-sm">Quản lý chi nhánh</span>
                   </NavLink>
-                  <a href="#" className="flex items-center justify-between text-slate-400 hover:bg-slate-800/50 hover:text-indigo-400 hover:translate-x-1 px-4 py-2.5 rounded-xl transition-all duration-300 font-medium group">
+                 <NavLink href={`/admin/QuanLiDatDon`}
+                        activeClassName="bg-indigo-600"
+                        className="flex items-center space-x-3  text-white px-4 py-2.5 rounded-xl transition-all font-semibold shadow-md">
                     <div className="flex items-center space-x-3">
                       <i className="fa-solid fa-file-invoice-dollar w-5 text-center text-base transition-transform duration-300 group-hover:scale-110"></i>
                       <span className="text-sm">Quản lý đặt đơn</span>
                     </div>
-                    <span className="bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-xs animate-pulse">5</span>
-                  </a>
+                  </NavLink>
                   <NavLink href={`/admin/QuanLiKhachHang`}
                         activeClassName="bg-indigo-600"
                         className="flex items-center space-x-3  text-white px-4 py-2.5 rounded-xl transition-all font-semibold shadow-md">
@@ -189,53 +188,13 @@ export default function AdminLayout({
               
               {/* DROPDOWN 1: THÔNG BÁO */}
               <div className="relative inline-block text-left" id="notification-dropdown-container">
-                <button 
-                  onClick={() => {
-                    setIsOpenNotification(!isOpenNotification);
-                    setIsOpenProfile(false); // đóng menu còn lại
-                  }}
-                  className={`relative p-2 rounded-xl transition-all focus:outline-none ${isOpenNotification ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500 hover:text-indigo-600 hover:bg-indigo-50'}`}
+                <Link href={`/admin/ThongBao`}
+                
+                  className={`relative p-2 rounded-xl transition-all focus:outline-none text-indigo-600 bg-indigo-50`}
                 >
                   <i className="fa-solid fa-bell text-lg"></i>
                   <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white"></span>
-                </button>
-
-                {/* Giao diện Menu Thông báo đóng mở thông qua State */}
-                <div 
-                  className={`absolute right-0 mt-2 w-80 bg-white border border-slate-100 rounded-2xl shadow-xl z-50 overflow-hidden transition-all duration-200 origin-top-right transform ${
-                    isOpenNotification ? 'block opacity-100 scale-100' : 'hidden opacity-0 scale-95'
-                  }`}
-                >
-                  <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                    <span className="font-bold text-sm text-slate-800">Thông báo</span>
-                    <span className="bg-rose-100 text-rose-600 text-xs font-bold px-2 py-0.5 rounded-full">2 Mới</span>
-                  </div>
-                  <div className="max-h-72 overflow-y-auto divide-y divide-slate-100">
-                    <a href="#" className="flex px-4 py-3.5 bg-indigo-50/30 hover:bg-slate-50 transition-colors relative group">
-                      <div className="mr-3 mt-0.5 w-8 h-8 bg-indigo-50 rounded-xl text-indigo-600 flex items-center justify-center shrink-0">
-                        <i className="fa-solid fa-calendar-check text-sm"></i>
-                      </div>
-                      <div className="pr-2">
-                        <p className="text-xs font-semibold text-slate-800 leading-tight">Yêu cầu đặt chỗ mới từ phòng họp M-01 cần duyệt.</p>
-                        <p className="text-[10px] text-slate-400 mt-1 font-medium"><i className="fa-regular fa-clock mr-1"></i>5 phút trước</p>
-                      </div>
-                      <span className="absolute right-3.5 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-rose-500 rounded-full"></span>
-                    </a>
-                    <a href="#" className="flex px-4 py-3.5 bg-indigo-50/30 hover:bg-slate-50 transition-colors relative group">
-                      <div className="mr-3 mt-0.5 w-8 h-8 bg-amber-50 rounded-xl text-amber-600 flex items-center justify-center shrink-0">
-                        <i className="fa-solid fa-triangle-exclamation text-sm"></i>
-                      </div>
-                      <div className="pr-2">
-                        <p className="text-xs font-semibold text-slate-800 leading-tight">Cảnh báo: Điều hòa phòng M-02 ngưng hoạt động.</p>
-                        <p className="text-[10px] text-slate-400 mt-1 font-medium"><i className="fa-regular fa-clock mr-1"></i>1 giờ trước</p>
-                      </div>
-                      <span className="absolute right-3.5 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-rose-500 rounded-full"></span>
-                    </a>
-                  </div>
-                  <div className="p-2 border-t border-slate-100 text-center bg-slate-50/30">
-                    <a href="#" className="text-xs font-bold text-indigo-600 hover:text-indigo-800 block py-1">Xem tất cả thông báo</a>
-                  </div>
-                </div>
+                </Link>
               </div>
 
               <div className="h-5 w-px bg-slate-200"></div>
@@ -244,8 +203,7 @@ export default function AdminLayout({
               <div className="relative inline-block text-left" id="profile-dropdown-container">
                 <button 
                   onClick={() => {
-                    setIsOpenProfile(!isOpenProfile);
-                    setIsOpenNotification(false); // đóng menu còn lại
+                    setIsOpenProfile(!isOpenProfile)
                   }}
                   className={`flex items-center space-x-3 p-1.5 rounded-xl transition-all cursor-pointer group focus:outline-none ${isOpenProfile ? 'bg-slate-100' : 'hover:bg-slate-50'}`}
                 >
@@ -274,10 +232,6 @@ export default function AdminLayout({
                     <i className="fa-regular fa-user text-slate-400 w-4 text-center"></i>
                     <span>Hồ sơ cá nhân</span>
                   </Link>
-                  <a href="#" className="flex items-center space-x-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium transition-colors">
-                    <i className="fa-regular fa-circle-question text-slate-400 text-base w-5 text-center"></i>
-                    <span>Hỗ trợ trợ giúp</span>
-                  </a>
                   <div className="border-t border-slate-100 my-1"></div>
                   <button onClick={DangXuat}  className="flex items-center space-x-3 px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 font-bold transition-colors">
                     <i className="fa-solid fa-right-from-bracket text-base w-5 text-center"></i>

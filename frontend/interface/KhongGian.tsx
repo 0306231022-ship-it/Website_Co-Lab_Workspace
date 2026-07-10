@@ -10,6 +10,7 @@ export interface KhongGian {
     NGAY_XONG: string | null;
     ID_CHI_NHANH: number;
     HINHANH: string;
+    DON_GIA : number | null;
 }
 
 export interface ChiTietKhongGian {

@@ -63,11 +63,23 @@ export default class ThietBi {
   }
 
   // 4. Cập nhật thiết bị
-  static async update(id, tenThietBi, hinhAnh) {
+  static async updateten(id, tenThietBi) {
     try {
       const [result] = await execute(
-        "UPDATE thietbi SET TEN_THIET_BI = ?, HINH_ANH = ? WHERE ID_THIET_BI = ?",
-        [tenThietBi, hinhAnh, id],
+        "UPDATE thietbi SET TEN_THIET_BI = ? WHERE ID_THIET_BI = ?",
+        [tenThietBi, id],
+      );
+      return result.affectedRows > 0;
+    } catch (error) {
+      console.error(` Lỗi Database trong update (${id}):`, error.message);
+      throw new Error("Không thể cập nhật thông tin thiết bị!");
+    }
+  }
+    static async updatehinhanh(id, hinhanh) {
+    try {
+      const [result] = await execute(
+        "UPDATE thietbi SET HINH_ANH = ? WHERE ID_THIET_BI = ?",
+        [hinhanh, id],
       );
       return result.affectedRows > 0;
     } catch (error) {

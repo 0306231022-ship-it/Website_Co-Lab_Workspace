@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import * as api from "@/API/API";
 import * as ThongBao from "@/FUNCTION/ThongBao";
-
+import { useModalContext } from "@/context/QuanLiMoal";
 export interface ThietBiDetail {
   ID_THIET_BI: number;
   TEN_THIET_BI: string;
@@ -21,7 +21,7 @@ export interface ThietBiKhongGian {
 export default function ChiTietThietBi() {
   const router = useRouter();
   const params = useParams();
-  
+  const { OpenMoDal } = useModalContext();
   // FIX CHỐNG SẬP 1: Dùng optional chaining (?.) để tránh crash khi params bị null
   // Hỗ trợ cả trường hợp bạn đặt tên thư mục là [idthietbi] hoặc [id]
   const idthietbi = params?.idthietbi || "";
@@ -131,11 +131,8 @@ export default function ChiTietThietBi() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center space-x-4">
             <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg ring-4 ring-indigo-50 overflow-hidden shrink-0">
-                {chiTiet.HINH_ANH ? (
-                    <img src={chiTiet.HINH_ANH} alt={chiTiet.TEN_THIET_BI} className="w-full h-full object-cover" />
-                ) : (
-                    <i className="fa-solid fa-desktop"></i>
-                )}
+                <i className={chiTiet.HINH_ANH}></i>
+      
             </div>
             <div>
               <h1 className="text-2xl font-black text-slate-900 tracking-tight">
@@ -145,15 +142,12 @@ export default function ChiTietThietBi() {
                 <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">
                   Mã: <span className="font-mono text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded">ID_{chiTiet.ID_THIET_BI}</span>
                 </span>
-                <span className="text-xs text-gray-400 font-bold uppercase tracking-wider border-l border-gray-200 pl-3">
-                  Loại: <span className="text-gray-600">Thiết bị IT</span>
-                </span>
               </div>
             </div>
           </div>
 
           <div className="flex items-center space-x-2 shrink-0">
-            <button className="px-4 py-2 bg-white hover:bg-gray-50 text-gray-600 text-xs font-bold rounded-xl border border-gray-200 transition shadow-3xs cursor-pointer">
+            <button onClick={()=>{OpenMoDal({id:chiTiet.ID_THIET_BI , ten : chiTiet.TEN_THIET_BI , hinhanh : chiTiet.HINH_ANH},{TenTrang:'ChinhSuaThietBi'})}} className="px-4 py-2 bg-white hover:bg-gray-50 text-gray-600 text-xs font-bold rounded-xl border border-gray-200 transition shadow-3xs cursor-pointer">
               <i className="fa-solid fa-pen-to-square mr-1.5"></i> Chỉnh sửa thiết bị
             </button>
           </div>

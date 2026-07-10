@@ -13,7 +13,6 @@ export default function VerifyEmailForm({DuLieu} : {DuLieu:objXacThuc}) {
   const { OpenMoDal , CloseMoDal } = useModalContext();
 
   const handleSubmit = async () => {
-  
     if (!email.trim()) {
       ThongBao.ThongBao_CanhBao('Vui lòng nhập đầy đủ thông tin!');
       return; 
@@ -25,7 +24,7 @@ export default function VerifyEmailForm({DuLieu} : {DuLieu:objXacThuc}) {
     try {
       const formData = new FormData();
       formData.append('Email', email);
-      formData.append('TrangThai', String(1));
+      formData.append('TrangThai', String(DuLieu.TrangThai));
       
       const res = await api.CallAPI(formData, { url: '/NguoiDung/XacThucOTP', PhuongThuc: 1 });
       

@@ -198,4 +198,26 @@ export default class NguoiDungModel {
       throw new Error("Database query failed: " + error.message);
     }
   }
-}
+
+   
+   static async thongke(id){
+      try {
+        const [thongkeThongBao] = await execute(`
+          SELECT COUNT(IDND) as ThongBao
+          FROM thongbao
+          WHERE IDND = ?
+          `,[id]);
+        const [thongkeDonHang] = await execute(`
+          SELECT COUNT(IDND) as DonHang
+          FROM  lichdat 
+          WHERE IDND = ?
+          `,[id]);
+        return {
+          ThongBao : thongkeThongBao[0].ThongBao,
+          DonHang: thongkeDonHang[0].DonHang
+        }
+      } catch (error) {
+        throw new Error('Database query failed: ' + error.message);
+      }
+   }
+  }

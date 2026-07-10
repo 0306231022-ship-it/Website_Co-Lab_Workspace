@@ -40,4 +40,20 @@ export default class hoadonModel {
       throw new Error("Không thể truy vấn thông tin hóa đơn!");
     }
   }
+
+
+    static async kiemtraid_hoadon(id){
+        try {
+            const [truyvan] = await execute(`
+                SELECT ID_HOADON
+                FROM hoadon 
+                WHERE ID_LICHDAT = ?
+                `,[id]);
+           return truyvan.length>0 
+        } catch (error) {
+             console.error(` Lỗi Database:`, error.message);
+            throw new Error("Không thể truy vấn thông tin hóa đơn!");
+        }
+    }
 }
+

@@ -32,3 +32,17 @@ export function formatShortNumber(number : number) {
     }
     return number.toString();
 }
+export const formatToBackendDateTime = (dateTimeLocalValue: string): string => {
+  if (!dateTimeLocalValue) return "";
+  
+  // dateTimeLocalValue sẽ có dạng: "2026-07-02T09:00"
+  // Bước 1: Thay thế ký tự 'T' bằng một dấu cách ' '
+  let formatted = dateTimeLocalValue.replace('T', ' ');
+  
+  // Bước 2: Nếu chuỗi thiếu phần giây (độ dài lúc này là 16 ký tự "YYYY-MM-DD HH:mm")
+  if (formatted.length === 16) {
+    formatted += ':00'; // Cộng thêm giây vào cuối
+  }
+  
+  return formatted; // Kết quả trả về: "2026-07-02 09:00:00"
+};

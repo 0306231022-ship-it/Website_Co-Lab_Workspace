@@ -63,6 +63,7 @@ export default class giaController {
         });
       }
 
+
       const { ID_GIA } = req.query;
       const item = await giaModel.getById(ID_GIA);
 
@@ -220,4 +221,19 @@ export default class giaController {
       return res.status(500).json({ success: false, message: error.message });
     }
   }
-}
+
+
+         
+    static async LayBangGia_KhongGian(req,res){
+        try {
+            const giatri = await giaModel.LayBangGia_KhongGian();
+            return res.status(200).json({
+                success:true,
+                dulieu:giatri
+            })
+        } catch (error) {
+             return res.status(500).json({ success: false, message: error.message });
+        }
+    }
+  }
+

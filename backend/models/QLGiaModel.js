@@ -61,6 +61,7 @@ export default class giaModel {
 
   // 4. Cập nhật thiết bị
   static async update(id, tengia, mota, dongia, danhmucghe) {
+
     try {
       const [result] = await execute(
         "UPDATE banggia SET TEN_GIA = ?,MOTA = ?, DON_GIA = ?, DANHMUC_GHE = ?   WHERE ID_GIA = ?",
@@ -84,4 +85,19 @@ export default class giaModel {
       throw new Error("Không thể truy vấn thông tin GIA!");
     }
   }
-}
+
+
+    static async LayBangGia_KhongGian(){
+        try {
+            const [kq] = await execute(`
+                SELECT ID_GIA, DON_GIA
+                FROM banggia
+                `,[]);
+            return kq;
+        } catch (error) {
+            console.error(` Lỗi Database:`, error.message);
+            throw new Error("Không thể truy vấn thông tin GIA!");
+        }
+    }
+
+  }

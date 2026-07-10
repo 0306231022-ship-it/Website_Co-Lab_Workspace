@@ -10,7 +10,8 @@ export default function HomePage() {
   const [page, setpage] = useState<number>(1);
   const [chiNhanh, setChiNhanh] = useState<objChiNhanh[]>([]);
   const [TongDanhSach, setTongDanhSach] = useState<number>(1);
-  const [TimKiem, setTimKiem] = useState<string>(""); 
+  const [TimKiem, setTimKiem] = useState<string>("");
+
 
   useEffect(() => {
     const laydl = async () => {

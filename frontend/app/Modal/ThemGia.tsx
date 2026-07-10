@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import * as ThongBao from "@/FUNCTION/ThongBao";
 import * as api from "@/API/API";
 import { useRouter } from "next/navigation";
-
+import { DanhMucGhe } from "@/interface/DanhMucGhe";
 export interface CreateGiaRequest {
   TEN_GIA: string;
   MOTA?: string;
@@ -20,13 +20,27 @@ export default function ThemGiaMoi() {
   const router = useRouter();
   const [loading, setLoading] = useState<boolean>(false);
   const [err, setErr] = useState<string[]>([]);
-
+      const [DanhMuc, setdanhmuc] = useState<DanhMucGhe[]>([]);
   const [formData, setFormData] = useState<CreateGiaRequest>({
     TEN_GIA: "",
     MOTA: "",
     DON_GIA: 0,
     DANHMUC_GHE: 1,
   });
+  useEffect(()=>{
+    const loaddl = async()=>{
+      try {
+        const ketqua =  await api.CallAPI(undefined, { url: `/admin/loaidanhmuc`, PhuongThuc: 2 })
+         if (ketqua.success) {
+                    setdanhmuc(ketqua.dulieu);
+                }
+      } catch (error) {
+         console.error("Lỗi khi lấy danh mục ghế:", error);
+                        ThongBao.ThongBao_Loi("Đã xảy ra lỗi kết nối đến máy chủ!");
+      }
+    }
+    loaddl();
+  },[])
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -150,10 +164,15 @@ export default function ThemGiaMoi() {
               onChange={handleChange}
               className="w-full text-sm px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl shadow-3xs focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all font-medium text-slate-700"
             >
-              <option value={1}>Ghế Công thái học (Ergonomic)</option>
-              <option value={2}>Ghế Gaming Pro</option>
-              <option value={3}>Ghế Sofa đơn tiêu chuẩn</option>
-              <option value={4}>Hot-desk (Chỗ ngồi tự do)</option>
+               {DanhMuc && DanhMuc.length > 0 ? (
+                                    DanhMuc.map((item) => (
+                                        <option key={item.ID_DANHMUC} value={item.ID_DANHMUC}>
+                                            {item.TEN_DANHMUC}
+                                        </option>
+                                    ))
+                                ) : (
+                                    <option disabled value={0}>Không có danh mục nào!</option>
+                                )}
             </select>
           </div>
 

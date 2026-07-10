@@ -214,15 +214,7 @@ export default function ChiTietGia() {
             <span>Chỉnh sửa giá</span>
           </button>
 
-          <button
-            type="button"
-            onClick={() => {
-              /* Thêm logic ngừng áp dụng ở đây */
-            }}
-            className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold rounded-xl border border-rose-200 transition-all cursor-pointer flex items-center gap-1.5"
-          >
-            <i className="fa-solid fa-ban"></i> Ngừng áp dụng
-          </button>
+          
         </div>
       </div>
 

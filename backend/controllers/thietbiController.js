@@ -130,7 +130,7 @@ export default class thietbiController {
     }
   }
 
-  static async updateThietBi(req, res) {
+  static async updatetenThietBi(req, res) {
     try {
       await Promise.all([
         body("ID_THIET_BI")
@@ -152,6 +152,49 @@ export default class thietbiController {
           .isLength({ max: 255 })
           .withMessage("Tên thiết bị không được vượt quá 255 ký tự!")
           .run(req),
+      ]);
+
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          validate: true,
+          message: "Dữ liệu không hợp lệ!",
+          errors: errors.array().map((err) => err.msg),
+        });
+      }
+
+      const { TEN_THIET_BI, ID_THIET_BI } = req.body;
+
+      const updated = await ThietBi.updateten(ID_THIET_BI, TEN_THIET_BI);
+      if (!updated) {
+        return res
+          .status(404)
+          .json({
+            success: false,
+            message: "Thiết bị không tồn tại hoặc dữ liệu không có thay đổi!",
+          });
+      }
+      res
+        .status(200)
+        .json({ success: true, message: "Cập nhật thiết bị thành công!" });
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+   static async updateHinhAnhThietBi(req, res) {
+    try {
+      await Promise.all([
+        body("ID_THIET_BI")
+          .notEmpty()
+          .withMessage("id thiết bị không được bỏ trống!")
+          .isInt()
+          .withMessage("ID thiết bị phải là số nguyên")
+          .custom(async (value) => {
+            const check = await ThietBi.testid(value);
+            if (!check) throw new Error("ID không tồn tại!");
+            return true;
+          })
+          .run(req),
         body("HINH_ANH")
           .notEmpty()
           .withMessage("Hình ảnh thiết bị không được để trống!")
@@ -167,11 +210,10 @@ export default class thietbiController {
         });
       }
 
-      const { TEN_THIET_BI, HINH_ANH, ID_THIET_BI } = req.body;
+      const {  HINH_ANH, ID_THIET_BI } = req.body;
 
-      const updated = await ThietBi.update(
+      const updated = await ThietBi.updatehinhanh(
         ID_THIET_BI,
-        TEN_THIET_BI.trim(),
         HINH_ANH ? HINH_ANH.trim() : null,
       );
       if (!updated) {
@@ -189,4 +231,5 @@ export default class thietbiController {
       res.status(500).json({ success: false, message: error.message });
     }
   }
+
 }

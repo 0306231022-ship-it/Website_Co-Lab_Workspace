@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import * as ThongBao from "@/FUNCTION/ThongBao";
 import * as api from "@/API/API";
 import { useRouter } from "next/navigation";
+import { DanhMucGhe } from "@/interface/DanhMucGhe";
 
 export interface UpdateGiaRequest {
   ID_GIA: number;
@@ -22,7 +23,7 @@ export default function SuaGia({
   onClose: () => void;
 }) {
   const router = useRouter();
-
+  const [DanhMuc, setdanhmuc] = useState<DanhMucGhe[]>([]);
   // 2. Lấy ID từ Props DuLieu (Được truyền vào từ nút bấm ngoài bảng)
   const id = DuLieu?.ID_GIA || "";
 
@@ -52,18 +53,19 @@ export default function SuaGia({
 
       setFetching(true);
       try {
-        const res: any = await api.CallAPI(undefined, {
-          url: `/admin/chitietgia?ID_GIA=${id}`,
-          PhuongThuc: 2,
-        });
+          
+        const [res1,res2] = await Promise.all([
+            api.CallAPI(undefined, {url: `/admin/chitietgia?ID_GIA=${id}`,PhuongThuc: 2,}),
+            api.CallAPI(undefined, { url: `/admin/loaidanhmuc`, PhuongThuc: 2 })
+        ]) 
 
         const targetData =
-          res?.data?.data ||
-          res?.data ||
-          res?.ChiTiet ||
-          res?.ChiTietGia ||
-          res?.DanhSach?.[0] ||
-          res;
+          res1?.data?.data ||
+          res1?.data ||
+          res1?.ChiTiet ||
+          res1?.ChiTietGia ||
+          res1?.DanhSach?.[0] ||
+          res1;
 
         if (targetData && targetData.ID_GIA !== undefined) {
           setFormData({
@@ -79,6 +81,9 @@ export default function SuaGia({
             "Không thể tải thông tin bảng giá cần chỉnh sửa!",
           );
         }
+         if (res2.success) {
+                    setdanhmuc(res2.dulieu);
+                }
       } catch (error) {
         console.error("Lỗi khi load chi tiết:", error);
         ThongBao.ThongBao_Loi("Lỗi kết nối đến máy chủ!");
@@ -129,7 +134,7 @@ export default function SuaGia({
     submitData.append("MOTA", formData.MOTA || "");
     submitData.append("DON_GIA", String(formData.DON_GIA));
     submitData.append("DANHMUC_GHE", String(formData.DANHMUC_GHE));
-    submitData.append("PHUONG_THUC_CAP_NHAT", formData.PHUONG_THUC_CAP_NHAT);
+
 
     setLoading(true);
     try {
@@ -235,10 +240,15 @@ export default function SuaGia({
             onChange={handleChange}
             className="w-full text-sm px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl shadow-3xs focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all font-medium text-slate-700"
           >
-            <option value={1}>Ghế Công thái học (Ergonomic)</option>
-            <option value={2}>Ghế Gaming Pro</option>
-            <option value={3}>Ghế Sofa đơn tiêu chuẩn</option>
-            <option value={4}>Hot-desk (Chỗ ngồi tự do)</option>
+            {DanhMuc && DanhMuc.length > 0 ? (
+                                    DanhMuc.map((item) => (
+                                        <option key={item.ID_DANHMUC} value={item.ID_DANHMUC}>
+                                            {item.TEN_DANHMUC}
+                                        </option>
+                                    ))
+                                ) : (
+                                    <option disabled value={0}>Không có danh mục nào!</option>
+                                )}
           </select>
         </div>
 
@@ -269,58 +279,7 @@ export default function SuaGia({
           </div>
         </div>
 
-        {/* PHƯƠNG THỨC CẬP NHẬT */}
-        <div className="space-y-2 pt-1">
-          <label className="text-xs font-bold text-slate-600 uppercase tracking-wide block">
-            Phương thức áp dụng hệ thống
-          </label>
-          <div className="grid grid-cols-1 gap-2.5">
-            <label
-              className={`flex items-start gap-3 p-3 border rounded-xl cursor-pointer transition-all ${formData.PHUONG_THUC_CAP_NHAT === "history" ? "bg-indigo-50/50 border-indigo-500 ring-1 ring-indigo-500" : "bg-white border-slate-200 hover:border-slate-300"}`}
-            >
-              <input
-                type="radio"
-                name="PHUONG_THUC_CAP_NHAT"
-                value="history"
-                checked={formData.PHUONG_THUC_CAP_NHAT === "history"}
-                onChange={handleChange}
-                className="mt-0.5 text-indigo-600 focus:ring-indigo-500 border-slate-300 w-4 h-4 cursor-pointer"
-              />
-              <div className="space-y-0.5">
-                <span className="text-xs font-bold text-slate-900 block">
-                  Lưu lịch sử đổi giá (Khuyên dùng)
-                </span>
-                <span className="text-[11px] text-slate-500 font-medium block leading-normal">
-                  Hệ thống tự động tắt gói giá cũ để bảo lưu lịch sử đối chiếu
-                  hóa đơn, và bắt đầu kích hoạt mức giá mới từ thời điểm này.
-                </span>
-              </div>
-            </label>
-
-            <label
-              className={`flex items-start gap-3 p-3 border rounded-xl cursor-pointer transition-all ${formData.PHUONG_THUC_CAP_NHAT === "overwrite" ? "bg-rose-50/50 border-rose-500 ring-1 ring-rose-500" : "bg-white border-slate-200 hover:border-slate-300"}`}
-            >
-              <input
-                type="radio"
-                name="PHUONG_THUC_CAP_NHAT"
-                value="overwrite"
-                checked={formData.PHUONG_THUC_CAP_NHAT === "overwrite"}
-                onChange={handleChange}
-                className="mt-0.5 text-rose-600 focus:ring-rose-500 border-slate-300 w-4 h-4 cursor-pointer"
-              />
-              <div className="space-y-0.5">
-                <span className="text-xs font-bold text-slate-900 block">
-                  Sửa/Ghi đè trực tiếp dòng cũ
-                </span>
-                <span className="text-[11px] text-slate-500 font-medium block leading-normal">
-                  Chỉ dùng khi bạn gõ sai số tiền lúc thêm mới. Không lưu lại
-                  dấu vết lịch sử của mức giá cũ nữa.
-                </span>
-              </div>
-            </label>
-          </div>
-        </div>
-
+       
         {/* MÔ TẢ */}
         <div className="space-y-1.5">
           <label

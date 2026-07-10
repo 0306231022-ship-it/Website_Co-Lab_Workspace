@@ -42,51 +42,31 @@ adminRouter.get("/laychitiet", ChiNhanhController.ChiTiet_ChiNhanh);
 adminRouter.get("/TimKiem", ChiNhanhController.TimKiem_ChiNhanh);
 //==========================================
 //QUẢN LÝ KHÔNG GIAN
-adminRouter.post(
-  "/ThemKhongGian",
-  createUpload("KhongGian").any(),
-  KhongGianController.Them_KhongGian,
-);
-adminRouter.post(
-  "/ChinhSuaTen_kg",
-  upload.none(),
-  KhongGianController.ChinhSua_TenKhongGian,
-);
-adminRouter.post(
-  "/ChinhSuaAnh",
-  createUpload("KhongGian").any(),
-  KhongGianController.ChinhAnh,
-);
-adminRouter.post(
-  "/ChinhSua_TrangThai_KhongGian",
-  upload.none(),
-  KhongGianController.ChinhSua_TrangThai_KhongGian,
-);
-adminRouter.get(
-  "/laydanhsachkhonggian",
-  KhongGianController.DanhSach_KhongGian,
-);
-adminRouter.get("/TimKiem_khonggian", KhongGianController.TimKiem_KhongGian);
-adminRouter.get("/ChiTiet_KhongGian", KhongGianController.ChiTiet_KhongGian);
+
+adminRouter.post('/ThemKhongGian' , createUpload('KhongGian').any(), KhongGianController.Them_KhongGian);
+adminRouter.post('/ChinhSuaTen_kg', upload.none() , KhongGianController.ChinhSua_TenKhongGian );
+adminRouter.post('/ChinhSuaAnh', createUpload('KhongGian').any(), KhongGianController.ChinhAnh);
+adminRouter.post('/ChinhSua_TrangThai_KhongGian' , upload.none(), KhongGianController.ChinhSua_TrangThai_KhongGian);
+adminRouter.post('/ChinhSuaGia_kg' , upload.none(), KhongGianController.ChinhSua_Gia);
+adminRouter.get('/laydanhsachkhonggian' , KhongGianController.DanhSach_KhongGian);
+adminRouter.get('/TimKiem_khonggian', KhongGianController.TimKiem_KhongGian);
+adminRouter.get('/ChiTiet_KhongGian', KhongGianController.ChiTiet_KhongGian);
+adminRouter.get('/ThongTin' , KhongGianController.thongTin_KhongGian);
+adminRouter.get('/thongke' , KhongGianController.ThongKe);
+
 // =========================================
 // QUẢN LÝ THIẾT BỊ
-adminRouter.post(
-  "/CapThietBi",
-  upload.none(),
-  ChiTietThietBiController.CapThietBi,
-);
+adminRouter.post('/CapThietBi' , upload.none(), ChiTietThietBiController.CapThietBi);
 adminRouter.get("/danhsachthietbi", thietbiController.getAllThietBi);
 adminRouter.get("/layid", thietbiController.getThietBiById);
-adminRouter.get(
-  "/DanhSachThietBi_theoKhongGian",
-  ChiTietThietBiController.DanhSach_ThietBi,
+adminRouter.get("/thietbi", thietbiController.getAllThietBi);
+adminRouter.get("/DanhSachThietBi_theoKhongGian",
+ChiTietThietBiController.DanhSach_ThietBi,
 );
-adminRouter.post("/thietbi", upload.none(), thietbiController.createThietBi);
-adminRouter.post(
-  "/CapNhatThietBi",
-  upload.none(),
-  thietbiController.updateThietBi,
-);
+adminRouter.post('/chinhsua_ten', upload.none(), thietbiController.updatetenThietBi)
+adminRouter.post('/chinhsua_anh' , upload.none(), thietbiController.updateHinhAnhThietBi);
+adminRouter.post("/themthietbi", upload.none(), thietbiController.createThietBi);
+
 //==========================================
 //QUẢN LÝ DANH MỤC GHẾ
 adminRouter.post(
@@ -110,15 +90,49 @@ adminRouter.get("/lichdat_hoatdong", LichDatController.LichDat_HoatDong);
 //QUẢN LÝ GHẾ
 adminRouter.post("/themghe", upload.none(), gheController.createGhe);
 adminRouter.get("/ChiTiet_ghe", gheController.getGheById);
-adminRouter.post("/capnhatghe", upload.none(), gheController.updateGhe);
+adminRouter.get('/DanhSachThietBi_theoKhongGian', ChiTietThietBiController.DanhSach_ThietBi);
+adminRouter.post("/themthietbi",  upload.none(),thietbiController.createThietBi);
+
+adminRouter.post('/XoaTB_KG', upload.none(), ChiTietThietBiController.XoaCapThietBi);
+//==========================================
+//QUẢN LÝ DANH MỤC GHẾ
+adminRouter.post("/danhmucghe",  upload.none(),danhmucgheController.createDanhMucGhe);
+adminRouter.post("/capnhatdanhmucghe",upload.none(),danhmucgheController.updateDanhMucGhe);
+adminRouter.get('/loaidanhmuc', danhmucgheController.LayDL_DnhMuc);
+//============================================
+//QUẢN LÝ LỊCH ĐẶT
+adminRouter.get('/danhsach_lichdat', LichDatController.DanhSachDatLich);
+adminRouter.get('/lichsu_ghe', LichDatController.LichSuDat_theoID_ghe);
+adminRouter.get('/lichdat_hoatdong' , LichDatController.LichDat_HoatDong);
+adminRouter.get('/DanhSach_lichDat_theoidghe_Hientai', LichDatController.DanhSach_IDGHE_Ngay_HienTai);
+adminRouter.get('/lichdatghe_theothoigian', LichDatController.LichDatGhe_TheoNgay);
+adminRouter.get('/DanhSach_theo_khonggian', LichDatController.DanhSachLichDat_HienTai_KhongGian);
+adminRouter.get('/lichdatkhonggian_theothoigian',LichDatController.LichDatKhongGian_TheoNgay);
+adminRouter.get('/thongke_lichdat', LichDatController.thongke_lichdat);
+//==========================================
+//QUẢN LÝ GHẾ
+adminRouter.post("/themghe",upload.none(),gheController.createGhe);
+adminRouter.get('/ChiTiet_ghe', gheController.getGheById);
+adminRouter.post("/CapNhatTen_ghe",upload.none(),gheController.updatetenGhe);
+adminRouter.post('/CapNhatDanhMuc_ghe' , upload.none(), gheController.CapNhatDanhMuc_ghe);
+adminRouter.get('/danhsachghe_idkg' , gheController.LayDanhSach_Theo_IDKG);
+adminRouter.post('/CapNhat_ToaDo' , upload.none(), gheController.CapNhat_TaoDo_Ghe);
+adminRouter.get('/ThongTin_ghe_datdon' , gheController.ThonhTin_Ghe_DatDon);
+adminRouter.post('/CapNhatTrangThai_ghe', upload.none(), gheController.CapNhatTrangThai_ghe);
+
 //=========================================
 //QUẢN LÝ HÓA DƠN
 adminRouter.post("/themhoadon", upload.none(), hoadonController.createHoaDon);
 adminRouter.get("/chitiethoadon", hoadonController.getHoaDonById);
 //Quản lý giá
-adminRouter.post("/themgiamoi", upload.none(), giaController.createGia);
+
+
 adminRouter.get("/layDS_Gia", giaController.getAllGia);
 adminRouter.post("/suagia", upload.none(), giaController.updateGia);
 adminRouter.get("/chitietgia", giaController.getGiaById);
+adminRouter.post("/themgiamoi",upload.none(),giaController.createGia);
+adminRouter.get("/layDS_Gia",giaController.getAllGia);
+adminRouter.get('/ChonGia' , giaController.LayBangGia_KhongGian);
+
 console.log("✅ adminRouter loaded");
 export default adminRouter;
