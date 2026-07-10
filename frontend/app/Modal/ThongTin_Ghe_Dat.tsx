@@ -96,7 +96,7 @@ function ThongTin({DuLieu} : { DuLieu : LichDat}) {
         }
         if(DatLich.success){
             ThongBao.ThongBao_ThanhCong(DatLich.message)
-            OpenMoDal({id:DatLich.ID_DATLICH, TongTien: tongGio * Number(String(ThongTinGhe?.DON_GIA)) },{TenTrang:'ThanhToan'})
+            OpenMoDal({id:DatLich.ID_LICHDAT, TongTien: tongGio * Number(String(ThongTinGhe?.DON_GIA)) },{TenTrang:'ThanhToan'})
         }
         if(DatLich.success===false){
             ThongBao.ThongBao_Loi(DatLich.message)

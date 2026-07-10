@@ -56,6 +56,7 @@ export default class LichDatController{
                 });
             }
             const DatLich = await DatLichModel.DatLich(dulieu,userId);
+           
             
             if(!DatLich){
                 return res.status(409).json({

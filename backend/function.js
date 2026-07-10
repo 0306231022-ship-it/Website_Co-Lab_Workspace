@@ -88,7 +88,16 @@ export const xoaFileCu = (duongDanTuDatabase) => {
         return false; // Trả về false vì không có file để xóa
     }
 };
+export function sortObject(obj) {
+    let sorted = {};
+    let keys = Object.keys(obj).sort();
 
+    for (let key of keys) {
+        sorted[key] = obj[key];
+    }
+
+    return sorted;
+}
 
 
 

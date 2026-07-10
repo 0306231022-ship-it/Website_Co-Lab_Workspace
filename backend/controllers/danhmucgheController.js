@@ -112,9 +112,9 @@ export default class danhmucgheController {
         });
       }
 
-      const { TEN_DANHMUC, ID_DANHMUC } = req.body;
+      const { TEN_DANHMUC, ID_DANHMUC , TRANG_THAI} = req.body;
 
-      const updated = await dmGhe.update(ID_DANHMUC, TEN_DANHMUC.trim());
+      const updated = await dmGhe.update(ID_DANHMUC, TEN_DANHMUC.trim(), TRANG_THAI);
       if (!updated) {
         return res
           .status(404)

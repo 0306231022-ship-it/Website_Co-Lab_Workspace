@@ -45,11 +45,11 @@ export default class dmGhe {
     }
   }
   // 4. Cập nhật thiết bị
-  static async update(id, tenDanhMuc) {
+  static async update(id, tenDanhMuc, trangthai) {
     try {
       const [result] = await execute(
-        "UPDATE danhmucghe SET TEN_DANHMUC = ? WHERE ID_DANHMUC = ?",
-        [tenDanhMuc, id],
+        "UPDATE danhmucghe SET TEN_DANHMUC = ? , TRANG_THAI = ? WHERE ID_DANHMUC = ?",
+        [tenDanhMuc, tenDanhMuc, id],
       );
       return result.affectedRows > 0;
     } catch (error) {
@@ -83,6 +83,7 @@ export default class dmGhe {
              throw new Error("Không thể truy vấn thông tin danh mục ghế!");
         }
     }
+  
 
 
 

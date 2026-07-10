@@ -85,12 +85,7 @@ export default function DanhMucGhe() {
     });
   }, [danhSachs, searchTerm, filterStatus]);
 
-  // Hàm hỗ trợ format tiền tệ VNĐ
-  const formatCurrency = (amount: string | null) => {
-    if (!amount) return "Chưa thiết lập";
-    const num = parseFloat(amount);
-    return isNaN(num) ? "0 đ" : `${num.toLocaleString("vi-VN")} đ`;
-  };
+
 
   return (
     <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
@@ -200,7 +195,7 @@ export default function DanhMucGhe() {
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/70 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                 <th className="px-6 py-3.5 font-mono w-24 text-center">
-                  ID_DANHMUC
+                  ID Danh mục
                 </th>
                 <th className="px-6 py-3.5">TEN_DANHMUC (Tên danh mục ghế)</th>
                 <th className="px-6 py-3.5 text-right">Đơn giá hiện hành</th>
@@ -256,7 +251,7 @@ export default function DanhMucGhe() {
                       className={`px-6 py-4 text-right ${item.TRANG_THAI !== 1 ? "opacity-60" : ""}`}
                     >
                       <div className="font-mono font-extrabold text-slate-900">
-                        {formatCurrency(item.DON_GIA)}
+                        {fun.formatCurrency(String(item.DON_GIA))}
                       </div>
                       <span className="text-[10px] text-indigo-500 font-bold block mt-0.5">
                         <i className="fa-solid fa-clock-rotate-left text-[9px] mr-0.5"></i>{" "}
@@ -267,12 +262,12 @@ export default function DanhMucGhe() {
                       {item.TRANG_THAI === 1 ? (
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-100/50">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>{" "}
-                          1 - Hoạt động
+                          Hoạt động
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-[10px] font-bold border border-amber-100/50">
                           <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>{" "}
-                          0 - Tạm khóa
+                           Tạm khóa
                         </span>
                       )}
                     </td>
@@ -280,7 +275,7 @@ export default function DanhMucGhe() {
                       <div className="flex items-center justify-center gap-1.5">
                         <button
                           onClick={() => {
-                            OpenMoDal({id:item.ID_DANHMUC }, { TenTrang: "ChinhSuaDMGhe" });
+                            OpenMoDal({id:item.ID_DANHMUC, ten: item.TEN_DANHMUC , trangthai : item.TRANG_THAI }, { TenTrang: "ChinhSuaDMGhe" });
                           }}
                           title="Sửa danh mục"
                           className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all cursor-pointer"

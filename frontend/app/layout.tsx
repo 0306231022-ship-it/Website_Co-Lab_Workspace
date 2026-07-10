@@ -9,10 +9,12 @@ import * as ThongBao from '@/FUNCTION/ThongBao';
 import { socket } from '@/FUNCTION/socket';
 import { usePathname } from 'next/navigation';
 import { NguoiDung } from "@/interface/NguoiDung";
-
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const { OpenMoDal } = useModalContext();
+   const router = useRouter();
   const [DangNhap, setDangNhap] = useState<boolean>(false);
   const [ThongTin, setThongTin] = useState<NguoiDung | null>(null);
     const [TongThongBao,setTongThongBao] = useState<number>(0);
@@ -82,6 +84,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
        });
         if(response.success){
            ThongBao.ThongBao_ThanhCong(response.message)
+           router.push('/');
            setDangNhap(false);
            setThongTin(null);
         }
@@ -184,12 +187,14 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
           {DangNhap ? (
             <div className="flex flex-col items-center bg-slate-50 p-3 rounded-xl border border-slate-200 shadow-inner">
               <div className="flex items-center gap-3 w-full mb-3">
-               <img
-                  src={`http://localhost:3001/${ThongTin?.HINH_ANH}`}
-                  alt="User avatar"
+                 <Image 
+                                src={`http://localhost:3001/${ThongTin?.HINH_ANH}`} 
+                                width={500}
+                                height={192}
+                                 unoptimized
                   className="w-10 h-10 rounded-full object-cover border border-slate-200"
-                  loading="lazy"
-                />
+                                alt="User avatar"  />
+      
                 <div className="flex-1 min-w-0 text-left">
                   <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">{ThongTin?.EMAIL}</p>
                   <p className="text-xs font-bold text-slate-800 truncate">{ThongTin?.TENND || "Thành viên"}</p>

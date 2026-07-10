@@ -242,9 +242,6 @@ function QuanLiDatDon() {
                         >
                             <i className="fa-solid fa-chevron-left"></i>
                         </button>
-                        
-                    
-                    
                                 <span
                     
                                     className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition cursor-pointer bg-indigo-600 text-white border-indigo-600 shadow-xs`}
