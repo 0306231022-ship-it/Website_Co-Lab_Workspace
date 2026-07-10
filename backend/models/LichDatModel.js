@@ -17,9 +17,40 @@ export default class DatLichModel{
     static async DanhSach(limit,offset){
         try {
             const [danhsach] = await execute(`
-                SELECT * FROM lichdat
-                 LIMIT ? OFFSET ?
-                `,[limit,offset]);
+    SELECT 
+        ld.ID_LICH_DAT,
+        ld.TRANG_THAI,
+        ld.KHUNG_BATDAU,
+        ld.KHUNG_KETTHUC,
+        nd.TENND,
+        nd.EMAIL,
+        hd.GIA_TIEN,
+        CASE 
+            WHEN ld.ID_GHE IS NOT NULL THEN g.TEN_GHE
+            ELSE kg.TEN_KHONG_GIAN
+        END AS TEN_DOI_TUONG,
+        CASE 
+            WHEN ld.ID_GHE IS NOT NULL THEN 'GHE'
+            ELSE 'KHONG_GIAN'
+        END AS LOAI_DAT,
+        CASE 
+            WHEN ld.ID_GHE IS NOT NULL THEN cn_ghe.TEN_CHI_NHANH
+            ELSE cn_kg.TEN_CHI_NHANH
+        END AS TEN_CHI_NHANH
+
+    FROM lichdat ld
+    INNER JOIN nguoidung nd ON ld.IDND = nd.IDND
+    LEFT JOIN hoadon hd ON ld.ID_LICH_DAT = hd.ID_LICHDAT
+
+    LEFT JOIN ghe g ON ld.ID_GHE = g.ID_GHE
+    LEFT JOIN khonggian kg_ghe ON g.ID_KHONG_GIAN = kg_ghe.ID_KHONG_GIAN
+    LEFT JOIN chinhanh cn_ghe ON kg_ghe.ID_CHI_NHANH = cn_ghe.ID_CHI_NHANH
+
+    LEFT JOIN khonggian kg ON ld.ID_KHONG_GIAN = kg.ID_KHONG_GIAN
+    LEFT JOIN chinhanh cn_kg ON kg.ID_CHI_NHANH = cn_kg.ID_CHI_NHANH
+
+    LIMIT ? OFFSET ?
+`, [limit, offset]);
              const [tong] = await execute(`
                 SELECT COUNT(*) AS total FROM lichdat
             `);
@@ -363,6 +394,32 @@ WHERE LD.ID_LICH_DAT = ?;
             return kq;
         } catch (error) {
             throw new Error('Database query failed: ' + error.message);
+        }
+    }
+    static async thongke_lichdat(){
+        try {
+            const [TongLichDat] = await execute(`
+                SELECT COUNT(ID_LICH_DAT) as TONG
+                FROM lichdat
+                `,[]);
+            const thoigian = new Date();
+            const [DangHoatDong] = await execute(`
+                SELECT COUNT(ID_LICH_DAT) as HOATDONG
+                FROM lichdat
+                WHERE ? BETWEEN KHUNG_BATDAU AND KHUNG_KETTHUC;
+                `,[thoigian]);
+            const [DoanhThuThang] = await execute(`
+                SELECT SUM(GIA_TIEN) AS DOANHTHU
+                FROM hoadon
+                WHERE DATE_FORMAT(NGAY_TAO, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m');
+                `,[])
+            return {
+                TONG : TongLichDat[0].TONG,
+                HOATDONG: DangHoatDong[0].HOATDONG,
+                DOANHTHU: DoanhThuThang[0].DOANHTHU
+            }
+        } catch (error) {
+             throw new Error('Database query failed: ' + error.message);
         }
     }
 }

@@ -79,7 +79,7 @@ export default class LichDatController{
     static async DanhSachDatLich(req,res){
         try {
           const page = parseInt(req.query.page) || 1;
-          const limit = parseInt(req.query.limit) || 10;
+          const limit = parseInt(req.query.limit) || 3;
           const offset = (page - 1) * limit;
            await Promise.all([
                 query('page')
@@ -420,6 +420,24 @@ export default class LichDatController{
              return res.status(401).json({
                 success: false,
                 message: 'Không tìm thấy lịch đặt: ' + error.message
+            });
+        }
+    }
+    static async thongke_lichdat(req,res){
+        try {
+            const thongke = await DatLichModel.thongke_lichdat();
+            return res.status(200).json({
+                success:true,
+                dulieu : {
+                    TONG:thongke.TONG,
+                    HOATDONG:thongke.HOATDONG,
+                    DOANHTHU:thongke.DOANHTHU
+                }
+            })
+        } catch (error) {
+             return res.status(401).json({
+                success: false,
+                message: 'Thống kê lịch đặt thất bại: ' + error.message
             });
         }
     }

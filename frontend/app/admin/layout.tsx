@@ -117,13 +117,14 @@ export default function AdminLayout({
                     <i className="fa-solid fa-map-location-dot w-5 text-center text-base transition-transform duration-300 group-hover:scale-110"></i>
                     <span className="text-sm">Quản lý chi nhánh</span>
                   </NavLink>
-                  <a href="#" className="flex items-center justify-between text-slate-400 hover:bg-slate-800/50 hover:text-indigo-400 hover:translate-x-1 px-4 py-2.5 rounded-xl transition-all duration-300 font-medium group">
+                 <NavLink href={`/admin/QuanLiDatDon`}
+                        activeClassName="bg-indigo-600"
+                        className="flex items-center space-x-3  text-white px-4 py-2.5 rounded-xl transition-all font-semibold shadow-md">
                     <div className="flex items-center space-x-3">
                       <i className="fa-solid fa-file-invoice-dollar w-5 text-center text-base transition-transform duration-300 group-hover:scale-110"></i>
                       <span className="text-sm">Quản lý đặt đơn</span>
                     </div>
-                    <span className="bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-xs animate-pulse">5</span>
-                  </a>
+                  </NavLink>
                   <NavLink href={`/admin/QuanLiKhachHang`}
                         activeClassName="bg-indigo-600"
                         className="flex items-center space-x-3  text-white px-4 py-2.5 rounded-xl transition-all font-semibold shadow-md">
