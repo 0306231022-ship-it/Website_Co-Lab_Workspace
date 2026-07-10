@@ -1,17 +1,16 @@
 // server.js
 
-import 'dotenv/config.js';
-import express from 'express';
-import cors from 'cors';
-import cookieParser from 'cookie-parser';
-import http from 'http';
-import { Server } from 'socket.io';
+import "dotenv/config.js";
+import express from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import http from "http";
+import { Server } from "socket.io";
 
-import NguoiDungRoute from './routers/NguoiDungRouter.js';
-import adminRouter from './routers/adminRouter.js';
+import NguoiDungRoute from "./routers/NguoiDungRouter.js";
+import adminRouter from "./routers/adminRouter.js";
 
-
-import './CleanDB.js';
+import "./CleanDB.js";
 
 const app = express();
 
@@ -31,10 +30,9 @@ app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
 // Routes
-app.get('/', (req, res) => res.json({ message: 'Server API running' }));
-app.use('/api/NguoiDung', NguoiDungRoute);
-app.use('/api/admin' , adminRouter);
-
+app.get("/", (req, res) => res.json({ message: "Server API running" }));
+app.use("/api/NguoiDung", NguoiDungRoute);
+app.use("/api/admin", adminRouter);
 
 // Middleware xử lý lỗi
 app.use((req, res) =>
@@ -79,7 +77,4 @@ io.on("connection", (socket) => {
 
 // Xuất io để controller dùng emit
 export { io };
-
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-

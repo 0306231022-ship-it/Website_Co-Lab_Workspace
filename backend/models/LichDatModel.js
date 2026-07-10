@@ -1,38 +1,55 @@
-import { execute, beginTransaction, rollbackTransaction, commitTransaction } from '../config/db.js';
-export default class DatLichModel{
-    static async DatLich(dulieu){
-        try {
-            
-          const [result] = await execute(`
+import {
+  execute,
+  beginTransaction,
+  rollbackTransaction,
+  commitTransaction,
+} from "../config/db.js";
+export default class DatLichModel {
+  static async DatLich(dulieu) {
+    try {
+      const [result] = await execute(
+        `
             CALL sp_CreateBooking(?, ?, ?, ?, ?, @bookingID)
-            `,[dulieu.ID_KHONG_GIAN || null,dulieu.ID_GHE || null,dulieu.KHUNG_BATDAU,dulieu.KHUNG_KETTHUC, dulieu.IDND]);
-            console.log('Result from stored procedure:', result);
-            const [rows] = await execute(`SELECT @bookingID AS newBookingID`);
-            return !!(rows && rows.length > 0 && rows[0].newBookingID > 0);
-        } catch (error) {
-            throw error;
-        }
+            `,
+        [
+          dulieu.ID_KHONG_GIAN || null,
+          dulieu.ID_GHE || null,
+          dulieu.KHUNG_BATDAU,
+          dulieu.KHUNG_KETTHUC,
+          dulieu.IDND,
+        ],
+      );
+      console.log("Result from stored procedure:", result);
+      const [rows] = await execute(`SELECT @bookingID AS newBookingID`);
+      return !!(rows && rows.length > 0 && rows[0].newBookingID > 0);
+    } catch (error) {
+      throw error;
     }
-    static async DanhSach(limit,offset){
-        try {
-            const [danhsach] = await execute(`
+  }
+  static async DanhSach(limit, offset) {
+    try {
+      const [danhsach] = await execute(
+        `
                 SELECT * FROM lichdat
                  LIMIT ? OFFSET ?
-                `,[limit,offset]);
-             const [tong] = await execute(`
+                `,
+        [limit, offset],
+      );
+      const [tong] = await execute(`
                 SELECT COUNT(*) AS total FROM lichdat
             `);
-            return {
-                DanhSach: danhsach,
-                TongDanhSach: tong
-            };
-        } catch (error) {
-             throw new Error('Database query failed: ' + error.message);
-        }
+      return {
+        DanhSach: danhsach,
+        TongDanhSach: tong,
+      };
+    } catch (error) {
+      throw new Error("Database query failed: " + error.message);
     }
-    static async NguoiDat_ghe_HienTai(IDGHE){
-        try {
-            const [layttt] = await execute(`
+  }
+  static async NguoiDat_ghe_HienTai(IDGHE) {
+    try {
+      const [layttt] = await execute(
+        `
                 SELECT 
         ld.KHUNG_BATDAU,
         ld.KHUNG_KETTHUC,
@@ -47,15 +64,18 @@ export default class DatLichModel{
         ld.ID_GHE = ? 
         AND NOW() BETWEEN ld.KHUNG_BATDAU AND ld.KHUNG_KETTHUC
     LIMIT 1
-                `,[IDGHE]);
-            return layttt.length> 0 ? layttt :null
-        } catch (error) {
-             throw new Error('Database query failed: ' + error.message);
-        }
+                `,
+        [IDGHE],
+      );
+      return layttt.length > 0 ? layttt : null;
+    } catch (error) {
+      throw new Error("Database query failed: " + error.message);
     }
-    static async DanhSach_theoIDGHE(limit, offset, IDGHE){
-        try {
-            const [DanhSach] = await execute(`
+  }
+  static async DanhSach_theoIDGHE(limit, offset, IDGHE) {
+    try {
+      const [DanhSach] = await execute(
+        `
                 SELECT 
         ld.KHUNG_BATDAU,
         ld.KHUNG_KETTHUC,
@@ -69,46 +89,58 @@ export default class DatLichModel{
     WHERE 
         ld.ID_GHE = ?
     LIMIT ? OFFSET ?
-                `,[IDGHE,limit,offset]);
-            const [TongSo] = await execute(`
+                `,
+        [IDGHE, limit, offset],
+      );
+      const [TongSo] = await execute(
+        `
                  SELECT COUNT(*) AS total FROM lichdat
                  WHERE ID_GHE=?
-                `,[IDGHE]);
+                `,
+        [IDGHE],
+      );
 
-            return {
-                DanhSach:DanhSach,
-                TongSo:TongSo[0].total
-            }
-        } catch (error) {
-            throw new Error('Database query failed: ' + error.message);
-        }
+      return {
+        DanhSach: DanhSach,
+        TongSo: TongSo[0].total,
+      };
+    } catch (error) {
+      throw new Error("Database query failed: " + error.message);
     }
-    static async kiemtraid(id){
-        try {
-            const [kiemtra] = await execute(`
+  }
+  static async kiemtraid(id) {
+    try {
+      const [kiemtra] = await execute(
+        `
                 SELECT*FROM lichdat
                 WHERE ID_LICH_DAT = ?
-                `,[id]);
-            return kiemtra.length>0? true : false;
-        } catch (error) {
-            throw new Error('Database query failed: ' + error.message);
-        }
+                `,
+        [id],
+      );
+      return kiemtra.length > 0 ? true : false;
+    } catch (error) {
+      throw new Error("Database query failed: " + error.message);
     }
-    static async DanhSachDang_HoatDong(){
-        try {
-            const thoiGianHienTai = new Date();
-            const [DanhSach] = await execute(`
+  }
+  static async DanhSachDang_HoatDong() {
+    try {
+      const thoiGianHienTai = new Date();
+      const [DanhSach] = await execute(
+        `
                 SELECT*FROM lichdat ld
                 WHERE ? BETWEEN ld.KHUNG_BATDAU AND ld.KHUNG_KETTHUC;
-                `,[thoiGianHienTai]);
-            return DanhSach;
-        } catch (error) {
-            throw new Error('Database query failed: ' + error.message);
-        }
+                `,
+        [thoiGianHienTai],
+      );
+      return DanhSach;
+    } catch (error) {
+      throw new Error("Database query failed: " + error.message);
     }
-    static async DanhSach_theoIDND(limit, offset, userId){
-        try {
-            const [DanhSach] = await execute(`
+  }
+  static async DanhSach_theoIDND(limit, offset, userId) {
+    try {
+      const [DanhSach] = await execute(
+        `
            SELECT 
     ld.ID_LICH_DAT,
     ld.KHUNG_BATDAU,
@@ -125,51 +157,64 @@ WHERE ld.IDND = ?
 ORDER BY ld.KHUNG_BATDAU DESC
 
 LIMIT ? OFFSET ?;
-                `,[userId,limit,offset]);
-            const [TongSo] = await execute(`
+                `,
+        [userId, limit, offset],
+      );
+      const [TongSo] = await execute(
+        `
                  SELECT COUNT(*) AS total FROM lichdat
                  WHERE IDND=?
-                `,[userId]);
-            return {
-                DanhSach:DanhSach,
-                TongSo:TongSo[0].total
-            }
-        } catch (error) {
-            throw new Error('Database query failed: ' + error.message);
-        }
+                `,
+        [userId],
+      );
+      return {
+        DanhSach: DanhSach,
+        TongSo: TongSo[0].total,
+      };
+    } catch (error) {
+      throw new Error("Database query failed: " + error.message);
     }
-    static async ChiTiet_LichDat_theoIDDL(id){
-        let connection = await beginTransaction();
-        try {
-            // dỰA VÀO  id lấy thông tin người dùng
-            const [ChiTiet_NguoiDung] = await connection.query(`
+  }
+  static async ChiTiet_LichDat_theoIDDL(id) {
+    let connection = await beginTransaction();
+    try {
+      // dỰA VÀO  id lấy thông tin người dùng
+      const [ChiTiet_NguoiDung] = await connection.query(
+        `
                 SELECT ND.TENND,  ND.EMAIL
                 FROM lichdat LD
                 INNER JOIN nguoidung ND ON LD.IDND = ND.IDND
                 WHERE LD.ID_LICH_DAT = ?
-                `,[id]);
-            if (!ChiTiet_NguoiDung || ChiTiet_NguoiDung.length === 0) {
-                await rollbackTransaction(connection);
-               return {
-                    success: false,
-                    message: 'Không tìm thấy thông tin người dùng cho ID_LICH_DAT đã cho.'
-                };
-            }
-            //dựa vào id lấy thông tin thời gian
-            const [ChiTiet_ThoiGian] =await connection.query(`
+                `,
+        [id],
+      );
+      if (!ChiTiet_NguoiDung || ChiTiet_NguoiDung.length === 0) {
+        await rollbackTransaction(connection);
+        return {
+          success: false,
+          message:
+            "Không tìm thấy thông tin người dùng cho ID_LICH_DAT đã cho.",
+        };
+      }
+      //dựa vào id lấy thông tin thời gian
+      const [ChiTiet_ThoiGian] = await connection.query(
+        `
                 SELECT KHUNG_BATDAU, KHUNG_KETTHUC
                 FROM lichdat
                 WHERE ID_LICH_DAT = ?
-                `,[id]);
-            if (!ChiTiet_ThoiGian || ChiTiet_ThoiGian.length === 0) {
-                await rollbackTransaction(connection);
-                return {
-                    success: false,
-                    message: 'Không tìm thấy thông tin thời gian cho ID_LICH_DAT đã cho.'
-                };
-            }
-            //dựa vào id lấy thông tin ghế, hoặc không gian 1 TRONG 2 TRƯỜNG SẼ NULL trường nào con thì lấy trường đó
-            const [ChiTiet_Ghe_KhongGian] = await connection.query(`
+                `,
+        [id],
+      );
+      if (!ChiTiet_ThoiGian || ChiTiet_ThoiGian.length === 0) {
+        await rollbackTransaction(connection);
+        return {
+          success: false,
+          message: "Không tìm thấy thông tin thời gian cho ID_LICH_DAT đã cho.",
+        };
+      }
+      //dựa vào id lấy thông tin ghế, hoặc không gian 1 TRONG 2 TRƯỜNG SẼ NULL trường nào con thì lấy trường đó
+      const [ChiTiet_Ghe_KhongGian] = await connection.query(
+        `
                SELECT
     LD.ID_GHE,
     LD.ID_KHONG_GIAN,
@@ -189,50 +234,59 @@ LEFT JOIN chinhanh CN2
     ON KG2.ID_CHI_NHANH = CN2.ID_CHI_NHANH
 
 WHERE LD.ID_LICH_DAT = ?;
-                `,[id]);
-            if (!ChiTiet_Ghe_KhongGian || ChiTiet_Ghe_KhongGian.length === 0) {
-                await rollbackTransaction(connection);
-                return {
-                    success: false,
-                    message: 'Không tìm thấy thông tin ghế hoặc không gian cho ID_LICH_DAT đã cho.'
-                };
-            }
-            // lấy thông tin hóa đơn dựa vào id
-            const [ChiTiet_HoaDon] = await connection.query(`
+                `,
+        [id],
+      );
+      if (!ChiTiet_Ghe_KhongGian || ChiTiet_Ghe_KhongGian.length === 0) {
+        await rollbackTransaction(connection);
+        return {
+          success: false,
+          message:
+            "Không tìm thấy thông tin ghế hoặc không gian cho ID_LICH_DAT đã cho.",
+        };
+      }
+      // lấy thông tin hóa đơn dựa vào id
+      const [ChiTiet_HoaDon] = await connection.query(
+        `
                 SELECT HD.ID_HOADON, HD.GIA_TIEN, HD.NGAY_TAO , HD.TRANG_THAI
                 FROM hoadon HD
                 WHERE HD.ID_LICHDAT = ?
-                `,[id]);
-            if (!ChiTiet_HoaDon || ChiTiet_HoaDon.length === 0) {
-                await rollbackTransaction(connection);
-                return {
-                    success: false,
-                    message: 'Không tìm thấy thông tin hóa đơn cho ID_LICH_DAT đã cho.'
-                };
-            }
-            // Nếu tất cả các truy vấn đều thành công, commit transaction
-            await commitTransaction(connection);
-            return {
-                success: true,
-                ChiTiet_NguoiDung: ChiTiet_NguoiDung[0],
-                ChiTiet_ThoiGian: ChiTiet_ThoiGian[0],
-                ChiTiet_Ghe_KhongGian: ChiTiet_Ghe_KhongGian[0],
-                ChiTiet_HoaDon: ChiTiet_HoaDon[0]
-            };
-        }catch (error) {
-                await rollbackTransaction(connection);
-                throw new Error('Database query failed: ' + error.message);
-        }
+                `,
+        [id],
+      );
+      if (!ChiTiet_HoaDon || ChiTiet_HoaDon.length === 0) {
+        await rollbackTransaction(connection);
+        return {
+          success: false,
+          message: "Không tìm thấy thông tin hóa đơn cho ID_LICH_DAT đã cho.",
+        };
+      }
+      // Nếu tất cả các truy vấn đều thành công, commit transaction
+      await commitTransaction(connection);
+      return {
+        success: true,
+        ChiTiet_NguoiDung: ChiTiet_NguoiDung[0],
+        ChiTiet_ThoiGian: ChiTiet_ThoiGian[0],
+        ChiTiet_Ghe_KhongGian: ChiTiet_Ghe_KhongGian[0],
+        ChiTiet_HoaDon: ChiTiet_HoaDon[0],
+      };
+    } catch (error) {
+      await rollbackTransaction(connection);
+      throw new Error("Database query failed: " + error.message);
     }
-    static async kiemtraidND(id, userId){
-        try {
-            const [kiemtra] = await execute(`
+  }
+  static async kiemtraidND(id, userId) {
+    try {
+      const [kiemtra] = await execute(
+        `
                 SELECT*FROM lichdat
                 WHERE ID_LICH_DAT = ? AND IDND = ?
-                `,[id,userId]);
-            return kiemtra.length>0? true : false;
-        } catch (error) {
-            throw new Error('Database query failed: ' + error.message);
-        }
+                `,
+        [id, userId],
+      );
+      return kiemtra.length > 0 ? true : false;
+    } catch (error) {
+      throw new Error("Database query failed: " + error.message);
     }
+  }
 }

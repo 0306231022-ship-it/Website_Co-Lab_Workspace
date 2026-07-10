@@ -1,154 +1,133 @@
-import { hash, compare } from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import { hash, compare } from "bcrypt";
+import jwt from "jsonwebtoken";
 import dmGhe from "../models/danhmucgheModel.js";
 import { body, query, validationResult } from "express-validator";
 
-export default class danhmucgheController{
-static async getAllDanhMucGhe(req, res) {
+export default class danhmucgheController {
+  static async getAllDanhMucGhe(req, res) {
     try {
-        await Promise.all([
-            query('page')
-                .notEmpty()
-                .withMessage('Trang không được bỏ trống!')
-                .isInt({ min: 1 }).withMessage('Số trang phải là số nguyên dương lớn hơn 0')
-                .run(req),
-        ]);
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ success: false, errors: errors.array().map(err => err.msg) });
-        }
+      await Promise.all([
+        query("page")
+          .notEmpty()
+          .withMessage("Trang không được bỏ trống!")
+          .isInt({ min: 1 })
+          .withMessage("Số trang phải là số nguyên dương lớn hơn 0")
+          .run(req),
+      ]);
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res
+          .status(400)
+          .json({
+            success: false,
+            errors: errors.array().map((err) => err.msg),
+          });
+      }
 
-       const page= parseInt(req.query.page);
-       const limit = parseInt(req.query.limit|| 10);
-       const ofset = (page-1) * limit;
-       const result = await dmGhe.getAll(ofset, limit);
-        
-        res.status(200).json({ 
-            success: true, 
-            data: result.data,
-            pagination: result.pagination 
+      const page = parseInt(req.query.page);
+      const limit = parseInt(req.query.limit || 10);
+      const ofset = (page - 1) * limit;
+      const result = await dmGhe.getAll(ofset, limit);
+
+      res.status(200).json({
+        success: true,
+        data: result.data,
+        pagination: result.pagination,
+      });
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+  // =================================================================
+  // CONTROLLER: Lấy chi tiết 1 danh mục ghế để phục vụ trang Chỉnh sửa
+  // =================================================================
+
+  // [POST] /api/admin/danh mục ghế
+  static async createDanhMucGhe(req, res) {
+    try {
+      const { TEN_DANHMUC } = req.body;
+      await Promise.all([
+        body("TEN_DANHMUC")
+          .notEmpty()
+          .withMessage("tên danh mục ghế không được bỏ trống")
+          .isLength({ max: 255 })
+          .withMessage("Tên danh mục ghế tối đa 255 lý tự")
+          .run(req),
+      ]);
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          message: "Dữ liệu không hợp lệ!",
+          errors: errors.array().map((err) => err.msg),
         });
+      }
+
+      // Thực hiện thêm mới (Loại bỏ khoảng trắng thừa bằng .trim())
+      const insertId = await dmGhe.create(TEN_DANHMUC.trim());
+      if (!insertId) {
+        return res.status(500).json({
+          success: false,
+          message: "Thêm danh mục ghế thất bại!",
+        });
+      }
+      res
+        .status(200)
+        .json({ success: true, message: "Thêm danh mục ghế thành công!" });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+      res.status(500).json({ success: false, message: error.message });
     }
-};
-// =================================================================
-    // CONTROLLER: Lấy chi tiết 1 danh mục ghế để phục vụ trang Chỉnh sửa
-    // =================================================================
-    static async getChiTietDanhMuc(req, res) {
-        try {
-            // 1. Lấy ID từ query (?id=1) hoặc từ params (/1) hoặc body (phòng hờ)
-            const id = req.query.id || req.params.id || req.body.id;
+  }
 
-            // 2. Kiểm tra tính hợp lệ của ID phía Controller
-            if (!id || isNaN(Number(id))) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Vui lòng cung cấp mã ID danh mục ghế hợp lệ!"
-                });
-            }
-
-            // 3. Gọi xuống hàm getById vừa tối ưu trong Model
-            // (Lưu ý: Thay DanhMucGheModel bằng tên Class Model thực tế của bạn)
-            const data = await dmGhe.getById(id);
-
-            // 4. Nếu không tìm thấy trong DB (Model trả về null) ➔ Báo lỗi 404
-            if (!data) {
-                return res.status(404).json({
-                    success: false,
-                    message: "Không tìm thấy danh mục ghế này trong hệ thống!"
-                });
-            }
-
-            // 5. Nếu thành công ➔ Trả về JSON đúng cấu trúc Frontend yêu cầu
-            return res.status(200).json({
-                success: true,
-                message: "Lấy thông tin danh mục thành công!",
-                data: data // Trả về object: { ID_DANHMUC: 1, TEN_DANHMUC: "...", TRANG_THAI: 1 }
-            });
-
-        } catch (error) {
-            console.error("❌ Lỗi tại DanhMucGheController.getChiTietDanhMuc:", error.message);
-            return res.status(500).json({
-                success: false,
-                message: "Lỗi máy chủ: Không thể lấy chi tiết danh mục!"
-            });
-        }
-    }
-// [POST] /api/admin/danh mục ghế
-static async createDanhMucGhe (req, res){
+  static async updateDanhMucGhe(req, res) {
     try {
-        const { TEN_DANHMUC } = req.body;
-        await Promise.all([
-            body('TEN_DANHMUC')
-                .notEmpty()
-                .withMessage('tên danh mục ghế không được bỏ trống')
-                .isLength({max:255}).withMessage('Tên danh mục ghế tối đa 255 lý tự')
-                .run(req),
-                
-        ]);
-        const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-               return res.status(400).json({
-                  success: false,
-                  message: 'Dữ liệu không hợp lệ!',
-                  errors: errors.array().map(err => err.msg)
-               });
-            };
+      await Promise.all([
+        body("ID_DANHMUC")
+          .notEmpty()
+          .withMessage("id danh mục ghế không được bỏ trống!")
+          .isInt()
+          .withMessage("ID danh mục ghế phải là số nguyên")
+          .custom(async (value) => {
+            const check = await dmGhe.testid(value);
+            if (!check) throw new Error("ID không tồn tại!");
+            return true;
+          })
+          .run(req),
+        body("TEN_DANHMUC")
+          .notEmpty()
+          .withMessage("Tên danh mục ghế không được để trống!")
+          .isString()
+          .withMessage("id danh mục ghế")
+          .isLength({ max: 255 })
+          .withMessage("Tên danh mục ghế không được vượt quá 255 ký tự!")
+          .run(req),
+      ]);
 
-        // Thực hiện thêm mới (Loại bỏ khoảng trắng thừa bằng .trim())
-        const insertId = await dmGhe.create(TEN_DANHMUC.trim());
-        if(!insertId){
-            return res.status(500).json({
-                success:false,
-                message:'Thêm danh mục ghế thất bại!'
-            })
-        }
-        res.status(200).json({ success: true, message: "Thêm danh mục ghế thành công!" });
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          message: "Dữ liệu không hợp lệ!",
+          errors: errors.array().map((err) => err.msg),
+        });
+      }
+
+      const { TEN_DANHMUC, ID_DANHMUC } = req.body;
+
+      const updated = await dmGhe.update(ID_DANHMUC, TEN_DANHMUC.trim());
+      if (!updated) {
+        return res
+          .status(404)
+          .json({
+            success: false,
+            message: "danh mục không tồn tại hoặc dữ liệu không có thay đổi!",
+          });
+      }
+      res
+        .status(200)
+        .json({ success: true, message: "Cập nhật danh muc ghế thành công!" });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+      res.status(500).json({ success: false, message: error.message });
     }
-};
-
-
-static async updateDanhMucGhe (req, res)  {
-    try {
-        await Promise.all([
-            body('ID_DANHMUC')
-                .notEmpty().withMessage('id danh mục ghế không được bỏ trống!')
-              .isInt().withMessage('ID danh mục ghế phải là số nguyên')
-              .custom(async (value)=>{
-                const check = await dmGhe.testid(value);
-                if(!check) throw new Error('ID không tồn tại!')
-                return true;
-              })
-            .run(req),
-            body('TEN_DANHMUC')
-                .notEmpty().withMessage('Tên danh mục ghế không được để trống!')
-                .isString().withMessage('id danh mục ghế')
-                .isLength({ max: 255 }).withMessage('Tên danh mục ghế không được vượt quá 255 ký tự!')
-                .run(req),
-           
-        ]);
-
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({
-                success: false,
-                message: 'Dữ liệu không hợp lệ!',
-                errors: errors.array().map(err => err.msg)
-            });
-        }
-
-        const { TEN_DANHMUC, ID_DANHMUC } = req.body;
-
-        const updated = await dmGhe.update(ID_DANHMUC, TEN_DANHMUC.trim());
-        if (!updated) {
-            return res.status(404).json({ success: false, message: "danh mục không tồn tại hoặc dữ liệu không có thay đổi!" });
-        }
-        res.status(200).json({ success: true, message: "Cập nhật danh muc ghế thành công!" });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-};
+  }
 }
