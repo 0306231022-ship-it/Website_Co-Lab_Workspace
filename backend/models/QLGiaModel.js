@@ -85,6 +85,59 @@ export default class giaModel {
       throw new Error("Không thể truy vấn thông tin GIA!");
     }
   }
+  static async updatePriceForDanhMucGhe(idDanhMuc, soTienMoi) {
+    try {
+        // 1. Lấy thông tin ID_GIA hiện tại của Danh mục ghế này
+        const [danhMuc] = await execute(
+            `SELECT ID_GIA FROM danhmucghe WHERE ID_DANHMUC = ?`, 
+            [idDanhMuc]
+        );
+        
+        if (!danhMuc || danhMuc.length === 0) return false;
+        const idGiaHienTai = danhMuc[0].ID_GIA;
+
+        // 2. Kiểm tra xem mã giá này có đang bị bên bảng 'khonggian' hoặc danh mục khác dùng chung không
+        const [dungChungPhong] = await execute(
+            `SELECT COUNT(*) AS count FROM khonggian WHERE ID_GIA = ?`, 
+            [idGiaHienTai]
+        );
+        const [dungChungDanhMucKhac] = await execute(
+            `SELECT COUNT(*) AS count FROM danhmucghe WHERE ID_GIA = ? AND ID_DANHMUC != ?`, 
+            [idGiaHienTai, idDanhMuc]
+        );
+
+        const totalShared = dungChungPhong[0].count + dungChungDanhMucKhac[0].count;
+
+        if (totalShared === 0) {
+            // TRƯỜNG HỢP 1: Không chung đụng với ai -> Sửa trực tiếp (Đúng Cách 1)
+            await execute(
+                `UPDATE banggia SET GIA = ? WHERE ID_GIA = ?`, 
+                [soTienMoi, idGiaHienTai]
+            );
+            console.log("Sửa trực tiếp giá cũ vì không có phòng/danh mục nào dùng chung.");
+        } else {
+            // TRƯỜNG HỢP 2: Có phòng hoặc danh mục khác dùng chung -> Phải tách giá ra để bảo vệ bảng không gian
+            // Tạo bản ghi giá mới tinh
+            const [newPriceResult] = await execute(
+                `INSERT INTO banggia (TEN_GIA, GIA) VALUES (?, ?)`, 
+                [`Giá tách tự động cho DM ${idDanhMuc}`, soTienMoi]
+            );
+            const idGiaMoi = newPriceResult.insertId;
+
+            // Cập nhật lại ID_GIA mới này riêng cho danh mục ghế hiện tại
+            await execute(
+                `UPDATE danhmucghe SET ID_GIA = ? WHERE ID_DANHMUC = ?`, 
+                [idGiaMoi, idDanhMuc]
+            );
+            console.log("Đã tự động tách sang mã giá mới để tránh ảnh hưởng đến bảng không gian.");
+        }
+
+        return true;
+    } catch (error) {
+        console.error("Lỗi xử lý giá an toàn:", error);
+        throw error;
+    }
+}
 
 
     static async LayBangGia_KhongGian(){

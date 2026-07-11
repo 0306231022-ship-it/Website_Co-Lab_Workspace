@@ -282,22 +282,6 @@ export default function DanhMucGhe() {
                         >
                           <i className="fa-solid fa-pen text-xs"></i>
                         </button>
-                        {item.TRANG_THAI === 1 ? (
-                          <button
-                            title="Cấu hình / Thay đổi giá"
-                            className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all cursor-pointer"
-                          >
-                            <i className="fa-solid fa-tags text-xs"></i>
-                          </button>
-                        ) : (
-                          <button
-                            disabled
-                            title="Không thể đổi giá khi đang khóa danh mục"
-                            className="p-2 text-slate-300 rounded-lg cursor-not-allowed"
-                          >
-                            <i className="fa-solid fa-tags text-xs"></i>
-                          </button>
-                        )}
                       </div>
                     </td>
                   </tr>

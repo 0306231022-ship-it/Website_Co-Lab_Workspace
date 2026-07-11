@@ -143,84 +143,105 @@ export default class giaController {
     }
   }
 
-  static async updateGia(req, res) {
-    try {
-      const { ID_GIA, TEN_GIA, MOTA, DON_GIA, DANHMUC_GHE, NGAY_KET_THUC } =
-        req.body;
+ static async updateGia(req, res) {
+  try {
+    // 1. Lấy dữ liệu từ req.body (FormData đẩy lên chuỗi string nên cần ép kiểu số cho các trường ID/Giá)
+    const ID_GIA = req.body.ID_GIA ? Number(req.body.ID_GIA) : undefined;
+    const DON_GIA = req.body.DON_GIA ? Number(req.body.DON_GIA) : undefined;
+    const DANHMUC_GHE = req.body.DANHMUC_GHE ? Number(req.body.DANHMUC_GHE) : undefined;
+    
+    const { TEN_GIA, MOTA, PHUONG_THUC_CAP_NHAT } = req.body;
 
-      // Validate toàn bộ các trường cập nhật
-      await Promise.all([
-        body("ID_GIA")
-          .notEmpty()
-          .withMessage("ID bảng giá cần cập nhật không được bỏ trống!")
-          .isInt({ min: 1 })
-          .withMessage("ID bảng giá phải là số nguyên dương!")
-          .custom(async (value) => {
-            const check = await giaModel.testid(value);
-            if (!check)
-              throw new Error("ID bảng giá cần cập nhật không tồn tại!");
-            return true;
-          })
-          .run(req),
-        body("TEN_GIA")
-          .notEmpty()
-          .withMessage("Tên bảng giá không được bỏ trống!")
-          .isLength({ max: 255 })
-          .withMessage("Tên bảng giá tối đa 255 ký tự!")
-          .run(req),
-        body("MOTA")
-          .optional({ nullable: true, checkFalsy: true })
-          .isLength({ max: 1000 })
-          .withMessage("Mô tả tối đa 1000 ký tự!")
-          .run(req),
-        body("DON_GIA")
-          .notEmpty()
-          .withMessage("Đơn giá không được bỏ trống!")
-          .isFloat({ min: 0 })
-          .withMessage("Đơn giá phải là số và không được âm!")
-          .run(req),
-        body("DANHMUC_GHE")
-          .notEmpty()
-          .withMessage("Danh mục ghế không được bỏ trống!")
-          .isInt({ min: 1 })
-          .withMessage("Danh mục ghế phải là số nguyên dương!")
-          .run(req),
-      ]);
+    // Đẩy ngược lại vào req.body các giá trị đã ép kiểu số để express-validator kiểm tra chính xác
+    req.body.ID_GIA = ID_GIA;
+    req.body.DON_GIA = DON_GIA;
+    req.body.DANHMUC_GHE = DANHMUC_GHE;
 
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          message: "Dữ liệu không hợp lệ!",
-          errors: errors.array().map((err) => err.msg),
-        });
-      }
+    // 2. Validate toàn bộ các trường cập nhật khớp theo Frontend
+    await Promise.all([
+      body("ID_GIA")
+        .notEmpty()
+        .withMessage("ID bảng giá cần cập nhật không được bỏ trống!")
+        .isInt({ min: 1 })
+        .withMessage("ID bảng giá phải là số nguyên dương!")
+        .custom(async (value) => {
+          const check = await giaModel.testid(value);
+          if (!check) throw new Error("ID bảng giá cần cập nhật không tồn tại!");
+          return true;
+        })
+        .run(req),
+      body("TEN_GIA")
+        .notEmpty()
+        .withMessage("Tên bảng giá không được bỏ trống!")
+        .isLength({ max: 255 })
+        .withMessage("Tên bảng giá tối đa 255 ký tự!")
+        .run(req),
+      body("MOTA")
+        .optional({ nullable: true, checkFalsy: true })
+        .isLength({ max: 1000 })
+        .withMessage("Mô tả tối đa 1000 ký tự!")
+        .run(req),
+      body("DON_GIA")
+        .notEmpty()
+        .withMessage("Đơn giá không được bỏ trống!")
+        .isFloat({ min: 1 })
+        .withMessage("Đơn giá điều chỉnh phải lớn hơn 0 đ!")
+        .run(req),
+      body("DANHMUC_GHE")
+        .notEmpty()
+        .withMessage("Danh mục ghế không được bỏ trống!")
+        .isInt({ min: 1 })
+        .withMessage("Danh mục ghế phải là số nguyên dương!")
+        .run(req),
+      body("PHUONG_THUC_CAP_NHAT")
+        .notEmpty()
+        .withMessage("Phương thức cập nhật không được bỏ trống!")
+        .isIn(["overwrite", "history"])
+        .withMessage("Phương thức cập nhật không hợp lệ!")
+        .run(req),
+    ]);
 
-      // Gọi Model cập nhật dữ liệu bảng giá
-      const updateSuccess = await giaModel.update(
-        ID_GIA,
-        TEN_GIA.trim(),
-        MOTA ? MOTA.trim() : null,
-        DON_GIA,
-        DANHMUC_GHE,
-      );
-
-      if (!updateSuccess) {
-        return res.status(500).json({
-          success: false,
-          message:
-            "Cập nhật bảng giá thất bại hoặc không có thay đổi mới nào được thực hiện!",
-        });
-      }
-
+    // Trả về lỗi nếu dữ liệu không qua được vòng kiểm tra
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
       return res.status(200).json({
-        success: true,
-        message: "Cập nhật bảng giá thành công!",
+        validate: true, // Đồng bộ với Frontend: if (res.validate)
+        success: false,
+        message: "Dữ liệu cấu hình không hợp lệ!",
+        errors: errors.array().map((err) => err.msg),
       });
-    } catch (error) {
-      return res.status(500).json({ success: false, message: error.message });
     }
+
+    // 3. Gọi Tầng Model xử lý nghiệp vụ kiểm tra chung đụng với Không gian/Phòng họp
+    // (Truyền thêm tham số PHUONG_THUC_CAP_NHAT vào hàm xử lý giá)
+    const updateSuccess = await giaModel.update(
+      ID_GIA,
+      TEN_GIA.trim(),
+      MOTA ? MOTA.trim() : null,
+      DON_GIA,
+      DANHMUC_GHE,
+      PHUONG_THUC_CAP_NHAT
+    );
+
+    if (!updateSuccess) {
+      return res.status(200).json({
+        success: false,
+        message: "Cập nhật bảng giá thất bại hoặc không có thay đổi mới nào được ghi nhận!",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Cập nhật bảng giá hệ thống thành công!",
+    });
+    
+  } catch (error) {
+    return res.status(500).json({ 
+      success: false, 
+      message: "Lỗi xử lý máy chủ: " + error.message 
+    });
   }
+}
 
 
          

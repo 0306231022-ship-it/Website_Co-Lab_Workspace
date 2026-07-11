@@ -22,8 +22,7 @@ export default function SoDoGheCanvas({
 
     // Hàm trả về màu sắc đại diện cho trạng thái của ghế
     const layMauGhe = (trangThai: number) => {
-        if (trangThai === 2) return '#ef4444'; // Đã thuê -> Đỏ
-        if (trangThai === 3) return '#f59e0b'; // Bảo trì -> Vàng
+        if (trangThai === 1) return '#ef4444'; // Đã thuê -> Đỏ
         return '#10b981'; // Trống -> Xanh lá
     };
 
@@ -81,7 +80,7 @@ export default function SoDoGheCanvas({
                                 <Rect
                                     width={50}
                                     height={50}
-                                    fill={layMauGhe(item.TRANG_THAI)}
+                                    fill={layMauGhe(item.DangCoNguoiDat)}
                                     cornerRadius={8}
                                     stroke="#ffffff"
                                     strokeWidth={2}

@@ -8,7 +8,8 @@ export interface Ghe {
     ID_DANH_MUC: number;
     TEN_KHONG_GIAN: string,
     TEN_DANHMUC: string,
-    DON_GIA: string
+    DON_GIA: string,
+    DangCoNguoiDat: number,
 
 }
 export interface DanhSachThietBi {

@@ -130,3 +130,65 @@ END //
 DELIMITER ;
  * 
  */
+// Doanh thu tạm tính theo tháng :
+/*SELECT 
+    SUM(GIA_TIEN) AS DoanhThuTamTinh
+FROM 
+    hoadon
+WHERE 
+    YEAR(NGAY_TAO) = YEAR(CURRENT_DATE()) 
+    AND MONTH(NGAY_TAO) = MONTH(CURRENT_DATE())
+    AND TRANG_THAI = 1;*/
+
+// ghế đang sử dụng 
+/**
+ * SELECT 
+    -- Tổng số ghế trong hệ thống
+    (SELECT COUNT(*) FROM ghe) AS TongSoGhe,
+    
+    -- Số lượng ghế đang được sử dụng hiện tại
+    COUNT(DISTINCT ld.ID_GHE) AS SoGheDangSuDung,
+    
+    -- Tính tỷ lệ phần trăm %
+    ROUND(
+        (COUNT(DISTINCT ld.ID_GHE) / (SELECT COUNT(*) FROM ghe)) * 100, 
+        2
+    ) AS PhanTramDangSuDung
+FROM 
+    lichdat ld
+WHERE 
+    -- Điều kiện 1: Thời gian hiện tại nằm trong khoảng lịch đặt
+    NOW() BETWEEN ld.THOI_GIAN_BAT_DAU AND ld.THOI_GIAN_KET_THUC
+    
+    -- Điều kiện 2: Ghế không bị trống (ID_GHE hợp lệ)
+    AND ld.ID_GHE IS NOT NULL
+    
+    -- Điều kiện 3 (Tùy chọn): Chỉ tính các lịch đặt có trạng thái hợp lệ/thành công (Ví dụ TRANG_THAI = 1)
+    AND ld.TRANG_THAI = 1;
+ */
+//phòng 
+/**
+ * SELECT 
+    -- 1. Tổng số phòng hiện có trong hệ thống
+    (SELECT COUNT(*) FROM khonggian) AS TongSoPhong,
+    
+    -- 2. Số phòng đang được sử dụng ở thời điểm hiện tại
+    COUNT(DISTINCT ld.ID_KHONG_GIAN) AS SoPhongDangSuDung,
+    
+    -- 3. Tỷ lệ phần trăm (%) phòng đang sử dụng
+    ROUND(
+        (COUNT(DISTINCT ld.ID_KHONG_GIAN) / (SELECT COUNT(*) FROM khonggian)) * 100, 
+        2
+    ) AS PhanTramPhongDangSuDung
+FROM 
+    lichdat ld
+WHERE 
+    -- Điều kiện: Thời gian hiện tại nằm trong khoảng đặt phòng
+    NOW() BETWEEN ld.THOI_GIAN_BAT_DAU AND ld.THOI_GIAN_KET_THUC
+    
+    -- Đảm bảo đây là lịch đặt phòng (ID_KHONG_GIAN không bị rỗng)
+    AND ld.ID_KHONG_GIAN IS NOT NULL
+    
+    -- Chỉ tính lịch đặt có trạng thái hợp lệ (Ví dụ TRANG_THAI = 1 là đã xác nhận/thành công)
+    AND ld.TRANG_THAI = 1;
+ */

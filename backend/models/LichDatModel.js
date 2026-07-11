@@ -422,4 +422,27 @@ WHERE LD.ID_LICH_DAT = ?;
              throw new Error('Database query failed: ' + error.message);
         }
     }
+    static async getUpcomingUserIDs() {
+    try {
+        const [rows] = await execute(`
+            SELECT DISTINCT 
+                ld.IDND
+            FROM 
+                lichdat ld
+            WHERE 
+                -- Lịch đặt phải lớn hơn hiện tại và nằm trong khoảng 15 phút tới
+                ld.KHUNG_BATDAU > NOW()
+                AND ld.KHUNG_BATDAU <= DATE_ADD(NOW(), INTERVAL 15 MINUTE)
+                -- Chỉ quét các lịch hợp lệ (tránh lịch đã hủy hoặc chưa thanh toán)
+                AND ld.TRANG_THAI = 1;
+        `);
+        const userIDs = rows.map(row => row.IDND);
+
+        return userIDs;
+        
+    } catch (error) {
+        console.error("Lỗi khi lấy danh sách IDND sắp đến lịch:", error);
+        return [];
+    }
+}
 }

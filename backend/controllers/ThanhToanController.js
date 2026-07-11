@@ -4,9 +4,9 @@ import hoadonModel from '../models/hoadonModel.js';
 import 'dotenv/config.js';
 import moment from 'moment'
 import crypto from 'crypto';
-import qs from 'qs';
 import { sortObject } from '../function.js';
-export default class ThanhToanController{
+
+export default class ThanhToanController {
   static async ThanhToan(req, res) {
     const id = req.query.id;
     const tongtien = req.query.TongTien;
@@ -44,7 +44,7 @@ export default class ThanhToanController{
         let expireDate = moment(date).add(15, 'minutes').format('YYYYMMDDHHmmss');
         let ipAddr = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
-        // 5. Đóng gói bộ tham số truyền đi (Đổi dấu cách thành gạch dưới ở OrderInfo để chuỗi sạch)
+        // 5. Đóng gói bộ tham số truyền đi
         let vnp_Params = {};
         vnp_Params['vnp_Version'] = '2.1.0';
         vnp_Params['vnp_Command'] = 'pay';
@@ -52,26 +52,48 @@ export default class ThanhToanController{
         vnp_Params['vnp_Locale'] = 'vn';
         vnp_Params['vnp_CurrCode'] = 'VND';
         vnp_Params['vnp_TxnRef'] = String(id); 
-        vnp_Params['vnp_OrderInfo'] = 'Thanh_toan_lich_dat_ID_' + id; // Tránh lỗi khoảng trắng
+        vnp_Params['vnp_OrderInfo'] = 'Thanh toan lich dat ID ' + id; // Dùng dấu cách bình thường
         vnp_Params['vnp_OrderType'] = 'other';
-        vnp_Params['vnp_Amount'] = Math.floor(Number(tongtien) * 100); // Ép số nguyên chuẩn
+        vnp_Params['vnp_Amount'] = Math.floor(Number(tongtien) * 100); 
         vnp_Params['vnp_ReturnUrl'] = process.env.VNP_RETURNURL.trim(); 
         vnp_Params['vnp_IpAddr'] = ipAddr;
         vnp_Params['vnp_CreateDate'] = createDate;
         vnp_Params['vnp_ExpireDate'] = expireDate;
 
-        // Sắp xếp các key tham số tăng dần theo bảng chữ cái A-Z
+        // Sắp xếp các key tham số tăng dần từ A-Z
         vnp_Params = sortObject(vnp_Params);
 
-        // 6. Thực hiện tạo chuỗi băm đúng quy chuẩn VNPAY 2.1.0
-        let signData = qs.stringify(vnp_Params, { encode: false }); 
+        // 6. XÂY DỰNG CHUỖI BĂM ĐỒNG BỘ THEO TIÊU CHUẨN VNPAY 2.1.0 (Bỏ qua thư viện qs)
+        let signData = "";
+        let queryUrl = "";
+        let isFirst = true;
+
+        for (let key in vnp_Params) {
+            if (vnp_Params.hasOwnProperty(key)) {
+                let value = vnp_Params[key];
+                
+                if (isFirst) {
+                    // Cả 2 chuỗi đều phải encodeURIComponent theo đúng chuẩn mã hóa URL
+                    signData += encodeURIComponent(key) + "=" + encodeURIComponent(value);
+                    queryUrl += encodeURIComponent(key) + "=" + encodeURIComponent(value);
+                    isFirst = false;
+                } else {
+                    signData += "&" + encodeURIComponent(key) + "=" + encodeURIComponent(value);
+                    queryUrl += "&" + encodeURIComponent(key) + "=" + encodeURIComponent(value);
+                }
+            }
+        }
+
+        // Thay đổi các ký tự encode đặc biệt để khớp hoàn toàn với bộ máy mã hóa của VNPAY (.NET/Java)
+        signData = signData.replace(/%20/g, "+");
+        queryUrl = queryUrl.replace(/%20/g, "+");
+
+        // 7. Thực hiện tạo chuỗi băm bảo mật SHA512
         let hmac = crypto.createHmac("sha512", process.env.VNP_HASHSECRET.trim()); 
         let signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex"); 
         
-        vnp_Params['vnp_SecureHash'] = signed;
-        
-        // 7. Tạo URL đích bằng cách sử dụng { encode: true } đồng bộ từ thư viện `qs`
-        const finalPaymentUrl = process.env.VNP_URL.trim() + '?' + qs.stringify(vnp_Params, { encode: true });
+        // 8. Đóng gói URL cuối cùng gửi về Frontend
+        const finalPaymentUrl = process.env.VNP_URL.trim() + '?' + queryUrl + '&vnp_SecureHash=' + signed;
 
         return res.status(200).json({
             success: true,
@@ -85,5 +107,5 @@ export default class ThanhToanController{
             message: error.message || 'Đã xảy ra lỗi kết nối với cổng thanh toán!'
         });
     }
-}
+  }
 }

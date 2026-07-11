@@ -227,10 +227,6 @@ function ChiTietKhongGian() {
                                                     <span className="w-3 h-3 rounded bg-red-500 inline-block"></span>
                                                     <span className="text-gray-900">Đã thuê</span>
                                                 </div>
-                                                <div className="flex items-center space-x-1.5">
-                                                    <span className="w-3 h-3 rounded bg-amber-500 inline-block"></span>
-                                                    <span className="text-amber-700">Bảo trì</span>
-                                                </div>
                                             </div>
                                         </div>
 
