@@ -1,10 +1,11 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useParams, useRouter } from 'next/navigation';
+import { useParams} from 'next/navigation';
 import Image from "next/image";
 import * as api from "@/API/API";
 import * as ThongBao from "@/FUNCTION/ThongBao";
 import * as fun from '@/FUNCTION/function';
+import { useModalContext } from "@/context/QuanLiMoal";
 // Định nghĩa interface dữ liệu bảng giá nhận về từ API
 interface BangGia {
   ID_GIA: number;
@@ -12,8 +13,8 @@ interface BangGia {
 }
 
 function ThemKhongGian() {
-  const router = useRouter();
   const { idChiNhanh } = useParams();
+   const {  CloseMoDal } = useModalContext();
   
   // --- 1. KHỞI TẠO CÁC BIẾN STATE ---
   const [tenKhongGian, setTenKhongGian] = useState<string>("");
@@ -327,7 +328,7 @@ function ThemKhongGian() {
       <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end space-x-3 shrink-0">
         <button 
           type="button" 
-          onClick={() => router.back()}
+            onClick={()=>{CloseMoDal()}}
           className="px-5 py-2.5 text-sm font-bold text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-xl transition cursor-pointer"
         >
           Hủy bỏ

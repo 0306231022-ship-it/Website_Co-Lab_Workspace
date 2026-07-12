@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import * as ThongBao from "@/FUNCTION/ThongBao";
 import * as api from "@/API/API";
 import { useRouter } from "next/navigation";
-
+import { useModalContext } from "@/context/QuanLiMoal";
 interface UpdateDanhMucGheRequest {
   id: number;
   ten: string;
@@ -17,6 +17,7 @@ interface ChinhsuadmgheProps {
 
 export default function Chinhsuadmghe({ DuLieu, onClose }: ChinhsuadmgheProps) {
   const router = useRouter();
+   const {  CloseMoDal } = useModalContext();
 
   const [loading, setLoading] = useState<boolean>(false);
   const [err, setErr] = useState<string[]>([]);
@@ -60,12 +61,10 @@ export default function Chinhsuadmghe({ DuLieu, onClose }: ChinhsuadmgheProps) {
       ThongBao.ThongBao_Loi?.("Vui lòng nhập tên danh mục ghế!");
       return;
     }
-
     const submitData = new FormData();
     submitData.append("ID_DANHMUC", String(formData.id));
     submitData.append("TEN_DANHMUC", formData.ten.trim());
     submitData.append("TRANG_THAI", String(formData.trangthai));
-
     setLoading(true);
     try {
       const res = await api.CallAPI(submitData, {
@@ -179,7 +178,7 @@ export default function Chinhsuadmghe({ DuLieu, onClose }: ChinhsuadmgheProps) {
       <div className="pt-4 border-t border-slate-100 flex items-center justify-end space-x-2">
         <button
           type="button"
-          onClick={onClose}
+           onClick={()=>{CloseMoDal()}}
           disabled={loading}
           className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold rounded-xl transition-all cursor-pointer disabled:opacity-50"
         >

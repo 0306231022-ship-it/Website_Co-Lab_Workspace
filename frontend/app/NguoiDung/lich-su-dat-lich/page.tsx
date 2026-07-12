@@ -156,16 +156,7 @@ function LichSuLichDat() {
 
                                         {/* CỘT 3: HÀNH ĐỘNG - LUÔN CÓ NÚT XEM CHI TIẾT */}
                                         <div className="flex items-center gap-2 w-full lg:w-auto pt-4 lg:pt-0 border-t lg:border-t-0 border-slate-100 justify-end">
-                                            {laDatGheLe && (
-                                                <button className="px-4 py-2 bg-white border border-rose-200 text-rose-600 text-sm font-semibold rounded-lg hover:bg-rose-50 transition-colors">
-                                                    Hủy lịch
-                                                </button>
-                                            )}
-                                            {!laDatGheLe && (
-                                                <button className="px-4 py-2 bg-white border border-slate-200 text-slate-600 text-sm font-semibold rounded-lg hover:bg-slate-50 transition-colors">
-                                                    Hóa đơn
-                                                </button>
-                                            )}
+                                    
             
                                        <Link href={`/NguoiDung/lich-su-dat-lich/chi-tiet-lich-dat/${item.ID_LICH_DAT}`} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-1.5">
     <i className="fa-regular fa-eye"></i>

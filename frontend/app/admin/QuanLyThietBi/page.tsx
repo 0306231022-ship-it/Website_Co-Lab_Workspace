@@ -2,7 +2,6 @@
 import { useState, useEffect, useMemo } from "react";
 import * as api from "@/API/API";
 import * as ThongBao from "@/FUNCTION/ThongBao";
-import * as fun from "@/FUNCTION/function";
 import Link from "next/link";
 import { useModalContext } from "@/context/QuanLiMoal";
 export interface ThietBi {
@@ -20,11 +19,13 @@ export interface ThietBiResponse {
   success: boolean;
   data: ThietBi[];
   pagination: Pagination;
+  TongSuDung: number
 }
 
 export interface ThietBiDetailResponse {
   success: boolean;
   data: ThietBi;
+
 }
 
 export default function QuanLyThietBi() {
@@ -39,6 +40,7 @@ export default function QuanLyThietBi() {
   const [page, setPage] = useState<number>(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const { OpenMoDal } = useModalContext();
+  const [TongsuDung, setTongSuDung] = useState<number>(0);
 
   // 2. Gọi API lấy dữ liệu từ Backend
   useEffect(() => {
@@ -53,6 +55,7 @@ export default function QuanLyThietBi() {
         if (response && response.success) {
           const data = response.data || [];
           setDanhSachThietBi(data);
+          setTongSuDung(response.TongSuDung)
           if (response.pagination) {
             setPagination(response.pagination);
           }
@@ -128,27 +131,11 @@ export default function QuanLyThietBi() {
               Đang sử dụng
             </p>
             <p className="text-2xl font-black text-gray-900 mt-0.5 font-mono">
-              {pagination.totalItems > 0
-                ? Math.floor(pagination.totalItems * 0.9)
-                : 0}
+              {TongsuDung}
             </p>
           </div>
         </div>
-        <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center space-x-4">
-          <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-xl">
-            <i className="fa-solid fa-screwdriver-wrench"></i>
-          </div>
-          <div>
-            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-              Đang bảo trì/Sửa chữa
-            </p>
-            <p className="text-2xl font-black text-gray-900 mt-0.5 font-mono">
-              {pagination.totalItems > 0
-                ? Math.ceil(pagination.totalItems * 0.1)
-                : 0}
-            </p>
-          </div>
-        </div>
+   
       </div>
 
       {/* --- THANH CÔNG CỤ TÌM KIẾM & LỌC --- */}

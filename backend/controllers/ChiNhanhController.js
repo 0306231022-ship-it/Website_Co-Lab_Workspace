@@ -200,13 +200,13 @@ export default class ChiNhanhController {
       }
       const dd_db = await ChiNhanhModel.LayChiTiet(dulieu.IDCN);
       const dd = dd_db[0].HINHANH;
-      /*const xoa = xoaFileCu(dd);
+      const xoa = xoaFileCu(dd);
             if(!xoa){
                 return res.status(500).json({
                     success:false,
                     message:'lỗi khi thao tác hệ thống!'
                 })
-            }*/
+            }
       const update = await ChiNhanhModel.CapNhatAnh(dulieu.IDCN, DuongDan);
       if (!update) {
         return res.status(500).json({

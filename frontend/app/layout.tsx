@@ -48,13 +48,13 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    // Chỉ chạy kiểm tra đăng nhập nếu KHÔNG PHẢI trang admin
     if (!isAdminPage) {
       const load = async () => {
           await KiemTra();
       };
       load();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdminPage]);
 
   useEffect(() => {
@@ -93,7 +93,6 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
       }
   };
 
-  // 2. NẾU LÀ TRANG ADMIN: Trả về trang trống hoàn toàn, không dính dáng layout cũ
   if (isAdminPage) {
     return <>{children}</>;
   }

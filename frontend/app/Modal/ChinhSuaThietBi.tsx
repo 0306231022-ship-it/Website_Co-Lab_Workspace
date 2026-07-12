@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import * as api from "@/API/API";
 import * as ThongBao from "@/FUNCTION/ThongBao";
+import { useModalContext } from "@/context/QuanLiMoal";
 export interface THIETBI {
     id: number;
     ten: string;
@@ -9,6 +10,7 @@ export interface THIETBI {
 }
 export default function ChinhSuaThietBi({ DuLieu}: {DuLieu : THIETBI}) {
     // 1. Tạo các biến State và khởi tạo bằng giá trị gốc
+     const {  CloseMoDal } = useModalContext();
     const [ten, setTen] = useState<string>(DuLieu?.ten || "");
     const [hinhanh, setHinhAnh] = useState<string>(DuLieu?.hinhanh || "");
     const [loading, setLoading] = useState<boolean>(false);
@@ -83,7 +85,18 @@ export default function ChinhSuaThietBi({ DuLieu}: {DuLieu : THIETBI}) {
         <div className="bg-white flex flex-col h-full">
             {/* Đổi thẻ <form> thành <div> */}
             <div className="p-6 space-y-5 flex-1">
-                
+                {err && err.length > 0 && (
+          <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl space-y-1">
+            <p className="text-xs font-bold text-rose-700 flex items-center gap-1.5">
+              <i className="fa-solid fa-triangle-exclamation"></i> Vui lòng kiểm tra lại:
+            </p>
+            <ul className="list-disc list-inside text-xs text-rose-600 font-medium space-y-0.5">
+              {err.map((errorMsg, index) => (
+                <li key={index}>{errorMsg}</li>
+              ))}
+            </ul>
+          </div>
+        )}
                 {/* TÊN THIẾT BỊ */}
                 <div className="space-y-1.5">
                     <label className="text-xs font-black text-gray-500 uppercase tracking-wider block">
@@ -135,7 +148,8 @@ export default function ChinhSuaThietBi({ DuLieu}: {DuLieu : THIETBI}) {
             {/* FOOTER ACTIONS */}
             <div className="px-6 py-4 bg-slate-50 border-t border-gray-100 flex items-center justify-end space-x-2 shrink-0">
                 <button 
-                    type="button" 
+                    type="button"
+                    onClick={()=>{CloseMoDal()}}
                     disabled={loading}
                     className="px-4 py-2 bg-white hover:bg-gray-100 text-gray-500 text-xs font-bold rounded-xl border border-gray-200 shadow-3xs transition-all cursor-pointer disabled:opacity-50"
                 >

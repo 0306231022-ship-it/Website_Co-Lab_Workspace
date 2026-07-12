@@ -180,14 +180,88 @@ function ChiTietKhongGian() {
     
     )
   }
-    if (loading) {
-        return (
-            <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
-                <div className="w-10 h-10 border-4 border-slate-200 border-t-brand-600 rounded-full animate-spin"></div>
-                <p className="font-medium text-slate-500 text-sm tracking-wide">Đang tải dữ liệu không gian...</p>
+ if (loading) {
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-4 space-y-6 animate-pulse">
+      {/* 1. Breadcrumb & Nút quay lại giả lập */}
+      <div className="flex justify-between items-center mb-4">
+        <div className="h-4 bg-slate-200 rounded-md w-1/4"></div>
+        <div className="h-8 bg-slate-200 rounded-lg w-20"></div>
+      </div>
+
+      {/* 2. CARD THÔNG TIN CHÍNH GIẢ LẬP */}
+      <div className="bg-white rounded-2xl p-6 border border-slate-100 grid grid-cols-1 md:grid-cols-12 gap-6">
+        <div className="md:col-span-4 rounded-xl h-48 bg-slate-200"></div>
+        <div className="md:col-span-8 flex flex-col justify-between py-2">
+          <div className="space-y-3">
+            <div className="h-7 bg-slate-200 rounded-md w-2/3"></div>
+            <div className="h-5 bg-slate-200 rounded-md w-1/4"></div>
+          </div>
+          <div className="space-y-2 mt-4">
+            <div className="h-4 bg-slate-200 rounded-md w-1/2"></div>
+            <div className="h-4 bg-slate-200 rounded-md w-3/4"></div>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. BẢNG THÔNG SỐ NHANH GIẢ LẬP */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {[1, 2, 3, 4].map((item) => (
+          <div key={item} className="bg-white p-4 rounded-xl border border-slate-100 flex items-center gap-3">
+            <div className="w-10 h-10 bg-slate-200 rounded-lg flex-shrink-0"></div>
+            <div className="flex-1 space-y-2">
+              <div className="h-3 bg-slate-200 rounded w-1/2"></div>
+              <div className="h-4 bg-slate-200 rounded w-3/4"></div>
             </div>
-        );
-    }
+          </div>
+        ))}
+      </div>
+
+      {/* 4. KHỐI LƯỚI THIẾT BỊ VÀ SƠ ĐỒ/FORM GIẢ LẬP */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+        {/* Cột thiết bị bên trái */}
+        <div className="md:col-span-5 bg-white p-5 rounded-2xl border border-slate-100 min-h-[300px] flex flex-col justify-between">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="h-4 bg-slate-200 rounded w-1/2"></div>
+              <div className="h-3 bg-slate-200 rounded w-1/3"></div>
+            </div>
+            <div className="p-3 bg-slate-50/50 rounded-xl border border-slate-100 space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <div className="w-11 h-11 bg-slate-200 rounded-lg flex-shrink-0"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-3 bg-slate-200 rounded w-2/3"></div>
+                    <div className="h-3 bg-slate-200 rounded w-1/4"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="h-6 bg-slate-200 rounded w-full mt-4"></div>
+        </div>
+
+        {/* Cột sơ đồ ghế / Form đặt lịch bên phải */}
+        <div className="md:col-span-7 bg-white p-5 rounded-2xl border border-slate-100 min-h-[300px] flex flex-col justify-between">
+          <div className="space-y-4">
+            <div className="h-4 bg-slate-200 rounded w-1/3"></div>
+            <div className="h-32 bg-slate-100 rounded-xl border border-dashed border-slate-200 flex items-center justify-center">
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-8 h-8 border-2 border-slate-300 border-t-indigo-600 rounded-full animate-spin"></div>
+                <span className="text-xs font-semibold text-slate-400">Đang chuẩn bị khu vực...</span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="h-9 bg-slate-200 rounded-xl w-full"></div>
+              <div className="h-9 bg-slate-200 rounded-xl w-full"></div>
+            </div>
+          </div>
+          <div className="h-10 bg-slate-200 rounded-xl w-full mt-4"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
   return (
     <>
       {/* Thêm px-4 vào container chính */}
@@ -362,7 +436,6 @@ function ChiTietKhongGian() {
       <div className="flex gap-3 text-[10px] text-gray-500 font-medium">
         <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-emerald-500"></span> Trống</span>
         <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-red-500"></span> Đang có người</span>
-        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-amber-500"></span> Đang chọn</span>
       </div>
     </div>
     <SoDoGheCanvas danhSachGhe={ghe} onGheClick={handleGheSelect}  isReadOnly={true} />

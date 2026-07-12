@@ -4,9 +4,11 @@ import Image from "next/image";
 import * as api from "@/API/API";
 import * as ThongBao from "@/FUNCTION/ThongBao";
 import { objChiNhanh } from "@/interface/ChiNhanh";
+import { useModalContext } from "@/context/QuanLiMoal";
 
 function ChinhSuaChiNhanh({ DuLieu }: { DuLieu: objChiNhanh }) {
   // --- KHỞI TẠO CÁC BIẾN STATE TRỰC TIẾP TỪ PROPS ---
+   const {  CloseMoDal } = useModalContext();
   const [tenChiNhanh, setTenChiNhanh] = useState<string>(DuLieu?.TEN_CHI_NHANH || "");
   const [diaChi, setDiaChi] = useState<string>(DuLieu?.DIA_CHI || "");
   const [errors, setErrors] = useState<string[]>([]);
@@ -339,6 +341,7 @@ function ChinhSuaChiNhanh({ DuLieu }: { DuLieu: objChiNhanh }) {
       <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end space-x-3 -mx-6 -mb-6">
         <button
           type="button"
+            onClick={()=>{CloseMoDal()}}
           className="px-5 py-2.5 text-sm font-bold text-gray-500 hover:text-gray-700 transition cursor-pointer"
         >
           Hủy bỏ

@@ -3,7 +3,9 @@ import React, { useState } from "react";
 import * as api from "@/API/API";
 import * as ThongBao from "@/FUNCTION/ThongBao";
 import Image from "next/image";
+import { useModalContext } from "@/context/QuanLiMoal";
 function ThemChiNhanh() {
+   const {  CloseMoDal } = useModalContext();
   const [tenChiNhanh, setTenChiNhanh] = useState<string>("");
   const [diaChi, setDiaChi] = useState<string>("");
   const [anhChiNhanh, setAnhChiNhanh] = useState<File | null>(null);
@@ -137,7 +139,7 @@ function ThemChiNhanh() {
 
           {/* Footer */}
           <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end space-x-3">
-            <button type="button" className="px-5 py-2.5 text-sm font-bold text-gray-500 hover:bg-gray-200 hover:text-gray-700 rounded-xl transition">Hủy bỏ</button>
+            <button type="button"   onClick={()=>{CloseMoDal()}} className="px-5 py-2.5 text-sm font-bold text-gray-500 hover:bg-gray-200 hover:text-gray-700 rounded-xl transition">Hủy bỏ</button>
             <button 
               type="button" 
               onClick={guiDuLieu}

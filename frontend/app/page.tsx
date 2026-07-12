@@ -11,7 +11,7 @@ export default function HomePage() {
   const [chiNhanh, setChiNhanh] = useState<objChiNhanh[]>([]);
   const [TongDanhSach, setTongDanhSach] = useState<number>(1);
   const [TimKiem, setTimKiem] = useState<string>("");
-
+ 
 
   useEffect(() => {
     const laydl = async () => {
@@ -24,6 +24,7 @@ export default function HomePage() {
         } else {
           setChiNhanh([]);
         }
+     
       } catch (error) {
         console.error("Lỗi khi load dữ liệu:", error);
       } finally {
@@ -31,7 +32,8 @@ export default function HomePage() {
       }
     };
     laydl();
-  }, [page,TimKiem]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
 
  const TimKiem_ChiNhanh = async () => {
   try {
@@ -126,7 +128,32 @@ export default function HomePage() {
                   <ChiNhanh key={item.ID_CHI_NHANH} DuLieu={item} />
                 ))
               ) : (
-                <p className="text-slate-500 text-sm italic">Không có dữ liệu chi nhánh nào.</p>
+               <div className="col-span-full bg-slate-50 border border-dashed border-slate-300 rounded-3xl p-12 flex flex-col items-center justify-center text-center max-w-xl mx-auto w-full my-8 transition-all">
+      {/* Vòng tròn chứa Icon kính lúp/định vị trống */}
+      <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-400 border border-slate-200 shadow-inner">
+        <i className="fa-solid fa-map-location-dot text-2xl animate-bounce"></i>
+      </div>
+      
+      {/* Tiêu đề thông báo */}
+      <h3 className="text-lg font-bold text-slate-700 mb-1">
+        Không tìm thấy chi nhánh nào
+      </h3>
+      
+      {/* Cụ thể hơn cho người dùng */}
+      <p className="text-sm text-slate-500 max-w-xs leading-relaxed">
+        Chúng tôi không tìm thấy kết quả nào phù hợp với địa chỉ <span className="font-semibold text-slate-700">{TimKiem}</span>. Vui lòng thử lại bằng một từ khóa khác.
+      </p>
+
+      {/* Nút bấm nhanh để xóa tìm kiếm và quay lại danh sách gốc (Tùy chọn) */}
+      {TimKiem.trim() !== "" && (
+        <button 
+          onClick={() => { setTimKiem(""); setpage(1); }}
+          className="mt-5 text-xs font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-xl transition cursor-pointer"
+        >
+          <i className="fa-solid fa-rotate-left mr-1.5"></i> Xem tất cả chi nhánh
+        </button>
+      )}
+    </div>
               )
             }
           </div>

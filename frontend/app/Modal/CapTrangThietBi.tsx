@@ -4,9 +4,10 @@ import { ThietBi } from "@/interface/ThietBi";
 import * as api from "@/API/API";
 import * as ThongBao from '@/FUNCTION/ThongBao';
 import { useParams } from 'next/navigation';
-
+import { useModalContext } from "@/context/QuanLiMoal";
 function CapTrangThietBi() {
     // 1. Quản lý States dữ liệu và Phân trang
+     const {  CloseMoDal } = useModalContext();
     const [dsThietBi, setDsThietBi] = useState<ThietBi[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [page1, setPage1] = useState<number>(1);
@@ -221,7 +222,7 @@ function CapTrangThietBi() {
                             Đã chọn <span className="font-bold text-indigo-600">{selectedIds.length}</span> trang thiết bị
                         </p>
                         <div className="flex space-x-2">
-                            <button type="button" className="px-4 py-2 text-xs font-bold text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition cursor-pointer">
+                            <button type="button"   onClick={()=>{CloseMoDal()}} className="px-4 py-2 text-xs font-bold text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition cursor-pointer">
                                 Đóng lại
                             </button>
                             <button 

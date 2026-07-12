@@ -4,6 +4,7 @@ import * as ThongBao from "@/FUNCTION/ThongBao";
 import * as api from "@/API/API";
 import { useRouter } from "next/navigation";
 import { DanhMucGhe } from "@/interface/DanhMucGhe";
+import { useModalContext } from "@/context/QuanLiMoal";
 export interface CreateGiaRequest {
   TEN_GIA: string;
   MOTA?: string;
@@ -21,6 +22,7 @@ export default function ThemGiaMoi() {
   const [loading, setLoading] = useState<boolean>(false);
   const [err, setErr] = useState<string[]>([]);
       const [DanhMuc, setdanhmuc] = useState<DanhMucGhe[]>([]);
+       const {  CloseMoDal } = useModalContext();
   const [formData, setFormData] = useState<CreateGiaRequest>({
     TEN_GIA: "",
     MOTA: "",
@@ -30,7 +32,7 @@ export default function ThemGiaMoi() {
   useEffect(()=>{
     const loaddl = async()=>{
       try {
-        const ketqua =  await api.CallAPI(undefined, { url: `/admin/loaidanhmuc`, PhuongThuc: 2 })
+        const ketqua =  await api.CallAPI(undefined, { url: `/admin/loaidanhmuc?Loai=2`, PhuongThuc: 2 })
          if (ketqua.success) {
                     setdanhmuc(ketqua.dulieu);
                 }
@@ -252,6 +254,7 @@ export default function ThemGiaMoi() {
           <button
             type="button"
             disabled={loading}
+              onClick={()=>{CloseMoDal()}}
             className="px-4 py-2 bg-white hover:bg-slate-100 text-slate-600 text-xs font-bold rounded-xl border border-slate-200 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Hủy bỏ

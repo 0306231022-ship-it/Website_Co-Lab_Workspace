@@ -49,7 +49,7 @@ export default class dmGhe {
     try {
       const [result] = await execute(
         "UPDATE danhmucghe SET TEN_DANHMUC = ? , TRANG_THAI = ? WHERE ID_DANHMUC = ?",
-        [tenDanhMuc, tenDanhMuc, id],
+        [tenDanhMuc, trangthai, id],
       );
       return result.affectedRows > 0;
     } catch (error) {
@@ -70,13 +70,16 @@ export default class dmGhe {
       throw new Error("Không thể truy vấn thông tin danh mục ghế!");
     }
   }
-    static async LayDL_DnhMuc(){
+    static async LayDL_DnhMuc(loai){
         try {
+            const phanloai = parseInt(loai) === 1 ? 'IN' : 'NOT IN';
             const [ketqua] = await execute(`
-                SELECT ID_DANHMUC, TEN_DANHMUC
-                FROM danhmucghe
-                WHERE TRANG_THAI=?
-                `,[1]);
+              SELECT ID_DANHMUC, TEN_DANHMUC
+              FROM danhmucghe
+              WHERE TRANG_THAI = 1
+              ${parseInt(loai) === 1 || parseInt(loai) === 2 ? 
+                `AND ID_DANHMUC ${phanloai} (SELECT DISTINCT DANHMUC_GHE FROM banggia WHERE DANHMUC_GHE IS NOT NULL)` : ''}
+        `,[]);
             return ketqua;
         } catch (error) {
              console.error(` Lỗi Database (${id}):`, error.message);

@@ -1,6 +1,7 @@
 import { hash, compare } from "bcrypt";
 import giaModel from "../models/QLGiaModel.js";
 import { body, query, validationResult } from "express-validator";
+import dmGhe from "../models/danhmucgheModel.js";
 
 export default class giaController {
   static async getAllGia(req, res) {
@@ -111,14 +112,15 @@ export default class giaController {
           .withMessage("Danh mục ghế không được bỏ trống!")
           .isInt({ min: 1 })
           .withMessage("Danh mục ghế phải là số nguyên dương!")
-          // .custom(async (value) => {
-          //     // Tự động kiểm tra danh mục ghế tồn tại nếu em có Model danh mục ghế
-          //     const check = await dmGhe.testid(value);
-          //     if (!check) throw new Error('ID danh mục ghế không tồn tại!');
-          //     return true;
-          // })
+          .custom(async (value) => {
+              // Tự động kiểm tra danh mục ghế tồn tại nếu em có Model danh mục ghế
+             const check = await dmGhe.testid(value);
+               if (!check) throw new Error('ID danh mục ghế không tồn tại!');
+              return true;
+           })
           .run(req),
       ]);
+    
       // Thực hiện thêm mới dựa theo Model (đã hỗ trợ trim() tên bảng giá)
       const insertSuccess = await giaModel.create(
         TEN_GIA.trim(),

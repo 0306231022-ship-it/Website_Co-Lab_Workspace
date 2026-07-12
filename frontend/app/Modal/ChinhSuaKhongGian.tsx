@@ -1,5 +1,5 @@
 "use client";
-import { useParams, useRouter } from 'next/navigation';
+import { useParams} from 'next/navigation';
 import React, { useState, useEffect } from "react";
 import * as api from "@/API/API";
 import { KhongGian } from '@/interface/KhongGian';
@@ -7,6 +7,7 @@ import { LichDatItems } from '@/interface/LichDat';
 import * as ThongBao from '@/FUNCTION/ThongBao';
 import * as fun from '@/FUNCTION/function';
 import Image from "next/image";
+import { useModalContext } from "@/context/QuanLiMoal";
 
 // Interface phục vụ danh sách bảng giá hiển thị trong select option
 interface BangGia {
@@ -17,7 +18,7 @@ interface BangGia {
 
 function ChinhSuaKhongGian() {
     const { idkhonggian } = useParams();
-    const router = useRouter();
+     const {  CloseMoDal } = useModalContext();
     const [loading, setloading] = useState<boolean>(false);
     const [khonggian, setkhonggian] = useState<KhongGian | null>(null);
     const [LichDatCuoi, setLichDatCuoi] = useState<LichDatItems | null>(null);
@@ -38,37 +39,48 @@ function ChinhSuaKhongGian() {
     const [idBangGia, setIdBangGia] = useState<string>("");
 
     // --- Lấy dữ liệu ban đầu từ Server ---
-    useEffect(() => {
-        const laythongtin = async () => {
-            setloading(true);
-            try {
-                // 1. Lấy thông tin chi tiết không gian hiện tại
-                const laydl = await api.CallAPI(undefined, { url: `/admin/ThongTin?id=${idkhonggian}`, PhuongThuc: 2 });
-                if (laydl.success) {
-                    const dataKg = laydl.dulieu.KhongGian[0];
-                    setkhonggian(dataKg);
-                    setLichDatCuoi(laydl.dulieu.LichDatCuoi[0]);
-                    setTenKhongGian(dataKg?.TEN_KHONG_GIAN || "");
-                    setTrangThai((dataKg?.TRANG_THAI ?? 1) === 1 ? 'active' : 'maintenance');
-                    if (dataKg?.HINHANH) {
-                        setPreviewUrl(`http://localhost:3001/${dataKg.HINHANH}`);
-                    }
+  useEffect(() => {
+    const laythongtin = async () => {
+        setloading(true);
+        try {
+            // 1. Lấy thông tin chi tiết không gian hiện tại
+            const laydl = await api.CallAPI(undefined, { url: `/admin/ThongTin?id=${idkhonggian}`, PhuongThuc: 2 });
+            
+            if (laydl.success) {
+                const dataKg = laydl.dulieu?.KhongGian?.[0];
+                
+                // Tránh lỗi khi alert chuỗi null/undefined
+                if (laydl.dulieu?.LichDatCuoi) {
+                    alert(JSON.stringify(laydl.dulieu.LichDatCuoi));
                 }
 
-                // 2. Lấy danh sách bảng giá để đổ vào select option
-                const resGia = await api.CallAPI(undefined, { url: "/admin/DanhSachBangGia", PhuongThuc: 2 });
-                if (resGia.success) {
-                    setDanhSachGia(resGia.dulieu || []);
+                setkhonggian(dataKg || null);
+                
+                // Sửa tại đây: An toàn 100% kể cả khi LichDatCuoi không tồn tại
+                setLichDatCuoi(laydl.dulieu?.LichDatCuoi?.[0] || null);
+                
+                setTenKhongGian(dataKg?.TEN_KHONG_GIAN || "");
+                setTrangThai((dataKg?.TRANG_THAI ?? 1) === 1 ? 'active' : 'maintenance');
+                if (dataKg?.HINHANH) {
+                    setPreviewUrl(`http://localhost:3001/${dataKg.HINHANH}`);
                 }
-            } catch (error) {
-                console.error("Lỗi khi tải thông tin không gian:", error);
-                ThongBao.ThongBao_CanhBao('Lỗi khi tải thông tin dữ liệu');
-            } finally {
-                setloading(false);
             }
-        };
-        if (idkhonggian) laythongtin();
-    }, [idkhonggian]);
+
+            // 2. Lấy danh sách bảng giá để đổ vào select option
+            const resGia = await api.CallAPI(undefined, { url: "/admin/DanhSachBangGia", PhuongThuc: 2 });
+          
+            if (resGia.success) {
+                setDanhSachGia(resGia.dulieu || []);
+            }
+        } catch (error) {
+            console.error("Lỗi khi tải thông tin không gian:", error);
+            ThongBao.ThongBao_CanhBao('Lỗi khi tải thông tin dữ liệu');
+        } finally {
+            setloading(false);
+        }
+    };
+    if (idkhonggian) laythongtin();
+}, [idkhonggian]);
     useEffect(() => {
         const layDanhSachGia = async () => {
           try {
@@ -359,7 +371,7 @@ function ChinhSuaKhongGian() {
                     <div className="px-6 py-4 bg-slate-50 border-t border-gray-100 flex items-center justify-end space-x-2">
                         <button 
                             type="button" 
-                            onClick={() => router.back()}
+                              onClick={()=>{CloseMoDal()}}
                             className="px-4 py-2 bg-white hover:bg-gray-100 text-gray-500 text-xs font-bold rounded-xl border border-gray-200 transition-all cursor-pointer"
                         >
                             Hủy bỏ

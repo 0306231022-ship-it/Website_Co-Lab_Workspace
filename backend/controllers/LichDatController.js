@@ -207,8 +207,9 @@ export default class LichDatController{
         }
     }
     static async ChiTiet_LichDat_theoIDDL(req, res) {
-        const id = req.query.Id;
+        const id = req.query.id;
         const userId = req.user.id;
+        console.log(id)
         try {
             const kiemtra = await DatLichModel.kiemtraid(id);
             if (!kiemtra) {

@@ -34,7 +34,6 @@ export default function QuanLyGia() {
   const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const { OpenMoDal } = useModalContext();
-  // Gọi API lấy danh sách giá theo page
   useEffect(() => {
     const fetchDanhSachGia = async () => {
       setLoading(true);
@@ -43,6 +42,7 @@ export default function QuanLyGia() {
           url: `/admin/layDS_Gia?page=${page}`,
           PhuongThuc: 2,
         });
+      
 
         if (res && res.success) {
           setBangGia(res.data || []);
@@ -132,7 +132,7 @@ export default function QuanLyGia() {
           </div>
         </div>
 
-        {/* TABLE SECTION */}
+     
         <div className="overflow-x-auto min-h-[300px] relative">
           {loading ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 z-10">

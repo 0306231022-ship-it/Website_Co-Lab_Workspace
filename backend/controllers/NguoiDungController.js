@@ -5,7 +5,7 @@ import XacThucOTPModel from '../models/XacThucOTPModel.js';
 import { body, query, validationResult } from 'express-validator';
 import { taoMaOTP , guiEmailOTP , generateToken } from '../function.js';
 import { io } from '../server.js';
-
+import { xoaFileCu } from "../function.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
@@ -282,6 +282,17 @@ export default class NguoiDungController{
                   message:'Lỗi tải ảnh!'
                })
             };
+             const dd_db = await NguoiDungModel.findByid(userId);
+             const dd = dd_db.HINH_ANH;
+             if(dd!==''){
+               const xoa = xoaFileCu(dd);
+                        if(!xoa){
+                            return res.status(500).json({
+                                success:false,
+                                message:'lỗi khi thao tác hệ thống!'
+                            })
+                        }
+             }
             const ketqua = await NguoiDungModel.CapNhat_Anh(userId,DuongDan);
             if(!ketqua){
                return res.status(500).json({

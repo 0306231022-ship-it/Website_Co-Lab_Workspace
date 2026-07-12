@@ -56,12 +56,11 @@ function ChiTietLichDat() {
         return;
       }
       try {
-        const res = await api.CallAPI(undefined, { url: `/NguoiDung/LICHDAT?Id=${id}`, PhuongThuc: 2 });
+        const res = await api.CallAPI(undefined, { url: `/NguoiDung/lich-dat?id=${id}`, PhuongThuc: 2 });
         alert(JSON.stringify(res))
         if (res && res.success) {
           setLichDat(res.lichDat);
         } else {
-          router.push('/admin'); 
           ThongBao.ThongBao_Loi(res.message);
         }
       } catch (error) {

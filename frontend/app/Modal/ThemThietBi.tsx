@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import * as api from "@/API/API";
 import * as ThongBao from "@/FUNCTION/ThongBao";
-
 export default function Themthietbi() {
     // 1. Khai báo các State lưu trữ dữ liệu
     const [tenThietBi, setTenThietBi] = useState<string>("");
@@ -29,7 +28,7 @@ export default function Themthietbi() {
         setLoading(true);
         try {
             // Gọi API (PhuongThuc: 1 tương đương với phương thức POST)
-            const res: any = await api.CallAPI(submitData, {
+            const res = await api.CallAPI(submitData, {
                 url: "/admin/themthietbi",
                 PhuongThuc: 1 
             });

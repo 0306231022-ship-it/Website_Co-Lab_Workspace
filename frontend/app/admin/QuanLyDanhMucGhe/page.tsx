@@ -46,6 +46,7 @@ export default function DanhMucGhe() {
           url: `/admin/danhsachdanhmucghe?page=${page}`,
           PhuongThuc: 2,
         });
+      
 
         if (response && response.success) {
           const data = response.data || [];
@@ -251,7 +252,7 @@ export default function DanhMucGhe() {
                       className={`px-6 py-4 text-right ${item.TRANG_THAI !== 1 ? "opacity-60" : ""}`}
                     >
                       <div className="font-mono font-extrabold text-slate-900">
-                        {fun.formatCurrency(String(item.DON_GIA))}
+                        {item.DON_GIA !== null  ? fun.formatCurrency(String(item.DON_GIA)) : 'Chưa áp dụng'}
                       </div>
                       <span className="text-[10px] text-indigo-500 font-bold block mt-0.5">
                         <i className="fa-solid fa-clock-rotate-left text-[9px] mr-0.5"></i>{" "}

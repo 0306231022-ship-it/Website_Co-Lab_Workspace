@@ -77,14 +77,13 @@ export default class KhongGianModel {
     static async LayDanhSach(limit,offset,ID){
         try {
             const [DanhSach] = await execute(`
-                SELECT 
-                    kg.*,
-                    bg.DON_GIA 
-                FROM khonggian kg
-                LEFT JOIN banggia bg 
-                ON kg.ID_GIA = bg.ID_GIA AND kg.LOAI_KHONG_GIAN = 2
-                WHERE kg.ID_CHI_NHANH = ?
-                LIMIT ? OFFSET ?
+               SELECT 
+        kg.*,
+        IF(kg.LOAI_KHONG_GIAN = 0, bg.DON_GIA, NULL) AS DON_GIA 
+    FROM khonggian kg
+    LEFT JOIN banggia bg ON kg.ID_GIA = bg.ID_GIA
+    WHERE kg.ID_CHI_NHANH = ?
+    LIMIT ? OFFSET ?
                 `,[ID,limit,offset]);
             const [TongSo] = await execute(`
                  SELECT COUNT(*) AS total FROM khonggian
@@ -141,31 +140,52 @@ export default class KhongGianModel {
              throw new Error('Database query failed: ' + error.message);
         }
     }
-   static async TimKiem_KhongGian(ten, trangthai, idcn , limit, offset) {
-        try {
-            let whereClause = ` WHERE ID_CHI_NHANH = ?`;
-            let params = [idcn];
-            if (ten && ten.trim() !== "") {
-                whereClause += ` AND TEN_KHONG_GIAN LIKE ?`;
-                params.push(`%${ten.trim()}%`);
-            }
-            if (trangthai !== 'all' && trangthai !== undefined && trangthai !== null) {
-                whereClause += ` AND TRANG_THAI = ?`;
-                params.push(Number(trangthai));
-            }
-            const sqlCount = `SELECT COUNT(*) AS Tong FROM khonggian` + whereClause;
-            const [kqCount] = await execute(sqlCount, params);
-            const tongDanhSach = kqCount[0]?.Tong || 0;
-            const sqlData = `SELECT * FROM khonggian` + whereClause + ` LIMIT ? OFFSET ?`;
-            const dataParams = [...params, Number(limit), Number(offset)];
-            const [danhsach] = await execute(sqlData, dataParams);
-             return {
-                DanhSach: danhsach,
-                TongDanhSach: tongDanhSach
-            };
-        } catch (error) {
-            throw new Error('Database query failed: ' + error.message);
+   static async TimKiem_KhongGian(ten, trangthai, idcn, limit, offset) {
+    try {
+        // 1. Tạo điều kiện WHERE động (Không dùng alias kg. ở đây để câu lệnh COUNT không lỗi)
+        let whereClause = ` WHERE ID_CHI_NHANH = ?`;
+        let params = [idcn];
+
+        if (ten && ten.trim() !== "") {
+            whereClause += ` AND TEN_KHONG_GIAN LIKE ?`;
+            params.push(`%${ten.trim()}%`);
         }
+
+        if (trangthai !== 'all' && trangthai !== undefined && trangthai !== null) {
+            whereClause += ` AND TRANG_THAI = ?`;
+            params.push(Number(trangthai));
+        }
+
+        // 2. Câu lệnh COUNT thuần túy trên bảng khonggian (Đảm bảo có dấu cách trước WHERE)
+        const sqlCount = `SELECT COUNT(*) AS Tong FROM khonggian` + whereClause;
+        const [kqCount] = await execute(sqlCount, params);
+        const tongDanhSach = kqCount[0]?.Tong || 0;
+
+        // 3. Khi JOIN dữ liệu, ta chủ động thêm alias 'kg.' vào trước các điều kiện WHERE
+        // Thay thế " WHERE " thành " WHERE kg." để ép chạy đúng trên bảng đã JOIN
+        let whereClauseForData = whereClause.replace(/WHERE /g, "WHERE kg.");
+        whereClauseForData = whereClauseForData.replace(/AND /g, "AND kg.");
+
+        const sqlData = `
+            SELECT 
+                kg.*,
+                bg.DON_GIA 
+            FROM khonggian kg
+            LEFT JOIN banggia bg 
+                ON kg.ID_GIA = bg.ID_GIA AND kg.LOAI_KHONG_GIAN = 2
+        ` + whereClauseForData + ` LIMIT ? OFFSET ?`;
+
+        const dataParams = [...params, Number(limit), Number(offset)];
+        const [danhsach] = await execute(sqlData, dataParams);
+
+        return {
+            DanhSach: danhsach,
+            TongDanhSach: tongDanhSach
+        };
+
+    } catch (error) {
+        throw new Error('Database query failed: ' + error.message);
+    }
 }
     static async TruyVan_ChiNhanh(IDKG){
         try {
@@ -278,6 +298,20 @@ export default class KhongGianModel {
             return update.affectedRows > 0
         } catch (error) {
              console.error("Lỗi chỉnh sửa giá:", error);
+        throw new Error('Database query failed: ' + error.message);
+        }
+    }
+    static async layten_khonggian(id){
+        try {
+            const [truyvan] = await execute(`
+                SELECT TEN_KHONG_GIAN
+                FROM khonggian
+                WHERE ID_KHONG_GIAN = ?
+                LIMIT 1
+                `,[id]);
+            return truyvan.length>0 ? truyvan[0].TEN_KHONG_GIAN : false;
+        } catch (error) {
+             console.error("Lỗi:", error);
         throw new Error('Database query failed: ' + error.message);
         }
     }

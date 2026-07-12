@@ -23,8 +23,6 @@ export default class thongBaoController {
             return res.status(500).json({ success: false, message: error.message });
         }
     }
-
-    
     // ========================================================
     // 3. [DELETE] /api/admin/thongbao (XÓA 1 THÔNG BÁO THEO ID_THONGBAO)
     // ========================================================

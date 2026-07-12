@@ -4,7 +4,7 @@ import * as ThongBao from "@/FUNCTION/ThongBao";
 import * as api from "@/API/API";
 import { useRouter } from "next/navigation";
 import { DanhMucGhe } from "@/interface/DanhMucGhe";
-
+import { useModalContext } from "@/context/QuanLiMoal";
 // Định nghĩa interface rõ ràng cho dữ liệu cũ truyền vào từ bảng
 export interface GiaDữLiệuGốc {
   ID_GIA: number;
@@ -42,7 +42,7 @@ export default function SuaGia({
   const [loading, setLoading] = useState<boolean>(false);
   const [fetching, setFetching] = useState<boolean>(true);
   const [err, setErr] = useState<string[]>([]);
-
+   const {  CloseMoDal } = useModalContext();
   // State quản lý Form Data
   const [formData, setFormData] = useState<UpdateGiaRequest>({
     ID_GIA: 0,
@@ -313,7 +313,7 @@ export default function SuaGia({
               />
               <div className="flex flex-col cursor-pointer">
                 <span className="text-xs font-bold text-amber-700 flex items-center gap-1">
-                  <i className="fa-solid fa-triangle-exclamation"></i> Ghi đè trực tiếp (Cách 1)
+                  <i className="fa-solid fa-triangle-exclamation"></i> Ghi đè trực tiếp
                 </span>
                 <span className="text-[11px] font-medium text-slate-400 mt-1 leading-normal">
                   Sửa đổi số tiền trực tiếp trên mã giá cũ. Lưu ý: Mọi phòng họp hay danh mục khác sử dụng chung mã giá này đều đổi theo.
@@ -344,7 +344,7 @@ export default function SuaGia({
       <div className="pt-6 mt-5 border-t border-slate-100 flex items-center justify-end space-x-2 shrink-0">
         <button
           type="button"
-          onClick={onClose}
+            onClick={()=>{CloseMoDal()}}
           disabled={loading}
           className="px-4 py-2 bg-white hover:bg-slate-100 text-slate-600 text-xs font-bold rounded-xl border border-slate-200 transition-all cursor-pointer disabled:opacity-50"
         >

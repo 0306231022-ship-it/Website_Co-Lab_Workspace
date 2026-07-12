@@ -32,7 +32,7 @@ export default class hoadonController {
         });
       }
 
-      // 👈 Lấy dữ liệu từ req.query thay vì req.body
+    
       const ID_LICH_DAT = req.query.ID_LICH_DAT;
       const item = await hoadonModel.getById(ID_LICH_DAT);
 

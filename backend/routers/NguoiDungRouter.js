@@ -37,4 +37,6 @@ nguoidungRouter.post('/XoaTatCa' , upload.none() , verifyToken , thongBaoControl
 // hóa đơn
 nguoidungRouter.get('/ThanhToan', verifyToken, ThanhToanController.ThanhToan);
 nguoidungRouter.get('/chitiethoadon',hoadonController.getHoaDonById);
+
+
 export default nguoidungRouter;

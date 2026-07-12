@@ -14,10 +14,11 @@ function ThemGhe({DuLieu} : {DuLieu: ID}){
     const [DanhMuc,setdanhmuc] = useState<DanhMucGhe[]>([]);
     const [iddm,setiddm] = useState<string>('');
     const [tenghe,settenghe] = useState<string>('')
+     const {  CloseMoDal } = useModalContext();
     useEffect(()=>{
         const laydl = async()=>{
             try {
-               const ketqua = await api.CallAPI(undefined,{url:`/admin/loaidanhmuc`, PhuongThuc:2})
+               const ketqua = await api.CallAPI(undefined,{url:`/admin/loaidanhmuc?Loai=1`, PhuongThuc:2})
                 if(ketqua.success){
                     setdanhmuc(ketqua.dulieu)
                 }
@@ -76,7 +77,8 @@ function ThemGhe({DuLieu} : {DuLieu: ID}){
                 </label>
                 <div className="relative flex items-center">
                     <span className="absolute left-3 text-gray-400 text-xs"><i className="fa-solid fa-layer-group"></i></span>
-                    <select onChange={(e)=>{setiddm(e.target.value)}} className="w-full bg-gray-50 border border-gray-200 focus:border-indigo-500 focus:bg-white text-sm font-bold text-gray-700 rounded-xl pl-9 pr-10 py-2.5 focus:outline-none transition-all cursor-pointer appearance-none">
+                    <select onChange={(e)=>{setiddm(e.target.value)}} value={iddm} className="w-full bg-gray-50 border border-gray-200 focus:border-indigo-500 focus:bg-white text-sm font-bold text-gray-700 rounded-xl pl-9 pr-10 py-2.5 focus:outline-none transition-all cursor-pointer appearance-none">
+                        <option value="" disabled hidden>-- Chọn danh mục loại ghế --</option>
                         {
                             DanhMuc && DanhMuc.length>0 ? (
                                 DanhMuc.map((item)=>(
@@ -96,7 +98,7 @@ function ThemGhe({DuLieu} : {DuLieu: ID}){
         </div>
 
         <div className="px-5 py-3.5 bg-gray-50 border-t border-gray-100 flex items-center justify-end space-x-2">
-            <button type="button" className="px-4 py-2 text-xs font-bold text-gray-500 hover:bg-gray-100 rounded-xl transition cursor-pointer">
+            <button type="button"   onClick={()=>{CloseMoDal()}} className="px-4 py-2 text-xs font-bold text-gray-500 hover:bg-gray-100 rounded-xl transition cursor-pointer">
                 Hủy bỏ
             </button>
             <button type="button" onClick={()=>{them()}} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition shadow-md shadow-indigo-600/10 flex items-center cursor-pointer">

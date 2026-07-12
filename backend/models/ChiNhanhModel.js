@@ -9,10 +9,10 @@ export default class ChiNhanhModel {
     try {
       const [them] = await execute(
         `
-                INSERT INTO chinhanh(TEN_CHI_NHANH,DIA_CHI,TRANG_THAI,HINHANH)
-                VALUES(?,?,1,?)
+               INSERT INTO chinhanh(TEN_CHI_NHANH, DIA_CHI, HINHANH, TRANG_THAI)
+                VALUES(?, ?, ?, ?)
                 `,
-        [ten, diachi, hinh],
+        [ten, diachi, hinh,1],
       );
       return them.affectedRows > 0;
     } catch (error) {

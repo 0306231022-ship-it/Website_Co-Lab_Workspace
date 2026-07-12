@@ -4,7 +4,7 @@ import * as api from "@/API/API";
 import { DanhMucGhe } from "@/interface/DanhMucGhe";
 import * as ThongBao from '@/FUNCTION/ThongBao';
 import { Ghe } from "@/interface/ghe";
-
+import { useModalContext } from "@/context/QuanLiMoal";
 
 interface gheProps {
     id: number;
@@ -13,7 +13,7 @@ interface gheProps {
 function ChinhSuaGhe({ DuLieu }: { DuLieu: gheProps }) {
     const [DanhMuc, setdanhmuc] = useState<DanhMucGhe[]>([]);
     const [ThongTin, setThongTin] = useState<Ghe | null>(null);
-    
+     const {  CloseMoDal } = useModalContext();
     // States quản lý dữ liệu chỉnh sửa form
     const [tenGhe, setTenGhe] = useState<string>('');
     const [idDanhMuc, setIdDanhMuc] = useState<number>(0);
@@ -23,7 +23,7 @@ function ChinhSuaGhe({ DuLieu }: { DuLieu: gheProps }) {
         const laydl = async () => {
             try {
                 const [ketqua1, ketqua2] = await Promise.all([
-                    api.CallAPI(undefined, { url: `/admin/loaidanhmuc`, PhuongThuc: 2 }),
+                    api.CallAPI(undefined, { url: `/admin/loaidanhmuc?Loai=1`, PhuongThuc: 2 }),
                     api.CallAPI(undefined, { url: `/admin/ChiTiet_ghe?ID_GHE=${DuLieu.id}`, PhuongThuc: 2 })
                 ]);
         
@@ -225,7 +225,7 @@ function ChinhSuaGhe({ DuLieu }: { DuLieu: gheProps }) {
 
             {/* Khối đóng modal */}
             <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end">
-                <button type="button" className="px-5 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl transition cursor-pointer">
+                <button type="button"  onClick={()=>{CloseMoDal()}} className="px-5 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl transition cursor-pointer">
                     Đóng cửa sổ
                 </button>
             </div>

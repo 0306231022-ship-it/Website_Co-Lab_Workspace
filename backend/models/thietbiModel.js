@@ -17,9 +17,15 @@ export default class ThietBi {
       const [totalRows] = await execute(
         "SELECT COUNT(*) as total FROM thietbi",
       );
+      const [TongSuDung] = await execute(`
+        SELECT COUNT(DISTINCT ID_THIET_BI) AS SoLoaiThietBiDaSuDung 
+        FROM chitiet_thietbi;
+        `,[])
       const total = totalRows[0]?.total || 0;
+      const TongsuDung = TongSuDung[0].SoLoaiThietBiDaSuDung 
       return {
         data: rows,
+        TongSuDung: TongsuDung,
         pagination: {
           totalItems: total,
           totalPages: Math.ceil(total / limit),

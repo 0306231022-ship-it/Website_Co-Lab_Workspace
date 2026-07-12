@@ -53,7 +53,7 @@ adminRouter.get('/TimKiem_khonggian', KhongGianController.TimKiem_KhongGian);
 adminRouter.get('/ChiTiet_KhongGian', KhongGianController.ChiTiet_KhongGian);
 adminRouter.get('/ThongTin' , KhongGianController.thongTin_KhongGian);
 adminRouter.get('/thongke' , KhongGianController.ThongKe);
-
+adminRouter.get('/layten_khonggian', KhongGianController.layten_khonggian);
 // =========================================
 // QUẢN LÝ THIẾT BỊ
 adminRouter.post('/CapThietBi' , upload.none(), ChiTietThietBiController.CapThietBi);

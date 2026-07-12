@@ -31,6 +31,7 @@ export default class thietbiController {
       res.status(200).json({
         success: true,
         data: result.data,
+        TongSuDung: result.TongSuDung,
         pagination: result.pagination,
       });
     } catch (error) {

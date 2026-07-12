@@ -12,18 +12,24 @@ function CauHinh2D() {
   const { idkhonggian } = useParams();
   const [loading, setLoading] = useState<boolean>(false);
   const [ghe, setGhe] = useState<Ghe[]>([]);
-  
-  const [selectedGhe, setSelectedGhe] = useState<Partial<Ghe> | null>(null);
-  const [isEditMode, setIsEditMode] = useState<boolean>(true); 
+  const [TenKG,setTenKG] = useState<string>('');
   const { OpenMoDal } = useModalContext();
 
   useEffect(() => {
     const loadGhe = async () => {
       setLoading(true);
       try {
-        const response = await api.CallAPI(undefined, {url: `/admin/danhsachghe_idkg?id=${idkhonggian}`,PhuongThuc: 2});
-        if (response.success) {
-          setGhe(response.dulieu);
+        const [response1,response2] = await Promise.all([
+           api.CallAPI(undefined, {url: `/admin/danhsachghe_idkg?id=${idkhonggian}`,PhuongThuc: 2}),
+            api.CallAPI(undefined,{url:`/admin/layten_khonggian?id=${idkhonggian}`, PhuongThuc:2})
+        ])
+        if (response1.success) {
+          setGhe(response1.dulieu);
+        }
+        if(response2.success){
+          setTenKG(response2.dulieu);
+        }else{
+          ThongBao.ThongBao_CanhBao(response2.message)
         }
       } catch (error) {
         console.error("Lỗi tải danh sách ghế:", error);
@@ -54,22 +60,6 @@ function CauHinh2D() {
     )
   );
 };
-
-
-  
-  const handleXoaGhe = async () => {
-    if (!selectedGhe || !selectedGhe.ID_GHE) return;
-      
-
-    try {
-      // Gọi API xóa ghế tại đây nếu có, hoặc cập nhật nhanh Client-state:
-      setGhe(prev => prev.filter(g => g.ID_GHE !== selectedGhe.ID_GHE));
-     
-    } catch (error) {
-      console.error("Lỗi xóa ghế:", error);
-    }
-  };
-
 
   const handleLuuSoDo = async () => {
     if (ghe.length === 0) ThongBao.ThongBao_CanhBao("Không có dữ liệu ghế để lưu!");
@@ -110,7 +100,7 @@ function CauHinh2D() {
           </div>
           <div>
             <h1 className="text-lg font-black text-gray-900 tracking-tight">Trình thiết kế Sơ đồ Ghế 2D</h1>
-            <p className="text-xs text-gray-400 font-medium">ID Không gian: <span className="text-slate-900 font-bold">{idkhonggian}</span></p>
+            <p className="text-xs text-gray-400 font-medium">Trên không gian: <span className="text-slate-900 font-bold">{TenKG}</span></p>
           </div>
         </div>
       </div>
@@ -134,17 +124,14 @@ function CauHinh2D() {
             <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Chú giải trạng thái</h3>
             <div className="space-y-2.5 text-xs font-bold text-gray-600">
               <div className="flex items-center space-x-2.5 bg-gray-50 p-2 rounded-lg border border-gray-100">
-                <span className="w-4 h-4 rounded bg-gray-200 border border-gray-300 inline-block shrink-0"></span>
+                <span className="w-4 h-4 rounded bg-[#10b981] border border-gray-300 inline-block shrink-0"></span>
                 <span>Trống / Sẵn sàng</span>
               </div>
               <div className="flex items-center space-x-2.5 bg-indigo-50/40 p-2 rounded-lg border border-indigo-100/50">
-                <span className="w-4 h-4 rounded bg-indigo-600 inline-block shrink-0"></span>
+                <span className="w-4 h-4 rounded bg-[#ef4444] inline-block shrink-0"></span>
                 <span className="text-indigo-900">Đang có khách ngồi</span>
               </div>
-              <div className="flex items-center space-x-2.5 bg-amber-50 p-2 rounded-lg border border-amber-100">
-                <span className="w-4 h-4 rounded bg-amber-400 inline-block shrink-0"></span>
-                <span className="text-amber-900">Tạm ngưng / Bảo trì</span>
-              </div>
+     
             </div>
           </div>
 

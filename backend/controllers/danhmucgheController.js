@@ -113,7 +113,6 @@ export default class danhmucgheController {
       }
 
       const { TEN_DANHMUC, ID_DANHMUC , TRANG_THAI} = req.body;
-
       const updated = await dmGhe.update(ID_DANHMUC, TEN_DANHMUC.trim(), TRANG_THAI);
       if (!updated) {
         return res
@@ -134,7 +133,14 @@ export default class danhmucgheController {
 
     static async LayDL_DnhMuc(req,res){
         try {
-            const ketqua = await dmGhe.LayDL_DnhMuc();
+          const loai = req.query.Loai;
+          if(!loai){
+              return res.status(401).json({
+                success:false,
+                message:'Vui lòng kiểm tra thông tin gửi đi!'
+              })
+          }
+            const ketqua = await dmGhe.LayDL_DnhMuc(loai);
             return res.status(200).json({
                 success:true,
                 dulieu:ketqua

@@ -43,7 +43,6 @@ function ChiTietChiNhanh() {
             }
         };
         if (idChiNhanh) fetchChiNhanh();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [idChiNhanh]);
 
     // Hàm gọi API lấy danh sách không gian (Xử lý đồng bộ Phân trang + Tìm kiếm + Loại hình)
@@ -191,9 +190,24 @@ function ChiTietChiNhanh() {
 
                 {/* Khu vực 3: Render danh sách các không gian từ API */}
                 {danhSachKhongGian.length === 0 ? (
-                    <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-slate-200 shadow-sm">
-                        <p className="text-slate-400 font-medium text-sm">Không tìm thấy không gian nào phù hợp với bộ lọc.</p>
-                    </div>
+                    <>
+                                          <div className="col-span-full bg-slate-50 border border-dashed border-slate-300 rounded-3xl p-12 flex flex-col items-center justify-center text-center max-w-xl mx-auto w-full my-6 transition-all">
+        {/* Vòng tròn chứa Icon đệm động */}
+        <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-400 border border-slate-200 shadow-inner">
+            <i className="fa-solid fa-store-slash text-2xl animate-pulse"></i>
+        </div>
+        
+        {/* Tiêu đề thông báo */}
+        <h3 className="text-lg font-bold text-slate-700 mb-1">
+            Không tìm thấy không gian phù hợp
+        </h3>
+        
+        {/* Mô tả chi tiết */}
+        <p className="text-sm text-slate-500 max-w-sm leading-relaxed">
+            Hiện tại chi nhánh này chưa có không gian nào thuộc bộ lọc bạn chọn hoặc đang tạm thời đóng cửa để nâng cấp. Vui lòng thay đổi tùy chọn tìm kiếm.
+        </p>
+    </div>
+                    </>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {danhSachKhongGian.map((space) => {
@@ -260,7 +274,7 @@ function ChiTietChiNhanh() {
                                                     ) : (
                                                         <span className="font-black text-sm md:text-base text-slate-900">
                                                             {
-                                                                                                                               space.ID_GIA !== null && `${fun.formatCurrency(String(space.DON_GIA))}`
+                                                                                                                               space.ID_GIA && `${fun.formatCurrency(String(space.DON_GIA))}`
                                                                                                                            }<span className="text-[11px] font-normal text-slate-400">/giờ</span>
                                                         </span>
                                                     )}

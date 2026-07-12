@@ -6,6 +6,7 @@ import DatLichModel from '../models/LichDatModel.js';
 import giaModel from '../models/QLGiaModel.js';
 import GheModel from '../models/gheModel.js';
 import LichDatController from './LichDatController.js';
+import { xoaFileCu } from "../function.js";
 import { body, query, validationResult } from 'express-validator';
 export default class KhongGianController{
     static async DanhSach_KhongGian(req, res) {
@@ -201,7 +202,7 @@ export default class KhongGianController{
                     message:'Không tìm thấy ID không gian để cập nhật!'
                 })
             }
-            /*const dd_db = await KhongGianModel.LayChiTiet(dulieu.IDKG);
+            const dd_db = await KhongGianModel.LayChiTiet(dulieu.IDKG);
             const dd = dd_db[0].HINHANH;
             const xoa = xoaFileCu(dd);
             if(!xoa){
@@ -209,7 +210,7 @@ export default class KhongGianController{
                     success:false,
                     message:'lỗi khi thao tác hệ thống!'
                 })
-            }*/
+            }
             const kiemtra = await KhongGianModel.kiemtraid(dulieu.IDKG);
             if(!kiemtra){
                 return res.status(401).json({
@@ -524,6 +525,40 @@ export default class KhongGianController{
               return res.status(500).json({
                 success: false,
                 message: 'Cập nhật thông tin không gian thất bại: ' + error.message
+            })
+        }
+    }
+    static async layten_khonggian(req,res){
+        const id = req.query.id;
+        try {
+            if(!id){
+                return res.status(401).json({
+                    success:false,
+                    message:'ID không gian không tồn tại!'
+                })
+            }
+            const kiemtra = await KhongGianModel.kiemtraid(id);
+            if(!kiemtra){
+                return res.status(401).json({
+                    success:false,
+                    message:'Không tìm thấy không gian cần sửa!'
+                })
+            }
+            const laydl = await KhongGianModel.layten_khonggian(id);
+            if(!laydl){
+                return res.status(401).json({
+                    success:false,
+                    message:'Không tìm thấy không gian cần sửa!'
+                })
+            }
+            return res.status(200).json({
+                success:true,
+                dulieu:laydl
+            })
+        } catch (error) {
+             return res.status(500).json({
+                success: false,
+                message: 'lấy thông tin không gian thất bại: ' + error.message
             })
         }
     }

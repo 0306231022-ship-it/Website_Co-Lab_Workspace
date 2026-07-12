@@ -22,8 +22,7 @@ interface ThongTin_DatLich {
 function ThongTinGhe({ DuLieu }: { DuLieu: dulieu }) {
     const [ThongTin, setThongTin] = useState<Ghe | null>(null);
     const [thongTin_DatL, setTT] = useState<ThongTin_DatLich | null>(null);
-    const { OpenMoDal } = useModalContext();
-
+    const { OpenMoDal,   CloseMoDal } = useModalContext();
     useEffect(() => {
         const laydl = async () => {
             try {
@@ -48,7 +47,7 @@ function ThongTinGhe({ DuLieu }: { DuLieu: dulieu }) {
     }, [DuLieu]);
 
     return (
-        <div className="bg-white w-full max-w-3xl rounded-2xl shadow-xl border border-slate-100 flex flex-col md:flex-row overflow-hidden transition-all duration-300">
+        <div className=" flex flex-col md:flex-row overflow-hidden transition-all duration-300">
             
             {/* CỘT TRÁI: THÔNG TIN CƠ BẢN CỦA GHẾ */}
             <div className="w-full md:w-5/12 bg-slate-50/70 p-6 flex flex-col justify-between border-b md:border-b-0 md:border-r border-slate-100">
@@ -193,10 +192,7 @@ function ThongTinGhe({ DuLieu }: { DuLieu: dulieu }) {
 
                 {/* Khối Actions bên dưới */}
                 <div className="mt-8 pt-4 border-t border-slate-100 flex items-center justify-end gap-2">
-                    <button type="button" className="px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 rounded-xl transition-all cursor-pointer flex items-center gap-1.5">
-                        <i className="fa-solid fa-history text-[11px]"></i> Lịch sử đặt
-                    </button>
-                    <button type="button" className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer">
+                    <button type="button" onClick={()=>{CloseMoDal()}} className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer">
                         Hoàn tất xem
                     </button>
                 </div>
