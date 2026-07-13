@@ -10,8 +10,10 @@ export function DangNhap() {
   const [email,setemail] = useState<string>();
   const [MatKhau,setMatKhau] = useState<string>();
   const { OpenMoDal , CloseMoDal , CloseAllModals } = useModalContext();
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const handleSubmit = async () => {
+    
     setLoading(true)
     if(email==="" ||MatKhau===""){
         ThongBao.ThongBao_CanhBao('Vui lòng nhập đầy đủ thông tin!');
@@ -88,18 +90,29 @@ export function DangNhap() {
 
       {/* Input Mật khẩu */}
       <div className="w-full mb-4">
-        <div className="flex items-center bg-slate-50 border border-slate-200/80 rounded-2xl px-4 py-3 focus-within:border-blue-500 focus-within:bg-white focus-within:shadow-[0_0_20px_rgba(37,99,235,0.06)] transition-all duration-300">
-          <i className="fa-solid fa-lock text-slate-400 mr-3.5 text-base"></i>
-          <input 
-            name="loginPassword" 
-            type="password" 
-            placeholder="Mật khẩu tài khoản" 
-            className="bg-transparent border-none outline-none w-full text-sm text-slate-800 placeholder-slate-400 font-medium" 
-            onChange={(e)=>{setMatKhau(e.target.value)}}
-            value={MatKhau}
-          />
-        </div>
-      </div>
+  <div className="flex items-center bg-slate-50 border border-slate-200/80 rounded-2xl px-4 py-3 focus-within:border-blue-500 focus-within:bg-white focus-within:shadow-[0_0_20px_rgba(37,99,235,0.06)] transition-all duration-300">
+    <i className="fa-solid fa-lock text-slate-400 mr-3.5 text-base"></i>
+    <input 
+      name="loginPassword" 
+      // Đổi type linh hoạt dựa vào state
+      type={showPassword ? "text" : "password"} 
+      placeholder="Mật khẩu tài khoản" 
+      className="bg-transparent border-none outline-none w-full text-sm text-slate-800 placeholder-slate-400 font-medium" 
+      onChange={(e) => {setMatKhau(e.target.value)}}
+      value={MatKhau}
+      onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+    />
+    
+    {/* Nút toggle con mắt */}
+    <button 
+      type="button" 
+      onClick={() => setShowPassword(!showPassword)}
+      className="ml-2 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors duration-200"
+    >
+      <i className={`fa-solid ${showPassword ? 'fa-eye' : 'fa-eye-slash'}`}></i>
+    </button>
+  </div>
+</div>
 
       {/* Ghi nhớ đăng nhập & Quên mật khẩu */}
       <div className="flex items-center justify-between w-full mb-6 text-xs font-medium">

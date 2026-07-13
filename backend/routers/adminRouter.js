@@ -17,26 +17,10 @@ import { verifyToken } from "../middleware/CheckToken.js";
 const upload = multer();
 //==========================================
 //QUẢN LÝ CHI NHÁNH
-adminRouter.post(
-  "/ThemChiNhanh",
-  createUpload("ChiNhanh").any(),
-  ChiNhanhController.Them_ChiNhanh,
-);
-adminRouter.post(
-  "/CapNhat_thongTinMem",
-  upload.none(),
-  ChiNhanhController.ChinhSua_Ten_DiaChi,
-);
-adminRouter.post(
-  "/ChinhSua_HinhAnh",
-  createUpload("ChiNhanh").any(),
-  ChiNhanhController.ChinhSua_HinhAnh,
-);
-adminRouter.post(
-  "/CapNhat_TrangThai",
-  upload.none(),
-  ChiNhanhController.ChinhSua_TrangThai_ChiNhanh,
-);
+adminRouter.post("/ThemChiNhanh",createUpload("ChiNhanh").any(),ChiNhanhController.Them_ChiNhanh,);
+adminRouter.post("/CapNhat_thongTinMem",upload.none(),ChiNhanhController.ChinhSua_Ten_DiaChi,);
+adminRouter.post("/ChinhSua_HinhAnh",createUpload("ChiNhanh").any(),ChiNhanhController.ChinhSua_HinhAnh,);
+adminRouter.post("/CapNhat_TrangThai",upload.none(),ChiNhanhController.ChinhSua_TrangThai_ChiNhanh,);
 adminRouter.get("/laydanhsach", ChiNhanhController.DanhSach_ChiNhanh);
 adminRouter.get("/laychitiet", ChiNhanhController.ChiTiet_ChiNhanh);
 adminRouter.get("/TimKiem", ChiNhanhController.TimKiem_ChiNhanh);
@@ -69,17 +53,9 @@ adminRouter.post("/themthietbi", upload.none(), thietbiController.createThietBi)
 
 //==========================================
 //QUẢN LÝ DANH MỤC GHẾ
-adminRouter.post(
-  "/themdanhmucghe",
-  upload.none(),
-  danhmucgheController.createDanhMucGhe,
-);
+adminRouter.post("/themdanhmucghe",upload.none(),danhmucgheController.createDanhMucGhe,);
 adminRouter.get("/danhsachdanhmucghe", danhmucgheController.getAllDanhMucGhe);
-adminRouter.post(
-  "/capnhatdanhmucghe",
-  upload.none(),
-  danhmucgheController.updateDanhMucGhe,
-);
+adminRouter.post("/capnhatdanhmucghe",upload.none(),danhmucgheController.updateDanhMucGhe,);
 
 //============================================
 //QUẢN LÝ LỊCH ĐẶT
@@ -134,5 +110,5 @@ adminRouter.post("/themgiamoi",upload.none(),giaController.createGia);
 adminRouter.get("/layDS_Gia",giaController.getAllGia);
 adminRouter.get('/ChonGia' , giaController.LayBangGia_KhongGian);
 
-console.log("✅ adminRouter loaded");
+console.log(" adminRouter loaded");
 export default adminRouter;
