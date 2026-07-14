@@ -14,6 +14,7 @@ import hoadonController from "../controllers/hoadonController.js";
 import giaController from "../controllers/QLGiaController.js";
 import thongBaoController from "../controllers/ThongBaoController.js";
 import { verifyToken } from "../middleware/CheckToken.js";
+import NguoiDungController from "../controllers/NguoiDungController.js";
 const upload = multer();
 //==========================================
 //QUẢN LÝ CHI NHÁNH
@@ -125,14 +126,13 @@ adminRouter.post('/CapNhatTrangThai_ghe', upload.none(), gheController.CapNhatTr
 adminRouter.post("/themhoadon", upload.none(), hoadonController.createHoaDon);
 adminRouter.get("/chitiethoadon", hoadonController.getHoaDonById);
 //Quản lý giá
-
-
 adminRouter.get("/layDS_Gia", giaController.getAllGia);
 adminRouter.post("/suagia", upload.none(), giaController.updateGia);
 adminRouter.get("/chitietgia", giaController.getGiaById);
 adminRouter.post("/themgiamoi",upload.none(),giaController.createGia);
 adminRouter.get("/layDS_Gia",giaController.getAllGia);
 adminRouter.get('/ChonGia' , giaController.LayBangGia_KhongGian);
-
+//Tổng quan 
+adminRouter.get('/layTongQuan' , NguoiDungController.TongQuanAD);
 console.log("✅ adminRouter loaded");
 export default adminRouter;

@@ -55,5 +55,17 @@ export default class hoadonModel {
             throw new Error("Không thể truy vấn thông tin hóa đơn!");
         }
     }
+    static async DoanhThu(){
+        try {
+            const [kq] = await execute(`
+              SELECT COALESCE(SUM(GIA_TIEN), 0) AS DoanhThuTamTinh 
+              FROM hoadon 
+              WHERE MONTH(NGAY_TAO) = MONTH(CURDATE()) AND YEAR(NGAY_TAO) = YEAR(CURDATE()) AND TRANG_THAI <> 0;
+              `,[]);
+            return kq[0].DoanhThuTamTinh;
+        } catch (error) {
+           throw new Error("Không thể truy vấn thông tin doanh thu!");
+        }
+    }
 }
 

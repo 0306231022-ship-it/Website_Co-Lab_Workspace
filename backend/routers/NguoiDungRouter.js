@@ -15,7 +15,7 @@ nguoidungRouter.post('/DangKy', upload.none(), NguoiDungController.DangKy);
 nguoidungRouter.post('/XacThucOTP', upload.none(), NguoiDungController.XacThucOTP);
 nguoidungRouter.post('/DangNhap' , upload.none(), NguoiDungController.DangNhap);
 nguoidungRouter.post('/QuenMatKhau' , upload.none(), NguoiDungController.QuenMatKhau);
-nguoidungRouter.post('/DoiMatKhau' , upload.none(), verifyToken, authorize(0,1), NguoiDungController.DoiMatKhau);
+nguoidungRouter.post('/DoiMatKhau' , upload.none(), verifyToken, NguoiDungController.DoiMatKhau);
 nguoidungRouter.post('/CapNhat_TrangThai', upload.none(), NguoiDungController.ChinhSua_TrangThai_NguoiDung);
 nguoidungRouter.post('/ChinhSua_thongTin' , upload.none(), verifyToken, NguoiDungController.ChinhSua_NguoiDung);
 nguoidungRouter.post('/ChinhSua_Anh', createUpload('DaiDien').any(),verifyToken, NguoiDungController.CapNhat_anhDaiDien);
@@ -30,6 +30,8 @@ nguoidungRouter.get('/lichsu_datlich', verifyToken, LichDatController.LichSuDat_
 nguoidungRouter.get('/lichsu_datlich_nguoidung', LichDatController.LichSuDat_theoIDND);
 nguoidungRouter.get('/lich-dat', verifyToken, LichDatController.ChiTiet_LichDat_theoIDDL);
 nguoidungRouter.get('/ThongTin' , NguoiDungController.ThongTin);
+nguoidungRouter.get('/check-in', LichDatController.Checkin);
+nguoidungRouter.get('/check-out', LichDatController.Checkout);
 //thoong bao
 nguoidungRouter.get('/layDS_thongbao', verifyToken , thongBaoController.getThongBaoByUser);
 nguoidungRouter.post('/XoaTheoid' , upload.none(), thongBaoController.deleteThongBao);

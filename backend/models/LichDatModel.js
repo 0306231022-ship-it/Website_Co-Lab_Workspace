@@ -1,4 +1,5 @@
 import { execute, beginTransaction, rollbackTransaction, commitTransaction } from '../config/db.js';
+import moment from 'moment'
 export default class DatLichModel{
     static async DatLich(dulieu, id){
         try {
@@ -190,7 +191,7 @@ LIMIT ? OFFSET ?;
             }
             //dựa vào id lấy thông tin thời gian
             const [ChiTiet_ThoiGian] =await connection.query(`
-                SELECT KHUNG_BATDAU, KHUNG_KETTHUC
+                SELECT KHUNG_BATDAU, KHUNG_KETTHUC, TRANG_THAI, THOIGIAN_VAO, THOIGIAN_RA
                 FROM lichdat
                 WHERE ID_LICH_DAT = ?
                 `,[id]);
@@ -423,27 +424,185 @@ WHERE LD.ID_LICH_DAT = ?;
              throw new Error('Database query failed: ' + error.message);
         }
     }
-    static async getUpcomingUserIDs() {
+    static async DanhSachHomnay(){
+        try {
+            const [ketqua] = await execute(`
+                SELECT 
+    ld.ID_LICH_DAT,
+    nd.TENND AS TenKhachHang,
+    ld.KHUNG_BATDAU,
+    ld.KHUNG_KETTHUC,
+    ld.TRANG_THAI
+FROM lichdat ld
+JOIN nguoidung nd ON ld.IDND = nd.IDND
+WHERE DATE(ld.NGAY_TAO) = CURDATE()
+ORDER BY ld.NGAY_TAO DESC;  
+                `,[]);
+            return ketqua;
+        } catch (error) {
+             throw new Error('Database query failed: ' + error.message);
+        }
+    }
+    static async TongLich(){
+        try {
+            const [ketqua] = await execute(`
+                SELECT COUNT(ID_LICH_DAT) AS TongLichHomNay
+FROM lichdat
+WHERE DATE(KHUNG_BATDAU) = CURDATE() 
+  AND TRANG_THAI <> 2;
+                
+                `,[]);
+            return ketqua[0].TongLichHomNay
+        } catch (error) {
+             throw new Error('Database query failed: ' + error.message);
+        }
+    }
+  static async PhanTram_ghe() {
     try {
-        const [rows] = await execute(`
-            SELECT DISTINCT 
-                ld.IDND
-            FROM 
-                lichdat ld
-            WHERE 
-                -- Lịch đặt phải lớn hơn hiện tại và nằm trong khoảng 15 phút tới
-                ld.KHUNG_BATDAU > NOW()
-                AND ld.KHUNG_BATDAU <= DATE_ADD(NOW(), INTERVAL 15 MINUTE)
-                -- Chỉ quét các lịch hợp lệ (tránh lịch đã hủy hoặc chưa thanh toán)
-                AND ld.TRANG_THAI = 1;
-        `);
-        const userIDs = rows.map(row => row.IDND);
+        // 1. Lấy số lượng ghế đang được sử dụng tại thời điểm hiện tại
+        const [tong_hoatdong] = await execute(`
+            SELECT COUNT(DISTINCT ID_GHE) AS TongGheDangSuDung
+            FROM lichdat
+            WHERE NOW() BETWEEN KHUNG_BATDAU AND KHUNG_KETTHUC
+              AND ID_GHE IS NOT NULL
+              AND TRANG_THAI = 1;
+        `, []);
 
-        return userIDs;
-        
+        // 2. Lấy tổng số lượng ghế có trong hệ thống (Đã xóa dấu ; thừa)
+        const [tong] = await execute(`
+            SELECT COUNT(ID_GHE) as TONG
+            FROM ghe;
+        `, []);
+
+        const gheDangDung = tong_hoatdong[0]?.TongGheDangSuDung || 0;
+        const tongSoGhe = tong[0]?.TONG || 0;
+
+        // Xử lý bảo vệ: Nếu hệ thống chưa có ghế nào thì trả về 0% để tránh lỗi chia cho 0 (NaN/Infinity)
+        if (tongSoGhe === 0) return 0;
+
+        // Tính phần trăm và làm tròn (ví dụ: 78% thay vì 78.333333%)
+        const phanTram = (gheDangDung / tongSoGhe) * 100;
+        return Math.round(phanTram); 
+
     } catch (error) {
-        console.error("Lỗi khi lấy danh sách IDND sắp đến lịch:", error);
-        return [];
+        console.error("Lỗi khi tính phần trăm ghế:", error);
+        return 0; // Trả về 0 nếu có lỗi xảy ra để giao diện không bị crash
     }
 }
+    static async PhanTram_phong(){
+    try {
+        // 1. Lấy số lượng không gian (phòng) đang được sử dụng tại thời điểm hiện tại
+        const [tong_hoatdong] = await execute(`
+            SELECT COUNT(DISTINCT ID_KHONG_GIAN) AS TongKhongGianDangSuDung
+            FROM lichdat
+            WHERE NOW() BETWEEN KHUNG_BATDAU AND KHUNG_KETTHUC
+              AND ID_KHONG_GIAN IS NOT NULL
+              AND TRANG_THAI = 1;
+        `, []);
+
+        // 2. Lấy tổng số lượng không gian (phòng) đang quản lý trong hệ thống
+        const [tong] = await execute(`
+            SELECT COUNT(ID_KHONG_GIAN) as TONG
+            FROM khonggian;
+        `, []);
+
+        const kgDangDung = tong_hoatdong[0]?.TongKhongGianDangSuDung || 0;
+        const tongSoKg = tong[0]?.TONG || 0;
+
+        // Xử lý bảo vệ: Tránh lỗi chia cho 0 nếu hệ thống chưa cấu hình phòng nào
+        if (tongSoKg === 0) return 0;
+
+        // Tính phần trăm lấp đầy phòng và làm tròn thành số nguyên
+        const phanTram = (kgDangDung / tongSoKg) * 100;
+        return Math.round(phanTram); 
+
+    } catch (error) {
+        console.error("Lỗi khi tính phần trăm không gian:", error);
+        return 0; // Trả về 0 nếu có lỗi xảy ra
+    }
+}
+    static async lichDatTruoc15p(){
+        try {
+            const [rows] = await execute(`
+                SELECT DISTINCT IDND 
+                FROM lichdat
+                WHERE KHUNG_BATDAU BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 15 MINUTE)
+                AND TRANG_THAI = 1;
+            `, []);
+            const mangIDND = rows.map(item => item.IDND);
+            return mangIDND;
+        } catch (error) {
+              console.error("Lỗi khi kiểm tra thông báo trước 15p:", error);
+        }
+    }
+    static async lichDatKetThucTruoc15p(){
+        try {
+            const ketqua = await execute(`
+                SELECT DISTINCT IDND 
+                FROM lichdat
+                WHERE KHUNG_KETTHUC BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 15 MINUTE)
+              AND TRANG_THAI = 1
+              AND THOIGIAN_RA IS NULL;
+                `,[])
+             const mangIDND = ketqua.map(item => item.IDND);
+             return mangIDND;
+        } catch (error) {
+             console.error("Lỗi khi kiểm tra thông báo trước 15p:", error);
+        }
+    }
+    static async HuyLichChua_checkin(){
+        try {
+            const [ketqua] = await execute(`
+                UPDATE lichdat
+                SET TRANG_THAI = 2
+                WHERE NOW() >= KHUNG_BATDAU
+              AND THOIGIAN_VAO IS NULL
+              AND TRANG_THAI = 1;
+                `,[]);
+            return ketqua.affectedRows>0;
+        } catch (error) {
+            console.error("Lỗi hủy lịch khi người dùng không check-in!", error);
+        }
+    }
+    static async ThongTin(id){
+        try {
+            const [ketqua] = await execute(`
+                SELECT * FROM lichdat
+                WHERE ID_LICH_DAT = ?
+                `,[id]);
+                return ketqua[0];
+        } catch (error) {
+            console.error("không thể lấy thông tin lịch đặt!", error);
+        }
+    }
+    static async checkin(id){
+        const thoiGianDB = moment().format('YYYY-MM-DD HH:mm:ss');
+        try {
+            const [update] = await execute(`
+                UPDATE lichdat 
+                SET THOIGIAN_VAO = ?
+                WHERE ID_LICH_DAT = ?
+                `,[thoiGianDB,id]);
+            return update.affectedRows>0
+        } catch (error) {
+             console.error("không thể ckeck-in thông tin lịch đặt!", error);
+        }
+    }
+        static async checkout(id){
+        const thoiGianDB = moment().format('YYYY-MM-DD HH:mm:ss');
+        try {
+            const [update] = await execute(`
+                UPDATE lichdat 
+                SET THOIGIAN_RA = ?
+                WHERE ID_LICH_DAT = ?
+                `,[thoiGianDB,id]);
+            return update.affectedRows>0
+        } catch (error) {
+             console.error("không thể ckeck-in thông tin lịch đặt!", error);
+        }
+    }
+
+
+
+                   
 }

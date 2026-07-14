@@ -4,6 +4,7 @@ import { useModalContext } from "@/context/QuanLiMoal";
 import * as ThongBao from '@/FUNCTION/ThongBao';
 import * as api from '@/API/API';
 import { useRouter } from 'next/navigation';
+import {socket} from '@/FUNCTION/socket';
 export function DangNhap() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string[]>([]);
@@ -30,12 +31,12 @@ export function DangNhap() {
             ThongBao.ThongBao_Loi(DangNhap.message);
             return;
         }else{
-          console.log(DangNhap.ThongTin_NguoiDung)
             if(DangNhap.ThongTin_NguoiDung===1){
                 router.push('/admin'); 
             }
             CloseAllModals();
             ThongBao.ThongBao_ThanhCong(DangNhap.message);
+            socket.emit('dang-nhap-phong', DangNhap.IDND);
             return;
         }
     } catch (error) {

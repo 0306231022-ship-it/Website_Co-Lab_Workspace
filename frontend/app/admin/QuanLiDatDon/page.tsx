@@ -203,7 +203,7 @@ function QuanLiDatDon() {
                                             </div>
                                         </td>
                                         <td className="py-4 px-5 font-bold text-slate-900">
-                                            {item.GIA_TIEN !== null ? `${item.GIA_TIEN.toLocaleString('vi-VN')}đ` : 'Chưa có hóa đơn'}
+                                            {item.GIA_TIEN !== null ? fun.formatCurrency(String(item.GIA_TIEN)) : 'Chưa có hóa đơn'}
                                         </td>
                                         <td className="py-4 px-5">
                                             {renderBadgeTrangThai(item.TRANG_THAI)}

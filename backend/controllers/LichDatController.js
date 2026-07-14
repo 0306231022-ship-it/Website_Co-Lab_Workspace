@@ -4,6 +4,7 @@ import KhongGianModel from '../models/KhongGianModel.js';
 import DatLichModel from '../models/LichDatModel.js';
 import GheModel from '../models/gheModel.js';
 import moment from 'moment'
+import { io } from '../server.js';
 export default class LichDatController{
     static async DatLich(req,res){
         const dulieu = req.body;
@@ -440,6 +441,75 @@ export default class LichDatController{
              return res.status(401).json({
                 success: false,
                 message: 'Thống kê lịch đặt thất bại: ' + error.message
+            });
+        }
+    }
+    static async Checkin(req,res){
+        const id = req.query.id;
+        const userId = req.user.id
+        try {
+            const kiemtra = await DatLichModel.kiemtraid(id);
+            if(!kiemtra){
+                io.to(id).emit('thong-bao-checkin', {
+                    success: false,
+                    message: "Không tồn tại lịch đặt này!"
+                });
+            }
+            const laythong_kiemtra = DatLichModel.ThongTin(id);
+       const thongtin_batdau = moment(laythong_kiemtra.KHUNG_BATDAU).valueOf();
+            const timeHienTai = new Date().getTime();
+            const mocCheckInSom = thongtin_batdau - (15 * 60 * 1000);
+            if (timeHienTai >= mocCheckInSom && timeHienTai <= thongtin_batdau) {
+               const check = await DatLichModel.checkin(id);
+               if(!check){
+                    io.to(id).emit('thong-bao-checkin', {
+                        success: false,
+                        message: "Check-in thất bại! Vui lòng thực hiện trong giây lát"
+            });
+               }
+               io.to(id).emit('thong-bao-checkin', {
+                success: true,
+                message: "Check-in thành công!"
+            });
+            } else if (timeHienTai < mocCheckInSom) {
+                io.to(id).emit('thong-bao-checkout', {
+                    success: false,
+                    message: "Check-in trước 15p!"
+                 });
+            } 
+        } catch (error) {
+              return res.status(401).json({
+                success: false,
+                message: 'Check-in thất bại: ' + error.message
+            });
+        }
+    }
+    static async Checkout(req,res){
+        const id = req.query.id;
+        try {
+            const kiemtra = await DatLichModel.kiemtraid(id);
+            if(!kiemtra){
+                io.to(id).emit('thong-bao-checkout', {
+                success: true,
+                message: "Vui lòng kiểm tra thông tin"
+            });
+            }
+               const check = await DatLichModel.checkout(id);
+               if(!check){
+                    io.to(id).emit('thong-bao-checkout', {
+                success: false,
+                message: "Check-out thất bại!"
+            });
+               }
+              io.to(id).emit('thong-bao-checkout', {
+                success: true,
+                message: "Check-out thành công!"
+            });
+          
+        } catch (error) {
+              return res.status(401).json({
+                success: false,
+                message: 'Check-out thất bại: ' + error.message
             });
         }
     }

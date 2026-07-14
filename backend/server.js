@@ -22,6 +22,8 @@ app.use(
   }),
 );
 
+
+
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.json());
@@ -74,7 +76,13 @@ io.on("connection", (socket) => {
     console.log(`User ${userId} đã join room`);
   });
 });
-
+io.on('connection', (socket) => {
+  
+    socket.on('lich-dat', (idNguoiDung) => {
+        socket.join(idNguoiDung); 
+        console.log(`lịch đặt ${idNguoiDung} đã vào phòng riêng thành công.`);
+    });
+});
 // Xuất io để controller dùng emit
 export { io };
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

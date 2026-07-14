@@ -61,9 +61,10 @@ function ChiTietKhongGian() {
     useEffect(() => {
         const loadl = async () => {
             try {
-                const [dulieu1, dulieu2] = await Promise.all([
+                const [dulieu1, dulieu2,dulieu3] = await Promise.all([
                     api.CallAPI(undefined, { url: `/admin/ChiTiet_KhongGian?IDKG=${idkhonggian}&IDCN=${idChiNhanh}`, PhuongThuc: 2 }),
-                    api.CallAPI(undefined, { url: `/admin/thongke?id=${idkhonggian}`, PhuongThuc: 2 })
+                    api.CallAPI(undefined, { url: `/admin/thongke?id=${idkhonggian}`, PhuongThuc: 2 }),
+                    api.CallAPI(undefined,{url:'/admin/dulieu_datphong',PhuongThuc:2})
                 ]);
                 if (dulieu1.validate) {
                     setErr(dulieu1.errors);

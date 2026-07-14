@@ -138,6 +138,7 @@ export default class NguoiDungModel {
       );
       const [tong] = await execute(`
            SELECT COUNT(*) AS total FROM nguoidung
+           WHERE LOAIND=0
         `);
       return {
         DanhSach: ketqua,
@@ -171,7 +172,8 @@ export default class NguoiDungModel {
       const [TongDS] = await execute(
         `
         SELECT COUNT(IDND) AS TongSoNguoiDung 
-        FROM NguoiDung;
+        FROM NguoiDung
+        WHERE LOAIND=0
         `,
         [],
       );
@@ -179,7 +181,7 @@ export default class NguoiDungModel {
         `
         SELECT COUNT(IDND) AS TongSoNguoiDung_ht
         FROM NguoiDung
-        WHERE TRANG_THAI=1
+        WHERE TRANG_THAI=1 AND LOAIND=0
         `,
         [],
       );
@@ -220,4 +222,16 @@ export default class NguoiDungModel {
         throw new Error('Database query failed: ' + error.message);
       }
    }
+    static async TongKhach(){
+      try {
+        const [kq] = await execute(`
+          SELECT COUNT(IDND) AS TongKhachHangMoi
+FROM nguoidung
+WHERE MONTH(NGAY_TAO) = MONTH(CURDATE()) 
+  AND YEAR(NGAY_TAO) = YEAR(CURDATE()) AND LOAIND=0;
+          `,[])
+      } catch (error) {
+        throw new Error('Database query failed: ' + error.message);
+      }
+    }
   }

@@ -31,7 +31,6 @@ export default class giaModel {
 
   // 2. Lấy giá  theo ID (Không cần LIMIT/OFFSET vì ID là duy nhất)
   static async getById(id) {
-    console.log(id);
     try {
       const [rows] = await execute("SELECT * FROM banggia WHERE ID_GIA = ?", [
         id,
