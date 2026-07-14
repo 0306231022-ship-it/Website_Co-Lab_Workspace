@@ -23,7 +23,7 @@ export default class hoadonModel {
         [giatien, idlichdat],
       );
       if (create.affectedRows > 0) {
-         return result.insertId; // Trả về ID tự tăng (ID_HOA_DON) vừa sinh ra
+         return create.insertId; // Trả về ID tự tăng (ID_HOA_DON) vừa sinh ra
       }
       return null;
     } catch (error) {

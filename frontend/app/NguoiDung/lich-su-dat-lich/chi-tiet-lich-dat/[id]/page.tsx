@@ -7,8 +7,8 @@ import * as fun from '@/FUNCTION/function';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import QRCode from "react-qr-code";
-
-
+import { socket } from '@/FUNCTION/socket';
+import { useSearchParams } from "next/navigation";
 interface ChiTietNguoiDung {
   TENND: string;
   EMAIL: string;
@@ -55,38 +55,45 @@ function ChiTietLichDat() {
 
   const qrUrl_checkin = `https://bacteria-widely-sizing.ngrok-free.dev/api/NguoiDung/check-in?id=${id}`;
   const qrUrl_checkout = `https://bacteria-widely-sizing.ngrok-free.dev/api/NguoiDung/check-out?id=${id}`;
+  const searchParams = useSearchParams();
+  const fetchLichDat1 = useCallback(async () => {
 
-  // Hàm fetch dữ liệu tách riêng để có thể tái sử dụng khi socket báo check-in thành công
-
-const fetchLichDat1 = useCallback(async () => {
-  if (!id) {
-    ThongBao.ThongBao_Loi('ID lịch đặt không hợp lệ.');
-    return;
-  }
-
-
-
-
-  try {
-    const res = await api.CallAPI(undefined, { url: `/NguoiDung/lich-dat?id=${id}`, PhuongThuc: 2 });
-    if (res && res.success) {
-      setLichDat(res.lichDat);
-    } else {
-      ThongBao.ThongBao_Loi(res.message);
+    if (!id) {
+      ThongBao.ThongBao_Loi('ID lịch đặt không hợp lệ.');
+      return;
     }
-  } catch (error) {
-    console.error('Lỗi khi tải dữ liệu lịch đặt:', error);
-    ThongBao.ThongBao_Loi('Đã xảy ra lỗi khi tải dữ liệu lịch đặt.');
-  }
-}, [id]);
+    try {
+      const res = await api.CallAPI(undefined, { url: `/NguoiDung/lich-dat?id=${id}`, PhuongThuc: 2 });
+      if (res && res.success) {
+        setLichDat(res.lichDat);
+      } else {
+        ThongBao.ThongBao_Loi(res.message);
+      }
+    } catch (error) {
+      console.error('Lỗi khi tải dữ liệu lịch đặt:', error);
+      ThongBao.ThongBao_Loi('Đã xảy ra lỗi khi tải dữ liệu lịch đặt.');
+    }
+  }, [id]);
+
   useEffect(() => {
-      const laydl1 = async()=>{
-        await fetchLichDat1();
-      };
-      laydl1();
-
+    const laydl1 = async () => {
+      await fetchLichDat1();
+    };
+    laydl1();
   }, [fetchLichDat1]);
-
+  useEffect(()=>{
+    socket.emit('thong-bao-thanhtoan', id)
+    const query = searchParams.toString();
+    const themhoa_don = async()=>{
+      try {
+        await api.CallAPI(undefined,{url:`/NguoiDung/XacNhan_ThanhToan?${query}&id=${id}`, PhuongThuc:2});
+      } catch (error) {
+           console.error('Lỗi khi tạo hóa đơn từ lịch đặt:', error);
+           ThongBao.ThongBao_Loi('Đã xảy ra lỗi khi tạo hóa đơn từ lịch đặt.');
+      }
+    }
+    themhoa_don();
+  },[searchParams,id])
   useEffect(() => {
     socket.on("thong-bao-checkout", (data) => {
       if (data.success) {
@@ -100,6 +107,7 @@ const fetchLichDat1 = useCallback(async () => {
       socket.off("thong-bao-checkout");
     };
   }, [fetchLichDat1]);
+
   useEffect(() => {
     socket.on("thong-bao-checkin", (data) => {
       if (data.success) {
@@ -113,7 +121,8 @@ const fetchLichDat1 = useCallback(async () => {
       socket.off("thong-bao-checkin");
     };
   }, [fetchLichDat1]);
-    useEffect(() => {
+
+  useEffect(() => {
     socket.on("thong-bao-thanhtoan", (data) => {
       if (data.success) {
         ThongBao.ThongBao_ThanhCong(data.message);
@@ -127,8 +136,6 @@ const fetchLichDat1 = useCallback(async () => {
     };
   }, [fetchLichDat1]);
 
-
-  // Định dạng hiển thị ngày/tháng từ chuỗi thời gian
   const renderDateDetails = () => {
     if (!lichDat?.ChiTiet_ThoiGian?.KHUNG_BATDAU) return { day: '--', month: '--', fullDate: 'Chưa cập nhật' };
     try {
@@ -151,6 +158,14 @@ const fetchLichDat1 = useCallback(async () => {
   };
 
   const getStatusDetails = (start: string | undefined, end: string | undefined) => {
+    if (lichDat?.ChiTiet_ThoiGian?.TRANG_THAI === 2) {
+      return {
+        text: "Đã hủy đơn",
+        className: "bg-rose-50 text-rose-700 border-rose-200/60",
+        dotClassName: "bg-rose-500"
+      };
+    }
+
     if (!start || !end) {
       return {
         text: "Không rõ",
@@ -199,6 +214,18 @@ const fetchLichDat1 = useCallback(async () => {
       };
     }
   };
+  const ThanhToan = async()=>{
+    try {
+      const chuyenhuong_thanhtoan = await api.CallAPI(undefined,{url:`/NguoiDung/ThanhToan?id=${id}`, PhuongThuc:2});
+                  if (chuyenhuong_thanhtoan && chuyenhuong_thanhtoan.success && chuyenhuong_thanhtoan.paymentUrl) {
+                     window.open(chuyenhuong_thanhtoan.paymentUrl, '_blank')
+                  } else {
+                    ThongBao.ThongBao_CanhBao(chuyenhuong_thanhtoan?.message || "Không thể khởi tạo link thanh toán từ hệ thống.");
+                  }
+    } catch (error) {
+       console.error("Lỗi lấy lịch sử đặt lịch:", error);
+    }
+  }
 
   const { day, month, fullDate } = renderDateDetails();
 
@@ -256,7 +283,7 @@ const fetchLichDat1 = useCallback(async () => {
             {/* Khối 1: Thời gian sử dụng */}
             <div className="mb-8">
               <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                <i className="fa-regular fa-clock text-brand-500"></i> Thời gian sử dụng
+                <i className="fa-regular fa-clock text-brand-500"></i> Thời gian đăng ký sử dụng
               </h3>
               <div className="flex items-center gap-5">
                 <div className="w-16 h-16 rounded-xl bg-brand-50 border border-brand-100 flex flex-col items-center justify-center text-brand-600 shadow-sm shrink-0">
@@ -274,6 +301,28 @@ const fetchLichDat1 = useCallback(async () => {
                   <p className="text-sm font-medium text-slate-500 mt-0.5">{fullDate}</p>
                 </div>
               </div>
+
+              {/* KHỐI MỚI THÊM: Thời gian Check-in / Check-out thực tế */}
+              {(lichDat.ChiTiet_ThoiGian?.THOIGIAN_VAO || lichDat.ChiTiet_ThoiGian?.THOIGIAN_RA) && (
+                <div className="mt-4 grid grid-cols-2 gap-3 bg-slate-50/80 rounded-xl p-3.5 border border-slate-100">
+                  <div>
+                    <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-1 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Giờ vào thực tế
+                    </p>
+                    <p className="text-sm font-bold text-slate-700">
+                      {lichDat.ChiTiet_ThoiGian?.THOIGIAN_VAO ? fun.formatTime(lichDat.ChiTiet_ThoiGian.THOIGIAN_VAO) : '--:--'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider mb-1 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Giờ ra thực tế
+                    </p>
+                    <p className="text-sm font-bold text-slate-700">
+                      {lichDat.ChiTiet_ThoiGian?.THOIGIAN_RA ? fun.formatTime(lichDat.ChiTiet_ThoiGian.THOIGIAN_RA) : '--:--'}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Khối 2: Vị trí & Không gian */}
@@ -333,37 +382,38 @@ const fetchLichDat1 = useCallback(async () => {
             <div className="hidden md:block absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-slate-50 rounded-full border-r border-slate-200 z-10"></div>
 
             {/* Khu vực QR Code theo trạng thái */}
-           <div className="flex flex-col items-center text-center bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-  {lichDat.ChiTiet_ThoiGian.TRANG_THAI === 2 ? (
-    /* 1. ĐƠN ĐÃ BỊ HỦY */
-    <p className="text-rose-600 font-bold py-8">Đơn đã bị hủy</p>
-  ) : lichDat.ChiTiet_ThoiGian.THOIGIAN_VAO !== null && lichDat.ChiTiet_ThoiGian.THOIGIAN_RA !== null ? (
-    /* 2. CẢ HAI KHÁC NULL => ĐƠN ĐÃ HOÀN THÀNH */
-    <div className="py-6 flex flex-col items-center gap-2">
-      <i className="fa-solid fa-circle-check text-slate-400 text-4xl mb-2"></i>
-      <p className="text-slate-600 font-bold">Lịch đặt đã hoàn thành</p>
-      <p className="text-[11px] text-slate-400 max-w-[200px] leading-relaxed">Cảm ơn bạn đã sử dụng dịch vụ của không gian Co-Lab!</p>
-    </div>
-  ) : lichDat.ChiTiet_ThoiGian.THOIGIAN_VAO !== null ? (
-    /* 3. ĐÃ VÀO NHƯNG CHƯA RA => HIỂN THỊ MÃ CHECK-OUT */
-    <>
-      <h3 className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-4">Quét mã để Check-out</h3>
-      <div className="w-32 h-32 bg-white border-2 border-slate-800 p-2 rounded-xl flex items-center justify-center relative shadow-inner">
-        <QRCode value={qrUrl_checkout} size={300} bgColor="#ffffff" fgColor="#000000" level="H" />
-      </div>
-      <p className="text-[11px] text-slate-400 mt-4 font-medium leading-relaxed">Vui lòng đưa mã này cho lễ tân khi bạn rời khỏi chỗ ngồi.</p>
-    </>
-  ) : (
-    /* 4. THOIGIAN_VAO === NULL => HIỂN THỊ MÃ CHECK-IN */
-    <>
-      <h3 className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-4">Quét mã để Check-in</h3>
-      <div className="w-32 h-32 bg-white border-2 border-slate-800 p-2 rounded-xl flex items-center justify-center relative shadow-inner">
-        <QRCode value={qrUrl_checkin} size={300} bgColor="#ffffff" fgColor="#000000" level="H" />
-      </div>
-      <p className="text-[11px] text-slate-400 mt-4 font-medium leading-relaxed">Vui lòng đưa mã này cho lễ tân khi bạn đến nhận chỗ.</p>
-    </>
-  )}
-</div>
+            <div className="flex flex-col items-center text-center bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+              {lichDat.ChiTiet_ThoiGian.TRANG_THAI === 2 ? (
+                /* 1. ĐƠN ĐÃ BỊ HỦY */
+                <p className="text-rose-600 font-bold py-8">Đơn đã bị hủy</p>
+              ) : lichDat.ChiTiet_ThoiGian.THOIGIAN_VAO !== null && lichDat.ChiTiet_ThoiGian.THOIGIAN_RA !== null ? (
+                /* 2. CẢ HAI KHÁC NULL => ĐƠN ĐÃ HOÀN THÀNH */
+                <div className="py-6 flex flex-col items-center gap-2">
+                  <i className="fa-solid fa-circle-check text-slate-400 text-4xl mb-2"></i>
+                  <p className="text-slate-600 font-bold">Lịch đặt đã hoàn thành</p>
+                  <p className="text-[11px] text-slate-400 max-w-[200px] leading-relaxed">Cảm ơn bạn đã sử dụng dịch vụ của không gian Co-Lab!</p>
+                </div>
+              ) : lichDat.ChiTiet_ThoiGian.THOIGIAN_VAO !== null ? (
+                /* 3. ĐÃ VÀO NHƯNG CHƯA RA => HIỂN THỊ MÃ CHECK-OUT */
+                <>
+                  <h3 className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-4">Quét mã để Check-out</h3>
+                  <div className="w-32 h-32 bg-white border-2 border-slate-800 p-2 rounded-xl flex items-center justify-center relative shadow-inner">
+                    <QRCode value={qrUrl_checkout} size={300} bgColor="#ffffff" fgColor="#000000" level="H" />
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-4 font-medium leading-relaxed">Vui lòng đưa mã này cho lễ tân khi bạn rời khỏi chỗ ngồi.</p>
+                </>
+              ) : (
+                /* 4. THOIGIAN_VAO === NULL => HIỂN THỊ MÃ CHECK-IN */
+                <>
+                  <h3 className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-4">Quét mã để Check-in</h3>
+                  <div className="w-32 h-32 bg-white border-2 border-slate-800 p-2 rounded-xl flex items-center justify-center relative shadow-inner">
+                    <QRCode value={qrUrl_checkin} size={300} bgColor="#ffffff" fgColor="#000000" level="H" />
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-4 font-medium leading-relaxed">Vui lòng đưa mã này cho lễ tân khi bạn đến nhận chỗ.</p>
+                </>
+              )}
+            </div>
+
             {/* Khu vực chi tiết thanh toán */}
             <div className="border-t border-slate-200/80 border-dashed pt-6">
               <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
@@ -395,18 +445,30 @@ const fetchLichDat1 = useCallback(async () => {
 
         {/* Các nút hành động phía dưới */}
         <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end mt-2">
-          {lichDat.ChiTiet_HoaDon?.TRANG_THAI === 1 ? (
-            <button className="px-5 py-3 bg-brand-600 text-white font-bold rounded-xl hover:bg-brand-700 transition-all shadow-sm flex items-center justify-center gap-2 text-sm">
-              <i className="fa-solid fa-check"></i> Đã thanh toán
-            </button>
-          ) : (
-            <button className="px-5 py-3 bg-white border border-rose-200 text-rose-600 font-bold rounded-xl hover:bg-rose-50 hover:border-rose-300 transition-all shadow-sm flex items-center justify-center gap-2 text-sm">
-              <i className="fa-regular fa-circle-xmark"></i> Hủy lịch đặt
-            </button>
+          {lichDat.ChiTiet_ThoiGian?.TRANG_THAI !== 2 && (
+            <>
+              {lichDat.ChiTiet_HoaDon?.TRANG_THAI === 1 ? (
+                <button className="px-5 py-3 bg-brand-600 text-white font-bold rounded-xl hover:bg-brand-700 transition-all shadow-sm flex items-center justify-center gap-2 text-sm">
+                  <i className="fa-solid fa-check"></i> Đã thanh toán
+                </button>
+              ) : (
+                <button className="px-5 py-3 bg-white border border-rose-200 text-rose-600 font-bold rounded-xl hover:bg-rose-50 hover:border-rose-300 transition-all shadow-sm flex items-center justify-center gap-2 text-sm">
+                  <i className="fa-regular fa-circle-xmark"></i> Hủy lịch đặt
+                </button>
+              )}
+              {/* Nút Xem hóa đơn được bọc tại đây, sẽ ẩn hoàn toàn khi đơn hàng bị hủy */}
+              <button className="px-5 py-3 font-bold rounded-xl hover:bg-brand-700 transition-all shadow-sm flex items-center justify-center gap-2 text-sm border border-slate-200 text-slate-700 hover:bg-slate-50">
+                <i className="fa-solid fa-receipt"></i> Xem hóa đơn
+              </button>
+            </>
           )}
-          <button className="px-5 py-3 font-bold rounded-xl hover:bg-brand-700 transition-all shadow-sm flex items-center justify-center gap-2 text-sm">
-            <i className="fa-solid fa-receipt"></i> Xem hóa đơn
-          </button>
+          {
+            lichDat.ChiTiet_ThoiGian.TRANG_THAI === 0 && (
+               <button onClick={()=>{ThanhToan();}} className="px-5 py-3 font-bold rounded-xl hover:bg-brand-700 transition-all shadow-sm flex items-center justify-center gap-2 text-sm">
+                  <i className="fa-solid fa-check"></i> Thanh toán
+                </button>
+            )
+          }
         </div>
 
       </div>

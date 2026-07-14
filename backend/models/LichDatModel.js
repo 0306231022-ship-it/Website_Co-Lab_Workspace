@@ -204,25 +204,29 @@ LIMIT ? OFFSET ?;
             }
             //dựa vào id lấy thông tin ghế, hoặc không gian 1 TRONG 2 TRƯỜNG SẼ NULL trường nào con thì lấy trường đó
             const [ChiTiet_Ghe_KhongGian] = await connection.query(`
-               SELECT
-    LD.ID_GHE,
-    LD.ID_KHONG_GIAN,
-    G.TEN_GHE,
-    COALESCE(KG1.TEN_KHONG_GIAN, KG2.TEN_KHONG_GIAN) AS TEN_KHONG_GIAN,
-    COALESCE(CN1.TEN_CHI_NHANH, CN2.TEN_CHI_NHANH) AS TEN_CHI_NHANH
-FROM lichdat LD
-LEFT JOIN ghe G
-    ON LD.ID_GHE = G.ID_GHE
-LEFT JOIN khonggian KG1
-    ON LD.ID_KHONG_GIAN = KG1.ID_KHONG_GIAN
-LEFT JOIN khonggian KG2
-    ON G.ID_KHONG_GIAN = KG2.ID_KHONG_GIAN
-LEFT JOIN chinhanh CN1
-    ON KG1.ID_CHI_NHANH = CN1.ID_CHI_NHANH
-LEFT JOIN chinhanh CN2
-    ON KG2.ID_CHI_NHANH = CN2.ID_CHI_NHANH
-
-WHERE LD.ID_LICH_DAT = ?;
+                    SELECT
+        LD.ID_GHE,
+        LD.ID_KHONG_GIAN,
+        G.TEN_GHE,
+        COALESCE(KG1.TEN_KHONG_GIAN, KG2.TEN_KHONG_GIAN) AS TEN_KHONG_GIAN,
+        COALESCE(CN1.TEN_CHI_NHANH, CN2.TEN_CHI_NHANH) AS TEN_CHI_NHANH,
+        COALESCE(BG_GHE.DON_GIA, BG_KG.DON_GIA) AS DON_GIA
+    FROM lichdat LD
+    LEFT JOIN ghe G 
+        ON LD.ID_GHE = G.ID_GHE
+    LEFT JOIN banggia BG_GHE 
+        ON G.ID_DANH_MUC = BG_GHE.DANHMUC_GHE
+    LEFT JOIN khonggian KG1 
+        ON LD.ID_KHONG_GIAN = KG1.ID_KHONG_GIAN
+    LEFT JOIN khonggian KG2 
+        ON G.ID_KHONG_GIAN = KG2.ID_KHONG_GIAN
+    LEFT JOIN banggia BG_KG 
+        ON COALESCE(KG1.ID_GIA, KG2.ID_GIA) = BG_KG.ID_GIA
+    LEFT JOIN chinhanh CN1 
+        ON KG1.ID_CHI_NHANH = CN1.ID_CHI_NHANH
+    LEFT JOIN chinhanh CN2 
+        ON KG2.ID_CHI_NHANH = CN2.ID_CHI_NHANH
+    WHERE LD.ID_LICH_DAT = ?;
                 `,[id]);
             if (!ChiTiet_Ghe_KhongGian || ChiTiet_Ghe_KhongGian.length === 0) {
                 await rollbackTransaction(connection);
@@ -231,19 +235,7 @@ WHERE LD.ID_LICH_DAT = ?;
                     message: 'Không tìm thấy thông tin ghế hoặc không gian cho ID_LICH_DAT đã cho.'
                 };
             }
-            // lấy thông tin hóa đơn dựa vào id
-            const [ChiTiet_HoaDon] = await connection.query(`
-                SELECT HD.ID_HOADON, HD.GIA_TIEN, HD.NGAY_TAO , HD.TRANG_THAI
-                FROM hoadon HD
-                WHERE HD.ID_LICHDAT = ?
-                `,[id]);
-            if (!ChiTiet_HoaDon || ChiTiet_HoaDon.length === 0) {
-                await rollbackTransaction(connection);
-                return {
-                    success: false,
-                    message: 'Không tìm thấy thông tin hóa đơn cho ID_LICH_DAT đã cho.'
-                };
-            }
+           
             // Nếu tất cả các truy vấn đều thành công, commit transaction
             await commitTransaction(connection);
             return {
@@ -251,7 +243,6 @@ WHERE LD.ID_LICH_DAT = ?;
                 ChiTiet_NguoiDung: ChiTiet_NguoiDung[0],
                 ChiTiet_ThoiGian: ChiTiet_ThoiGian[0],
                 ChiTiet_Ghe_KhongGian: ChiTiet_Ghe_KhongGian[0],
-                ChiTiet_HoaDon: ChiTiet_HoaDon[0]
             };
         }catch (error) {
                 await rollbackTransaction(connection);
@@ -599,6 +590,57 @@ WHERE DATE(KHUNG_BATDAU) = CURDATE()
             return update.affectedRows>0
         } catch (error) {
              console.error("không thể ckeck-in thông tin lịch đặt!", error);
+        }
+    }
+    static async DonGia_idlichdat(id){
+        try {
+          const [truyvan] = await execute(`
+    SELECT
+        LD.KHUNG_BATDAU,
+        LD.KHUNG_KETTHUC,
+        LD.THOIGIAN_RA,
+        COALESCE(BG_GHE.DON_GIA, BG_KG.DON_GIA) AS DON_GIA
+    FROM lichdat LD
+    LEFT JOIN ghe G 
+        ON LD.ID_GHE = G.ID_GHE
+    LEFT JOIN banggia BG_GHE 
+        ON G.ID_DANH_MUC = BG_GHE.DANHMUC_GHE
+    LEFT JOIN khonggian KG1 
+        ON LD.ID_KHONG_GIAN = KG1.ID_KHONG_GIAN
+    LEFT JOIN khonggian KG2 
+        ON G.ID_KHONG_GIAN = KG2.ID_KHONG_GIAN
+    LEFT JOIN banggia BG_KG 
+        ON COALESCE(KG1.ID_GIA, KG2.ID_GIA) = BG_KG.ID_GIA
+    WHERE LD.ID_LICH_DAT = ?;
+`, [id]);
+
+if (!truyvan || truyvan.length === 0) return 0;
+
+const data = truyvan[0];
+const donGia = data.DON_GIA || 0;
+const isValidDate = (dateStr) => {
+    return dateStr && dateStr !== 'NULL' && !dateStr.startsWith('0000-00-00');
+};
+
+let thoiGianBatDau = new Date(data.KHUNG_BATDAU);
+let thoiGianKetThuc;
+if (isValidDate(data.THOIGIAN_RA)) {
+    thoiGianKetThuc = new Date(data.THOIGIAN_RA);
+    if (!isValidDate(data.KHUNG_BATDAU) && isValidDate(data.THOIGIAN_VAO)) {
+        thoiGianBatDau = new Date(data.THOIGIAN_VAO);
+    }
+} else {
+
+    thoiGianKetThuc = new Date(data.KHUNG_KETTHUC);
+}
+
+const diffMs = thoiGianKetThuc - thoiGianBatDau; 
+const soGio = diffMs > 0 ? diffMs / (1000 * 60 * 60) : 0;
+const tongTien = soGio * donGia;
+
+return tongTien;
+        } catch (error) {
+             console.error("không thể lấy thông tin giá theo lịch đặt!", error);
         }
     }
 

@@ -210,7 +210,6 @@ export default class LichDatController{
     static async ChiTiet_LichDat_theoIDDL(req, res) {
         const id = req.query.id;
         const userId = req.user.id;
-        console.log(id)
         try {
             const kiemtra = await DatLichModel.kiemtraid(id);
             if (!kiemtra) {
@@ -239,7 +238,6 @@ export default class LichDatController{
                     cHITiet_NguoiDung: lichDat.ChiTiet_NguoiDung,
                     ChiTiet_ThoiGian: lichDat.ChiTiet_ThoiGian,
                     ChiTiet_Ghe_KhongGian: lichDat.ChiTiet_Ghe_KhongGian,
-                    ChiTiet_HoaDon: lichDat.ChiTiet_HoaDon
                 } 
             });
         } catch (error) {
@@ -446,7 +444,6 @@ export default class LichDatController{
     }
     static async Checkin(req,res){
         const id = req.query.id;
-        const userId = req.user.id
         try {
             const kiemtra = await DatLichModel.kiemtraid(id);
             if(!kiemtra){

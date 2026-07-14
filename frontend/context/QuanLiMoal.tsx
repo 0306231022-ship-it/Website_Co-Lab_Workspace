@@ -18,7 +18,6 @@ import ThemGhe from "@/app/Modal/ThemGhe";
 import ThongTinGhe from "@/app/Modal/ThongTinGhe";
 import ChinhSuaGhe from "@/app/Modal/ChinhSuaGhe";
 import ThongTin from "@/app/Modal/ThongTin_Ghe_Dat";
-import ThanhToan from "@/app/Modal/ThanhToan";
 import Themthietbi from "@/app/Modal/ThemThietBi";
 import ChinhSuaThietBi from "@/app/Modal/ChinhSuaThietBi";
 
@@ -40,7 +39,6 @@ const MODAL_REGISTRY = {
     'ThongTinGhe' : ThongTinGhe,
     'ChinhSuaGhe' : ChinhSuaGhe,
     'ThongTin_ghe' : ThongTin,
-    'ThanhToan' : ThanhToan,
     'ThemThietBi' : Themthietbi,
     'ChinhSuaThietBi' : ChinhSuaThietBi
 

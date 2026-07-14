@@ -66,29 +66,25 @@ const io = new Server(server, {
   },
 });
 
-// Lắng nghe kết nối socket
-io.on("connection", (socket) => {
-  console.log("Client đã kết nối:", socket.id);
-
-  // Cho phép client join room theo userId
-  socket.on("join-room", (userId) => {
-    socket.join(userId.toString());
-    console.log(`User ${userId} đã join room`);
-  });
-});
 io.on('connection', (socket) => {
   
     socket.on('lich-dat', (idNguoiDung) => {
         socket.join(idNguoiDung); 
         console.log(`lịch đặt ${idNguoiDung} đã vào phòng riêng thành công.`);
     });
-});
-io.on('connection', (socket) => {
+
     socket.on('thong-bao-thanhtoan', (idNguoiDung) => {
         socket.join(idNguoiDung); 
         console.log(`lịch đặt ${idNguoiDung} đã vào phòng riêng.`);
     });
+
+    socket.on("join-room", (userId) => {
+        socket.join(userId.toString());
+        console.log(`User ${userId} đã join room`);
+    });
+
 });
+//ngrok http 3001 --domain=bacteria-widely-sizing.ngrok-free.dev
 // Xuất io để controller dùng emit
 export { io };
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
