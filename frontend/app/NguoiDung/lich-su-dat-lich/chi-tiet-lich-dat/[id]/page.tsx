@@ -7,7 +7,7 @@ import * as fun from '@/FUNCTION/function';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import QRCode from "react-qr-code";
-import { socket } from '@/FUNCTION/socket';
+
 
 interface ChiTietNguoiDung {
   TENND: string;
@@ -58,11 +58,15 @@ function ChiTietLichDat() {
 
   // Hàm fetch dữ liệu tách riêng để có thể tái sử dụng khi socket báo check-in thành công
 
-   const fetchLichDat1 = useCallback(async () => {
+const fetchLichDat1 = useCallback(async () => {
   if (!id) {
     ThongBao.ThongBao_Loi('ID lịch đặt không hợp lệ.');
     return;
   }
+
+
+
+
   try {
     const res = await api.CallAPI(undefined, { url: `/NguoiDung/lich-dat?id=${id}`, PhuongThuc: 2 });
     if (res && res.success) {
@@ -74,7 +78,7 @@ function ChiTietLichDat() {
     console.error('Lỗi khi tải dữ liệu lịch đặt:', error);
     ThongBao.ThongBao_Loi('Đã xảy ra lỗi khi tải dữ liệu lịch đặt.');
   }
-}, [id]); // Hàm chỉ tạo lại khi 'id' thay đổi, an toàn cho useEffect
+}, [id]);
   useEffect(() => {
       const laydl1 = async()=>{
         await fetchLichDat1();
@@ -109,6 +113,20 @@ function ChiTietLichDat() {
       socket.off("thong-bao-checkin");
     };
   }, [fetchLichDat1]);
+    useEffect(() => {
+    socket.on("thong-bao-thanhtoan", (data) => {
+      if (data.success) {
+        ThongBao.ThongBao_ThanhCong(data.message);
+        fetchLichDat1();
+      } else {
+        ThongBao.ThongBao_CanhBao(data.message || data.mesage);
+      }
+    });
+    return () => {
+      socket.off("thong-bao-thanhtoan");
+    };
+  }, [fetchLichDat1]);
+
 
   // Định dạng hiển thị ngày/tháng từ chuỗi thời gian
   const renderDateDetails = () => {

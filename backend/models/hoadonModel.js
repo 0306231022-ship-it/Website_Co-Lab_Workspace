@@ -22,7 +22,10 @@ export default class hoadonModel {
             VALUES(?,1,?)`,
         [giatien, idlichdat],
       );
-      return create.affectedRows > 0;
+      if (create.affectedRows > 0) {
+         return result.insertId; // Trả về ID tự tăng (ID_HOA_DON) vừa sinh ra
+      }
+      return null;
     } catch (error) {
       console.error(" Lỗi Database trong hoadonModel.create:", error.message);
       throw new Error("Không thể thêm hóa đơn mới vào cơ sở dữ liệu!");

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { CallAPI } from "@/API/API";
 import Link from "next/link";
 import { LichDatItems } from "@/interface/LichDat";
+import { socket } from '@/FUNCTION/socket';
 function LichSuLichDat() {
     const [danhSach, setDanhSach] = useState<LichDatItems[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -14,7 +15,9 @@ function LichSuLichDat() {
     const itemsPerPage = 3; 
 
     const tongSoTrang = Math.ceil(tongSoDong / itemsPerPage) || 1;
-
+      if (socket.connected) {
+        socket.emit("thong-bao-thanhtoan", id);
+     } 
     useEffect(() => {
         const layDuLieuLichDat = async () => {
             try {

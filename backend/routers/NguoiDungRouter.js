@@ -32,6 +32,7 @@ nguoidungRouter.get('/lich-dat', verifyToken, LichDatController.ChiTiet_LichDat_
 nguoidungRouter.get('/ThongTin' , NguoiDungController.ThongTin);
 nguoidungRouter.get('/check-in', LichDatController.Checkin);
 nguoidungRouter.get('/check-out', LichDatController.Checkout);
+nguoidungRouter.get('/XacNhan_ThanhToan', ThanhToanController.XacNhan_ThanhToan);
 //thoong bao
 nguoidungRouter.get('/layDS_thongbao', verifyToken , thongBaoController.getThongBaoByUser);
 nguoidungRouter.post('/XoaTheoid' , upload.none(), thongBaoController.deleteThongBao);

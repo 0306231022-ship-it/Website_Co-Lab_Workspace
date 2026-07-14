@@ -83,6 +83,12 @@ io.on('connection', (socket) => {
         console.log(`lịch đặt ${idNguoiDung} đã vào phòng riêng thành công.`);
     });
 });
+io.on('connection', (socket) => {
+    socket.on('thong-bao-thanhtoan', (idNguoiDung) => {
+        socket.join(idNguoiDung); 
+        console.log(`lịch đặt ${idNguoiDung} đã vào phòng riêng.`);
+    });
+});
 // Xuất io để controller dùng emit
 export { io };
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

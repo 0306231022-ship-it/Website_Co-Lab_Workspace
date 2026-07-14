@@ -1,10 +1,12 @@
 import { body, query, validationResult } from 'express-validator';
 import DatLichModel from '../models/LichDatModel.js';
 import hoadonModel from '../models/hoadonModel.js';
+import ThanhToanModal from '../models/ThanhToanModal.js';
 import 'dotenv/config.js';
 import moment from 'moment'
 import crypto from 'crypto';
 import { sortObject } from '../function.js';
+import { io } from '../server.js';
 
 export default class ThanhToanController {
   static async ThanhToan(req, res) {
@@ -106,6 +108,66 @@ export default class ThanhToanController {
             success: false,
             message: error.message || 'Đã xảy ra lỗi kết nối với cổng thanh toán!'
         });
+    }
+  }
+  static async XacNhan_ThanhToan(req, res) {
+    try {
+        let vnp_Params = { ...req.query };
+        const secureHash = vnp_Params['vnp_SecureHash'];
+        delete vnp_Params['vnp_SecureHash'];
+        delete vnp_Params['vnp_SecureHashType'];
+        vnp_Params = sortObject(vnp_Params);
+        const secretKey = "YOUR_HASH_SECRET_FROM_VNPAY"; 
+        const signData = querystring.stringify(vnp_Params, { encode: false });
+        const checkSum = sha256(secretKey + signData);
+        const vnp_ResponseCode = vnp_Params['vnp_ResponseCode'];
+        if (secureHash !== checkSum) {
+            io.to(id).emit('thong-bao-thanhtoan', {
+                success: false,
+                message: "Vui lòng kiểm tra thông tin"
+            })
+        }
+        const idlichdat = parseInt(vnp_Params['vnp_TxnRef']); // ID hóa đơn hệ thống của bạn gửi đi
+        const maGiaoDich = vnp_Params['vnp_TransactionNo'];
+        const maNganHang = vnp_Params['vnp_BankCode'];
+        const soTienVnPay = parseFloat(vnp_Params['vnp_Amount']) / 100; // Chia 100 lấy tiền thực tế
+        const payDateRaw = vnp_Params['vnp_PayDate'];
+        let formattedPayDate = null;
+        if (payDateRaw && payDateRaw.length === 14) {
+            formattedPayDate = `${payDateRaw.slice(0, 4)}-${payDateRaw.slice(4, 6)}-${payDateRaw.slice(6, 8)} ${payDateRaw.slice(8, 10)}:${payDateRaw.slice(10, 12)}:${payDateRaw.slice(12, 14)}`;
+        } else {
+            formattedPayDate = new Date().toISOString().slice(0, 19).replace('T', ' '); // Backup ngày hiện tại
+        }
+        if (vnp_ResponseCode === '00'){
+            const them = await hoadonModel.create(soTienVnPay,idlichdat);
+            if(them===null){
+                io.to(id).emit('thong-bao-thanhtoan', {
+                    success: false,
+                    message: "Vui lòng kiểm tra thông tin"
+                })
+            }
+            const themthanhtoan = await ThanhToanModal.Them(maGiaoDich,maNganHang,soTienVnPay,trangThaiThanhToan,them);
+            if(!themthanhtoan){
+                 io.to(id).emit('thong-bao-thanhtoan', {
+                    success: false,
+                    message: "Vui lòng kiểm tra thông tin"
+                 })
+            }
+             io.to(id).emit('thong-bao-thanhtoan', {
+                success: true,
+                message: "Bạn đã thanh toán thành công!"
+             });
+        }else{
+             io.to(id).emit('thong-bao-thanhtoan', {
+                success: false,
+                message: "Thanh toán thất bại, Vui lòng kiểm tra lại!"
+            })
+        }
+    } catch (error) {
+         io.to(id).emit('thong-bao-thanhtoan', {
+                success: false,
+                message: "Thanh toán thất bại, Vui lòng kiểm tra lại!"
+            })
     }
   }
 }
