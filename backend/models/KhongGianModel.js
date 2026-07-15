@@ -76,15 +76,17 @@ export default class KhongGianModel {
     }
     static async LayDanhSach(limit,offset,ID){
         try {
-            const [DanhSach] = await execute(`
-               SELECT 
+           const [DanhSach] = await execute(`
+    SELECT 
         kg.*,
+        kg.LOAI_KHONG_GIAN, -- Để check xem có đúng bằng 0 không
+        bg.DON_GIA AS DON_GIA_GOC, -- Để check xem JOIN có ra giá trị không
         IF(kg.LOAI_KHONG_GIAN = 0, bg.DON_GIA, NULL) AS DON_GIA 
     FROM khonggian kg
     LEFT JOIN banggia bg ON kg.ID_GIA = bg.ID_GIA
     WHERE kg.ID_CHI_NHANH = ?
     LIMIT ? OFFSET ?
-                `,[ID,limit,offset]);
+`, [ID, limit, offset]);
             const [TongSo] = await execute(`
                  SELECT COUNT(*) AS total FROM khonggian
                 WHERE ID_CHI_NHANH = ?
@@ -142,7 +144,6 @@ export default class KhongGianModel {
     }
    static async TimKiem_KhongGian(ten, trangthai, idcn, limit, offset) {
     try {
-        // 1. Tạo điều kiện WHERE động (Không dùng alias kg. ở đây để câu lệnh COUNT không lỗi)
         let whereClause = ` WHERE ID_CHI_NHANH = ?`;
         let params = [idcn];
 
@@ -152,17 +153,12 @@ export default class KhongGianModel {
         }
 
         if (trangthai !== 'all' && trangthai !== undefined && trangthai !== null) {
-            whereClause += ` AND TRANG_THAI = ?`;
+            whereClause += ` AND LOAI_KHONG_GIAN = ?`;
             params.push(Number(trangthai));
         }
-
-        // 2. Câu lệnh COUNT thuần túy trên bảng khonggian (Đảm bảo có dấu cách trước WHERE)
         const sqlCount = `SELECT COUNT(*) AS Tong FROM khonggian` + whereClause;
         const [kqCount] = await execute(sqlCount, params);
         const tongDanhSach = kqCount[0]?.Tong || 0;
-
-        // 3. Khi JOIN dữ liệu, ta chủ động thêm alias 'kg.' vào trước các điều kiện WHERE
-        // Thay thế " WHERE " thành " WHERE kg." để ép chạy đúng trên bảng đã JOIN
         let whereClauseForData = whereClause.replace(/WHERE /g, "WHERE kg.");
         whereClauseForData = whereClauseForData.replace(/AND /g, "AND kg.");
 
@@ -172,7 +168,7 @@ export default class KhongGianModel {
                 bg.DON_GIA 
             FROM khonggian kg
             LEFT JOIN banggia bg 
-                ON kg.ID_GIA = bg.ID_GIA AND kg.LOAI_KHONG_GIAN = 2
+                ON kg.ID_GIA = bg.ID_GIA AND kg.LOAI_KHONG_GIAN = 0
         ` + whereClauseForData + ` LIMIT ? OFFSET ?`;
 
         const dataParams = [...params, Number(limit), Number(offset)];

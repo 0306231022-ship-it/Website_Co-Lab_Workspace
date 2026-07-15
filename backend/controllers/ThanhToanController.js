@@ -155,10 +155,9 @@ export default class ThanhToanController {
             })
         }
     } catch (error) {
-        console.log(error)
          io.to(id).emit('thong-bao-thanhtoan', {
-                success: false,
-                message: "Thanh toán thất bại, Vui lòng kiểm tra lại!"
+            success: false,
+            message: "Thanh toán thất bại, Vui lòng kiểm tra lại!"
         })
     }
   }

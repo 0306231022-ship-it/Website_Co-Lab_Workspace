@@ -132,7 +132,9 @@ export default class DatLichModel{
             const thoiGianHienTai = new Date();
             const [DanhSach] = await execute(`
                 SELECT*FROM lichdat ld
-                WHERE ? BETWEEN ld.KHUNG_BATDAU AND ld.KHUNG_KETTHUC;
+                WHERE ? BETWEEN ld.KHUNG_BATDAU AND ld.KHUNG_KETTHUC 
+                    AND ld.THOIGIAN_RA IS NULL
+                    AND ld.THOIGIAN_VAO IS NOT NULL;
                 `,[thoiGianHienTai]);
             return DanhSach;
         } catch (error) {
@@ -641,6 +643,16 @@ const tongTien = soGio * donGia;
 return tongTien;
         } catch (error) {
              console.error("không thể lấy thông tin giá theo lịch đặt!", error);
+        }
+    }
+     static async kiemtra_trangthai_lichdat(id){
+        try {
+            const [truyvan] = await execute(`SELECT KiemTraTrangThaiDatLich(?) AS trang_thai`, [id])
+            if (truyvan && truyvan.length > 0) return Boolean(truyvan[0].trang_thai);
+            return true;
+        } catch (error) {
+            console.error("Lỗi khi kiểm tra trạng thái lịch đặt:", error);
+            throw error;
         }
     }
 

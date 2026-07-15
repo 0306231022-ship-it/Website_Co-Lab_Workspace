@@ -41,6 +41,7 @@ adminRouter.post(
 adminRouter.get("/laydanhsach", ChiNhanhController.DanhSach_ChiNhanh);
 adminRouter.get("/laychitiet", ChiNhanhController.ChiTiet_ChiNhanh);
 adminRouter.get("/TimKiem", ChiNhanhController.TimKiem_ChiNhanh);
+adminRouter.get('/thongtin_chinhanh_khonggian',ChiNhanhController.thongtin_chinhanh_khonggian);
 //==========================================
 //QUẢN LÝ KHÔNG GIAN
 

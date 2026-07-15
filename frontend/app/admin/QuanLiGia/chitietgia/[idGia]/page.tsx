@@ -45,7 +45,7 @@ export default function ChiTietGia() {
       try {
         console.log("1. Đang gọi API với ID:", id);
 
-        const res: any = await api.CallAPI(undefined, {
+        const res = await api.CallAPI(undefined, {
           url: `/admin/chitietgia?ID_GIA=${id}`,
           PhuongThuc: 2,
         });
@@ -283,26 +283,11 @@ export default function ChiTietGia() {
             {/* Ngày tạo */}
             <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
-                Ngày khởi tạo (NGAY_TAO)
+                Ngày khởi tạo
               </span>
               <div className="text-xs font-bold text-slate-700 flex items-center gap-2 mt-2 font-mono">
                 <i className="fa-regular fa-calendar text-slate-400 text-sm"></i>
                 <span>{formatDate(gia.NGAY_TAO)}</span>
-              </div>
-            </div>
-
-            {/* Ngày kết thúc (Nếu có) */}
-            <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
-                Ngày kết thúc (NGAY_KET_THUC)
-              </span>
-              <div className="text-xs font-bold text-slate-700 flex items-center gap-2 mt-2 font-mono">
-                <i className="fa-regular fa-calendar-xmark text-slate-400 text-sm"></i>
-                <span>
-                  {gia.NGAY_KET_THUC
-                    ? formatDate(gia.NGAY_KET_THUC)
-                    : "Vô thời hạn"}
-                </span>
               </div>
             </div>
           </div>

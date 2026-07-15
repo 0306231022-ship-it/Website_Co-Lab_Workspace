@@ -176,7 +176,6 @@ export default class ChiTietThietBiController{
         if (!ID_KHONG_GIAN || !ID_THIET_BI) {
             return res.status(400).json({ success: false, message: "Thiếu thông tin để xóa!" });
         }
-
         const ketqua = await ChiTietThietBiModel.XoaCapThietBi(ID_KHONG_GIAN, ID_THIET_BI);
 
         if (ketqua) {

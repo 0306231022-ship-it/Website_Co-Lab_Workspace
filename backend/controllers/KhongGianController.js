@@ -10,10 +10,10 @@ import { xoaFileCu } from "../function.js";
 import { body, query, validationResult } from 'express-validator';
 export default class KhongGianController{
     static async DanhSach_KhongGian(req, res) {
-          const page = parseInt(req.query.page) || 1;
-                const limit = parseInt(req.query.limit) || 3;
-                const offset = (page - 1) * limit;
-                const ID = parseInt(req.query.IDCN);
+        const page = parseInt(req.query.page) || 1;
+const limit = parseInt(req.query.limit) || 3;
+const offset = (page - 1) * limit;
+const ID = parseInt(req.query.IDCN);
                 try {
                     await Promise.all([
                         query('page')

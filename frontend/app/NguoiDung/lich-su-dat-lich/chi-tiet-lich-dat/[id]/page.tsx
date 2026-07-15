@@ -64,6 +64,7 @@ function ChiTietLichDat() {
     }
     try {
       const res = await api.CallAPI(undefined, { url: `/NguoiDung/lich-dat?id=${id}`, PhuongThuc: 2 });
+      alert(JSON.stringify(res))
       if (res && res.success) {
         setLichDat(res.lichDat);
       } else {
@@ -82,6 +83,8 @@ function ChiTietLichDat() {
     laydl1();
   }, [fetchLichDat1]);
   useEffect(()=>{
+    const vnpResponseCode = searchParams.get('vnp_ResponseCode');
+    if (!vnpResponseCode) return;
     socket.emit('thong-bao-thanhtoan', id)
     const query = searchParams.toString();
     const themhoa_don = async()=>{
@@ -394,7 +397,7 @@ function ChiTietLichDat() {
                   <p className="text-[11px] text-slate-400 max-w-[200px] leading-relaxed">Cảm ơn bạn đã sử dụng dịch vụ của không gian Co-Lab!</p>
                 </div>
               ) : lichDat.ChiTiet_ThoiGian.THOIGIAN_VAO !== null ? (
-                /* 3. ĐÃ VÀO NHƯNG CHƯA RA => HIỂN THỊ MÃ CHECK-OUT */
+              
                 <>
                   <h3 className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-4">Quét mã để Check-out</h3>
                   <div className="w-32 h-32 bg-white border-2 border-slate-800 p-2 rounded-xl flex items-center justify-center relative shadow-inner">

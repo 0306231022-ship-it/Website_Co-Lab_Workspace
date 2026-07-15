@@ -1,3 +1,46 @@
+//thủ tục check xem lịch đã check-out chưa
+/**
+ * DELIMITER $$
+
+CREATE FUNCTION KiemTraTrangThaiDatLich(p_id_lich_dat INT)
+RETURNS BOOLEAN
+DETERMINISTIC
+BEGIN
+    DECLARE v_khung_batdau DATETIME;
+    DECLARE v_khung_ketthuc DATETIME;
+    DECLARE v_thoigian_ra DATETIME;
+    DECLARE v_exists INT DEFAULT 0;
+
+    -- 1. Lấy thông tin thời gian của lịch đặt dựa vào ID truyền vào
+    SELECT KHUNG_BATDAU, KHUNG_KETTHUC, THOIGIAN_RA, 1
+    INTO v_khung_batdau, v_khung_ketthuc, v_thoigian_ra, v_exists
+    FROM LICH_DAT -- Thay 'LICH_DAT' bằng tên bảng thực tế của bạn
+    WHERE ID_LICH_DAT = p_id_lich_dat;
+
+    -- Nếu không tìm thấy ID lịch đặt này, trả về TRUE (hoặc tùy bạn xử lý)
+    IF v_exists = 0 THEN
+        RETURN TRUE;
+    END IF;
+
+    -- 2. Kiểm tra xem thời gian hiện tại (NOW()) có nằm trong khung giờ đặt hay không
+    IF NOW() BETWEEN v_khung_batdau AND v_khung_ketthuc THEN
+        -- Đang trong khung giờ đặt (Có người đặt) -> Kiểm tra THOIGIAN_RA đã có dữ liệu chưa
+        IF v_thoigian_ra IS NULL THEN
+            RETURN FALSE; -- Chưa check-out (trả về false)
+        ELSE
+            RETURN TRUE;  -- Đã check-out (trả về true)
+        END IF;
+    ELSE
+        -- Thời gian hiện tại không nằm trong khung giờ đặt (Không có người đặt)
+        RETURN TRUE;
+    END IF;
+END$$
+
+DELIMITER ;
+ * 
+ * 
+ */
+
 // Viết thủ tục đặt lịch, kiểm tra trùng lịch
 /**
 -- BƯỚC CẦN THIẾT: Xóa thủ tục cũ để nạp code mới

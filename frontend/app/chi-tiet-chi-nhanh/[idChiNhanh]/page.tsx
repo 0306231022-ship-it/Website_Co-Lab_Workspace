@@ -57,6 +57,8 @@ function ChiTietChiNhanh() {
                 url: `/admin/laydanhsachkhonggian?IDCN=${idChiNhanh}&page=${trangMoi}&limit=${limit}&TimKiem=${searchFilter}&Loai=${typeFilter}`, 
                 PhuongThuc: 2 
             });
+            alert(JSON.stringify(response))
+
             if (response.success) {
                 setChiTiet2({
                     DanhSach: response.DanhSach || [],
@@ -167,7 +169,7 @@ function ChiTietChiNhanh() {
                                 >
                                     <option value="all">Tất cả loại không gian</option>
                                     <option value="1">Không gian chung</option>
-                                    <option value="2">Không gian họp</option>
+                                    <option value="0">Không gian họp</option>
                                 </select>
                                 <i className="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] pointer-events-none"></i>
                             </div>

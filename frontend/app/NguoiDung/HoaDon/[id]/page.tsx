@@ -19,10 +19,7 @@ interface HoaDon {
     TEN_GHE: string | null;
 }
 
-interface HoaDonResponse {
-    success: boolean;
-    data: HoaDon[];
-}
+
 
 // Hàm định dạng tiền tệ VNĐ
 const formatCurrency = (amount: number | string): string => {
