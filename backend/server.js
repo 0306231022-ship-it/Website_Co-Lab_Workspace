@@ -78,9 +78,27 @@ io.on('connection', (socket) => {
         console.log(`lịch đặt ${idNguoiDung} đã vào phòng riêng.`);
     });
 
+    socket.on('khach-dang-su-dung', (idNguoiDung) => {
+        socket.join(idNguoiDung); 
+        console.log(`không gian ${idNguoiDung} đã vào phòng riêng.`);
+    });
+
     socket.on("join-room", (userId) => {
         socket.join(userId.toString());
         console.log(`User ${userId} đã join room`);
+    });
+    socket.on("join_space_room", (data) => {
+        const { idKhongGian, loaiKhongGian } = data;
+        const roomName = `space_type_${loaiKhongGian}_id_${idKhongGian}`;
+        socket.join(roomName);
+        console.log(`Socket ${socket.id} đã vào phòng: ${roomName} (Loại: ${loaiKhongGian})`);
+    });
+    socket.on("leave_space", (data) => {
+        const { idKhongGian, loaiKhongGian } = data;
+        const roomName = `space_type_${loaiKhongGian}_id_${idKhongGian}`;
+        
+        socket.leave(roomName);
+        console.log(`⬅️  Socket [${socket.id}] đã RỜI phòng: ${roomName}`);
     });
 
 });

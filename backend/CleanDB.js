@@ -117,7 +117,7 @@ try {
         const danhSachIdLoi = [];
         
         await Promise.all(kiemtra.map(async (id_nd) => {
-            // SỬA LỖI TẠI ĐÂY: Nếu id_nd bị null hoặc undefined, bỏ qua ngay lập tức không ném vào DB
+    
             if (id_nd === null || id_nd === undefined) return;
 
             const kq = await thongBaoModel.create('Nhắc nhở lịch đặt sắp kết thúc!', noiDungChiTiet, 4, id_nd);
@@ -139,9 +139,15 @@ try {
 }
     // tác vụ 3: Hủy đơn nếu không check-in
     try {
-        const huydon= await DatLichModel.HuyLichChua_checkin();
-        if(huydon){
-             const kq = await thongBaoModel.create('HỆ THỐNG: lịch đặt đã bị hủy', 'Vui lòng xem lại thông tin lich đặt đã hủy, vì người dùng không check-in!', 5, ID_ADMIN || null);
+        const danhSachLichQuaHan = await DatLichModel.LayDanhSachLichChuaCheckinQuaHan();
+        if (danhSachLichQuaHan && danhSachLichQuaHan.length > 0) {
+            for (const lich of danhSachLichQuaHan) {
+                const thanhCong = await DatLichModel.HuyLichTheoId(lich.ID_LICH_DAT);
+                if (thanhCong) {
+                    await thongBaoModel.create(`HỆ THỐNG: Lịch đặt #${lich.ID_LICH_DAT} đã bị hủy`, `Lịch đặt của khách hàng đã bị hủy tự động vì quá giờ mà không check-in!`,5, ID_ADMIN || null);
+                    await thongBaoModel.create('Lịch đặt của bạn đã bị hủy','Lịch đặt đã bị hệ thống hủy tự động do bạn không check-in đúng giờ.', 5,lich.IDND);
+                }
+            }
         }
     } catch (error) {
         console.error("Lỗi trong quá trình tìm lịch chưa check-in và tạo thông báo tự động:", error);

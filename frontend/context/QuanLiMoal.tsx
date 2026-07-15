@@ -129,7 +129,6 @@ export function AppMDProvider({ children }: { children: ReactNode }) {
                                w-auto md:min-w-[400px] max-w-[95vw] max-h-[90vh]"
                     style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}
                 >
-                    {/* --- HEADER --- */}
                     <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white shrink-0 sticky top-0 z-10 gap-8">
                         <div className="flex items-center gap-4">
                             {modalStack.length > 1 && (

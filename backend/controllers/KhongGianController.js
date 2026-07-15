@@ -351,7 +351,7 @@ const ID = parseInt(req.query.IDCN);
                 ChiTietThietBiModel.DanhSachThietBi_Khonggian(IDKG, 5, 0)
             ]);
             // Lấy loại không gian
-            const LoaiKG= thongTin_KhongGian[0].LOAI_KHONG_GIAN;
+          const LoaiKG = thongTin_KhongGian.khongGian?.LOAI_KHONG_GIAN ?? thongTin_KhongGian.KhongGian?.LOAI_KHONG_GIAN;
             if(LoaiKG===1){
                 const ghe = await GheModel.getIDkhongian(IDKG);
                 DanhSachGhe = ghe

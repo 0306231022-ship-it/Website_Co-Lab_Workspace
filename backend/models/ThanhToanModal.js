@@ -13,4 +13,5 @@ export default class ThanhToanModal{
                 throw new Error('Database query failed: ' + error.message);
         }
     }
+    
 }

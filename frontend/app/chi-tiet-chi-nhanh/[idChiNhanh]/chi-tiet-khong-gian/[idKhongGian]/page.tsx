@@ -11,7 +11,7 @@ import * as fun from '@/FUNCTION/function';
 import { Ghe } from '@/interface/ghe';
 import SoDoGheCanvas from '@/component/Ghe';
 import { useModalContext } from "@/context/QuanLiMoal";
-import {  useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 interface LichDaDat{
     KHUNG_BATDAU:string,
     KHUNG_KETTHUC: string

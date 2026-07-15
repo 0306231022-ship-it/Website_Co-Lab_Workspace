@@ -41,13 +41,11 @@ function ChiTietChiNhanh() {
         };
         if (idChiNhanh) fetchChiNhanh();
     }, [idChiNhanh]);
-
-    // Hàm gọi API lấy danh sách không gian (Phân trang + Bộ lọc)
     const fetchKhongGian = async (HanhDong: 'next' | 'prev' | 'search', trangChiDinh?: number) => {
         let trangMoi = page;
         if (HanhDong === 'next') trangMoi = page + 1;
         else if (HanhDong === 'prev') trangMoi = Math.max(page - 1, 1);
-        else if (HanhDong === 'search') trangMoi = 1; // Tìm kiếm thì reset về trang 1
+        else if (HanhDong === 'search') trangMoi = 1; 
         if (trangChiDinh) trangMoi = trangChiDinh;
     
         setPage(trangMoi);
@@ -57,8 +55,6 @@ function ChiTietChiNhanh() {
                 url: `/admin/laydanhsachkhonggian?IDCN=${idChiNhanh}&page=${trangMoi}&limit=${limit}&TimKiem=${searchFilter}&Loai=${typeFilter}`, 
                 PhuongThuc: 2 
             });
-            alert(JSON.stringify(response))
-
             if (response.success) {
                 setChiTiet2({
                     DanhSach: response.DanhSach || [],

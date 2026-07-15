@@ -20,13 +20,11 @@ export default function SoDoGheCanvas({
     isReadOnly = false 
 }: SoDoGheCanvasProps) {
 
-    // Hàm trả về màu sắc đại diện cho trạng thái của ghế
     const layMauGhe = (trangThai: number) => {
-        if (trangThai === 1) return '#ef4444'; // Đã thuê -> Đỏ
-        return '#10b981'; // Trống -> Xanh lá
+        if (trangThai === 1) return '#ef4444'; 
+        return '#10b981';
     };
 
-    // Kiểm tra an toàn dữ liệu đầu vào chuẩn Array chống crash
     if (!danhSachGhe || !Array.isArray(danhSachGhe) || danhSachGhe.length === 0) {
         return (
             <div className="text-xs text-amber-500 font-medium py-4">

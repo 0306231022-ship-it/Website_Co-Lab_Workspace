@@ -45,7 +45,32 @@ export default class KhongGianModel {
             WHERE kg.ID_KHONG_GIAN = ?
             LIMIT 1;
                 `,[id]);
-            return kiemtra.length>0 ? kiemtra : null
+            const [rowsHienTai] = await execute(`
+                SELECT ld.ID_LICH_DAT
+                FROM lichdat ld
+                WHERE ld.ID_KHONG_GIAN = ?
+                AND ld.TRANG_THAI <> 2
+                AND NOW() >= KHUNG_BATDAU
+                AND NOW() < ld.KHUNG_KETTHUC
+                 LIMIT 1;
+            `, [id]);
+            const lichHienTai = (rowsHienTai && rowsHienTai.length > 0) ? rowsHienTai[0].ID_LICH_DAT : null;
+            const [rowsKeTiep] = await execute(`
+                SELECT ld.ID_LICH_DAT, ld.KHUNG_BATDAU, ld.KHUNG_KETTHUC
+                FROM lichdat ld
+                WHERE ld.ID_KHONG_GIAN = ?
+                AND ld.TRANG_THAI = 0 
+                AND ld.KHUNG_BATDAU > NOW()
+                AND ld.THOIGIAN_VAO IS NULL
+                ORDER BY ld.KHUNG_BATDAU ASC
+                LIMIT 1;
+            `, [id]);
+            const lichKeTiep = (rowsKeTiep && rowsKeTiep.length > 0) ? rowsKeTiep[0] : null;
+            return {
+                KhongGian: kiemtra[0],
+                lichHienTai: lichHienTai,
+                lichKeTiep: lichKeTiep
+            };
         } catch (error) {
             throw new Error('Database query failed: ' + error.message);
         }
@@ -308,6 +333,19 @@ export default class KhongGianModel {
             return truyvan.length>0 ? truyvan[0].TEN_KHONG_GIAN : false;
         } catch (error) {
              console.error("Lỗi:", error);
+        throw new Error('Database query failed: ' + error.message);
+        }
+    }
+    static async LayLoai_KG(id){
+        try {
+            const [ketqua] = await execute(`
+                SELECT LOAI_KHONG_GIAN
+                FROM khonggian
+                WHERE ID_KHONG_GIAN = ?
+                `,[id]);
+            return ketqua.length>0 ? ketqua[0].LOAI_KHONG_GIAN : null
+        } catch (error) {
+              console.error("Lỗi chỉnh sửa giá:", error);
         throw new Error('Database query failed: ' + error.message);
         }
     }

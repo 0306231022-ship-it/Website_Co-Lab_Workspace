@@ -158,7 +158,6 @@ LEFT JOIN khonggian kg ON kg.ID_KHONG_GIAN = COALESCE(g.ID_KHONG_GIAN, ld.ID_KHO
 LEFT JOIN chinhanh cn ON kg.ID_CHI_NHANH = cn.ID_CHI_NHANH
 WHERE ld.IDND = ?
 ORDER BY ld.KHUNG_BATDAU DESC
-
 LIMIT ? OFFSET ?;
                 `,[userId,limit,offset]);
             const [TongSo] = await execute(`
@@ -237,8 +236,6 @@ LIMIT ? OFFSET ?;
                     message: 'Không tìm thấy thông tin ghế hoặc không gian cho ID_LICH_DAT đã cho.'
                 };
             }
-           
-            // Nếu tất cả các truy vấn đều thành công, commit transaction
             await commitTransaction(connection);
             return {
                 success: true,
@@ -520,7 +517,7 @@ WHERE DATE(KHUNG_BATDAU) = CURDATE()
                 SELECT DISTINCT IDND 
                 FROM lichdat
                 WHERE KHUNG_BATDAU BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 15 MINUTE)
-                AND TRANG_THAI = 1;
+                AND TRANG_THAI = 0;
             `, []);
             const mangIDND = rows.map(item => item.IDND);
             return mangIDND;
@@ -534,7 +531,7 @@ WHERE DATE(KHUNG_BATDAU) = CURDATE()
                 SELECT DISTINCT IDND 
                 FROM lichdat
                 WHERE KHUNG_KETTHUC BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 15 MINUTE)
-              AND TRANG_THAI = 1
+              AND TRANG_THAI = 0
               AND THOIGIAN_RA IS NULL;
                 `,[])
              const mangIDND = ketqua.map(item => item.IDND);
@@ -550,7 +547,7 @@ WHERE DATE(KHUNG_BATDAU) = CURDATE()
                 SET TRANG_THAI = 2
                 WHERE NOW() >= KHUNG_BATDAU
               AND THOIGIAN_VAO IS NULL
-              AND TRANG_THAI = 1;
+              AND TRANG_THAI = 0;
                 `,[]);
             return ketqua.affectedRows>0;
         } catch (error) {
@@ -655,6 +652,32 @@ return tongTien;
             throw error;
         }
     }
+    static async LayDanhSachLichChuaCheckinQuaHan() {
+    try {
+        const [rows] = await execute(`
+            SELECT ID_LICH_DAT, IDND
+            FROM lichdat
+            WHERE NOW() >= KHUNG_BATDAU
+              AND THOIGIAN_VAO IS NULL
+              AND TRANG_THAI = 0;
+        `, []);
+        return rows;
+    } catch (error) {
+        console.error("Lỗi lấy danh sách lịch chưa check-in:", error);
+        return [];
+    }
+}
+    static async HuyLichTheoId(idLich) {
+    try {
+        const [ketqua] = await execute(`
+            UPDATE lichdat SET TRANG_THAI = 2 WHERE ID_LICH_DAT = ?
+        `, [idLich]);
+        return ketqua.affectedRows > 0;
+    } catch (error) {
+        console.error(`Lỗi hủy lịch ${idLich}:`, error);
+        return false;
+    }
+}
 
 
 

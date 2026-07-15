@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import QRCode from "react-qr-code";
 import { socket } from '@/FUNCTION/socket';
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 interface ChiTietNguoiDung {
   TENND: string;
   EMAIL: string;
@@ -28,6 +29,7 @@ interface ChiTietGheKhongGian {
   TEN_GHE: string | null;
   TEN_KHONG_GIAN: string | null;
   TEN_CHI_NHANH: string | null;
+  DON_GIA: string
 }
 
 interface ChiTietHoaDon {
@@ -56,6 +58,16 @@ function ChiTietLichDat() {
   const qrUrl_checkin = `https://bacteria-widely-sizing.ngrok-free.dev/api/NguoiDung/check-in?id=${id}`;
   const qrUrl_checkout = `https://bacteria-widely-sizing.ngrok-free.dev/api/NguoiDung/check-out?id=${id}`;
   const searchParams = useSearchParams();
+  const strKetThuc = lichDat?.ChiTiet_ThoiGian?.THOIGIAN_RA ?? lichDat?.ChiTiet_ThoiGian?.KHUNG_KETTHUC;
+  const strBatDau = lichDat?.ChiTiet_ThoiGian?.KHUNG_BATDAU;
+  const donGia = Number(lichDat?.ChiTiet_Ghe_KhongGian?.DON_GIA) ?? 0;
+   let TongThanhToan = 0;
+if (strKetThuc && strBatDau) {
+  const dateKetThuc = new Date(strKetThuc).getTime();
+  const dateBatDau = new Date(strBatDau).getTime();
+  const soGio = (dateKetThuc - dateBatDau) / (1000 * 60 * 60);
+  TongThanhToan = Math.max(0, soGio) * donGia;
+}
   const fetchLichDat1 = useCallback(async () => {
 
     if (!id) {
@@ -424,9 +436,9 @@ function ChiTietLichDat() {
               </h3>
               <div className="space-y-2.5 text-sm">
                 <div className="flex justify-between items-center text-slate-600 font-medium">
-                  <span>Phí dịch vụ</span>
+                  <span>Phí dịch vụ(Tạm tính): </span>
                   <span className="text-slate-800 font-semibold">
-                    {fun.formatCurrency(lichDat.ChiTiet_HoaDon?.GIA_TIEN)}
+                    {fun.formatCurrency(TongThanhToan)}
                   </span>
                 </div>
                 <div className="pt-3 border-t border-slate-200 border-dashed flex justify-between items-baseline">
@@ -460,9 +472,9 @@ function ChiTietLichDat() {
                 </button>
               )}
               {/* Nút Xem hóa đơn được bọc tại đây, sẽ ẩn hoàn toàn khi đơn hàng bị hủy */}
-              <button className="px-5 py-3 font-bold rounded-xl hover:bg-brand-700 transition-all shadow-sm flex items-center justify-center gap-2 text-sm border border-slate-200 text-slate-700 hover:bg-slate-50">
+              <Link href={`/NguoiDung/HoaDon/${id}`} className="px-5 py-3 font-bold rounded-xl hover:bg-brand-700 transition-all shadow-sm flex items-center justify-center gap-2 text-sm border border-slate-200 text-slate-700 hover:bg-slate-50">
                 <i className="fa-solid fa-receipt"></i> Xem hóa đơn
-              </button>
+              </Link>
             </>
           )}
           {
