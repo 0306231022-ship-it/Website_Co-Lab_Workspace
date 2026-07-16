@@ -12,6 +12,7 @@ import { Ghe } from '@/interface/ghe';
 import SoDoGheCanvas from '@/component/Ghe';
 import { useModalContext } from "@/context/QuanLiMoal";
 import { useRouter } from 'next/navigation';
+import {socket} from '@/FUNCTION/socket';
 interface LichDaDat{
     KHUNG_BATDAU:string,
     KHUNG_KETTHUC: string
@@ -55,18 +56,23 @@ function ChiTietKhongGian() {
           setErr(dulieu1.errors);
           return;
         }
-        if(dulieu1.success){
+        if (dulieu1.success) {
           setchinhanh(dulieu1.DanhSach.ChiNhanh);
-          setkhonggian(dulieu1.DanhSach.KhongGian[0]);
+          setkhonggian(dulieu1.DanhSach.KhongGian.KhongGian);
+          socket.emit("join_space_room", {
+            idKhongGian: idKhongGian,
+            loaiKhongGian: dulieu1.DanhSach.KhongGian.KhongGian.LOAI_KHONG_GIAN
+          });
           setThietBi(dulieu1.DanhSach.ThietBi.DanhSach);
           setTongDanhSach(dulieu1.DanhSach.ThietBi.TongDanhSach);
-          setghe(dulieu1.DanhSach.Ghe)
+          const danhSachGheChuan = dulieu1.DanhSach.Ghe || dulieu1.DanhSach.ghe || dulieu1.DanhSach.DanhSachGhe || [];
+          setghe(danhSachGheChuan);
         }
         if (dulieu2 && dulieu2.success) {
-                setLichDaDat(dulieu2.dulieu || []);
-            } else {
-                setLichDaDat([]);
-            }
+          setLichDaDat(dulieu2.dulieu || []);
+        } else {
+          setLichDaDat([]);
+        }
       } catch (error) {
          console.error("Lỗi khi tải thông tin không gian:", error);
          ThongBao.ThongBao_CanhBao('Lỗi khi tải thông tin không gian');
@@ -76,6 +82,43 @@ function ChiTietKhongGian() {
     }
     laydl();
   },[idChiNhanh,idKhongGian])
+  useEffect(() => {
+          socket.on("update_schedule", async(data) => {
+            if (data.success) {
+                   const [dulieu1,dulieu2] = await Promise.all([
+          api.CallAPI(undefined,{url:`/admin/ChiTiet_KhongGian?IDKG=${idKhongGian}&IDCN=${idChiNhanh}`,PhuongThuc:2}),
+          api.CallAPI(undefined,{url:`/admin/DanhSach_theo_khonggian?IDKG=${idKhongGian}`, PhuongThuc:2})
+        ])
+        if(dulieu1.validate){
+          setErr(dulieu1.errors);
+          return;
+        }
+        if (dulieu1.success) {
+          setchinhanh(dulieu1.DanhSach.ChiNhanh);
+          setkhonggian(dulieu1.DanhSach.KhongGian.KhongGian);
+          socket.emit("join_space_room", {
+            idKhongGian: idKhongGian,
+            loaiKhongGian: dulieu1.DanhSach.KhongGian.KhongGian.LOAI_KHONG_GIAN
+          });
+          setThietBi(dulieu1.DanhSach.ThietBi.DanhSach);
+          setTongDanhSach(dulieu1.DanhSach.ThietBi.TongDanhSach);
+          const danhSachGheChuan = dulieu1.DanhSach.Ghe || dulieu1.DanhSach.ghe || dulieu1.DanhSach.DanhSachGhe || [];
+          setghe(danhSachGheChuan);
+        }
+        if (dulieu2 && dulieu2.success) {
+          setLichDaDat(dulieu2.dulieu || []);
+        } else {
+          setLichDaDat([]);
+        }
+            } else {
+              ThongBao.ThongBao_CanhBao(data.message || data.mesage);
+            }
+          });
+          return () => {
+            socket.off("update_schedule");
+          };
+        }, [idKhongGian, idChiNhanh]);
+
 
   const getTrangThaiConfig = (trangThai: number) => {
   switch (trangThai) {
@@ -547,8 +590,6 @@ function ChiTietKhongGian() {
     </div>
   )}
 </div>
-        
-            
           </div>
         </div>
       </div>
@@ -583,7 +624,7 @@ function ChiTietKhongGian() {
               <div>
                 <p className="text-xs font-bold text-gray-800">Gặp sự cố về chỗ ngồi?</p>
                 <p className="text-[11px] text-gray-400 mt-0.5">Liên hệ quản lý chi nhánh hoặc gọi hotline để đổi vị trí</p>
-                <p className="text-sm font-bold text-emerald-600 mt-1">📞 028 7109 8888</p>
+                <p className="text-sm font-bold text-emerald-600 mt-1">📞 0374 207 259</p>
               </div>
             </div>
           </div>
