@@ -3,12 +3,7 @@ import { execute } from "../config/db.js";
 export default class hoadonModel {
   static async getById(id) {
     try {
-      const [dulieu] = await execute(
-        `
-                CALL GetChiTietHoaDonTheoLichDat(?)
-                `,
-        [id],
-      );
+      const [dulieu] = await execute(`CALL GetChiTietHoaDonTheoLichDat(?)`,[id]);
       return dulieu;
     } catch (error) {
       throw new Error("Database query failed: " + error.message);
@@ -70,5 +65,7 @@ export default class hoadonModel {
            throw new Error("Không thể truy vấn thông tin doanh thu!");
         }
     }
+
+  
 }
 

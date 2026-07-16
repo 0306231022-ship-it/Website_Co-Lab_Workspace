@@ -169,4 +169,53 @@ LIMIT ? OFFSET ?;`,
       throw new Error("Database query failed: " + error.message);
     }
   }
+  // [GET] THỐNG KÊ HIỆU SUẤT CHI NHÁNH
+static async ThongKeHieuSuat(kyThongKe) {
+  try {
+    const sql = `
+      SELECT 
+          cn.ID_CHI_NHANH,
+          cn.TEN_CHI_NHANH,
+          IFNULL(SUM(tt.SO_TIEN), 0) AS TONG_DOANH_THU
+      FROM chinhanh cn
+      LEFT JOIN khonggian kg ON cn.ID_CHI_NHANH = kg.ID_CHI_NHANH
+      LEFT JOIN ghe g ON kg.ID_KHONG_GIAN = g.ID_KHONG_GIAN
+      LEFT JOIN lichdat ld ON (ld.ID_KHONG_GIAN = kg.ID_KHONG_GIAN OR ld.ID_GHE = g.ID_GHE)
+      LEFT JOIN hoadon hd ON ld.ID_LICH_DAT = hd.ID_LICHDAT
+      LEFT JOIN thanhtoan tt ON hd.ID_HOADON = tt.ID_HOA_DON AND tt.TRANG_THAI = 1
+      GROUP BY cn.ID_CHI_NHANH, cn.TEN_CHI_NHANH
+      ORDER BY TONG_DOANH_THU DESC;
+    `;
+    
+    const [rows] = await execute(sql, []);
+    const mucTieu = 1000000000; 
+
+    return rows.map(row => {
+      let doanhThu = Number(row.TONG_DOANH_THU) || 0;
+      let tienDo = Math.round((doanhThu / mucTieu) * 100);
+      
+      return {
+        ID_CHI_NHANH: row.ID_CHI_NHANH,
+        TEN_CHI_NHANH: row.TEN_CHI_NHANH,
+        TONG_DOANH_THU: doanhThu,
+        TIEN_DO: tienDo > 100 ? 100 : tienDo 
+      };
+    });
+
+  } catch (error) {
+    console.error("Lỗi Database trong ChiNhanhModel.ThongKeHieuSuat:", error.message);
+    throw new Error("Không thể lấy thống kê hiệu suất chi nhánh từ cơ sở dữ liệu!");
+  }
+}
+  static async TongChiNhanh(){
+    try {
+      const [TongChiNhanh] = await execute(`
+        SELECT COUNT(ID_CHI_NHANH) AS Tong_So_Chi_Nhanh
+        FROM chinhanh;
+        `,[]);
+        return TongChiNhanh[0].Tong_So_Chi_Nhanh;
+    } catch (error) {
+      throw new Error("Database query failed: " + error.message);
+    }
+  }
 }

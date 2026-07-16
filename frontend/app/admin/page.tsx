@@ -2,8 +2,9 @@
 import * as api from '@/API/API';
 import * as ThongBao from '@/FUNCTION/ThongBao';
 import { useEffect, useState } from 'react';
+import ThongKe from "../Modal/Thongke";
+import * as fun from '@/FUNCTION/function';
 
-// Chèn các interface vừa tạo ở đây
 interface LichDatItem {
     ID_LICH_DAT: number;
     TenKhachHang: string;
@@ -15,19 +16,22 @@ interface LichDatItem {
 interface DashboardData {
     DanhSach: LichDatItem[];
     TongLich: number;
-    DoanhThu: number; // Đổi sang number để dễ tính toán/format ở client
+    DoanhThu: number; 
     ghe: number;
     phong: number;
+    TongChiNhanh: number;
+    TongKhongGian:number
 }
 
 function Admin() {
-    // Khởi tạo state khớp với cấu trúc dữ liệu từ API
     const [dashboardData, setDashboardData] = useState<DashboardData>({
         DanhSach: [],
         TongLich: 0,
         DoanhThu: 0,
         ghe: 0,
-        phong: 0
+        phong: 0,
+        TongChiNhanh:0,
+        TongKhongGian:0
     });
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -35,17 +39,16 @@ function Admin() {
        const fetchData = async () => {
         setIsLoading(true);
         try {
-            // Thực hiện gọi hàm api từ file API của bạn
-            // Giả sử tên hàm là api.getDashboard()
             const response = await api.CallAPI(undefined,{url:'/admin/layTongQuan', PhuongThuc:2}) 
-            
             if (response && response.success) {
                 setDashboardData({
                     DanhSach: response.DanhSach,
                     TongLich: response.TongLich,
-                    DoanhThu: parseFloat(response.DoanhThu || "0"), // Chuyển chuỗi "0.00" sang số
+                    DoanhThu: parseFloat(response.DoanhThu || "0"),
                     ghe: response.ghe,
-                    phong: response.phong
+                    phong: response.phong,
+                    TongChiNhanh:response.TongChiNhanh,
+                    TongKhongGian:response.TongKhongGian
                 });
             } else {
                 ThongBao.ThongBao_CanhBao("Lấy dữ liệu thất bại");
@@ -58,55 +61,13 @@ function Admin() {
         }
     };
     fetchData();
-
     }, []);
-
-    
-    // --- CÁC HÀM TRỢ GIÚP ĐỊNH DẠNG (HELPERS) ---
-    
-    // Ngày hiện tại
     const today = new Date();
     const formattedDate = `${String(today.getDate()).padStart(2, '0')} Tháng ${String(today.getMonth() + 1).padStart(2, '0')}, ${today.getFullYear()}`;
-
-    // Format tiền VNĐ
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
-    };
-
-    // Lấy 2 chữ cái đầu của tên khách (Ví dụ: Nguyễn Ngọc Hiếu -> NH)
-    const getInitials = (name: string) => {
-        if (!name) return "KH";
-        const parts = name.trim().split(' ');
-        if (parts.length >= 2) {
-            return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-        }
-        return name.substring(0, 2).toUpperCase();
-    };
-
-    // Format ISO Date thành định dạng Giờ (HH:MM)
-    const formatTime = (isoString: string) => {
-        if (!isoString) return "--:--";
-        const date = new Date(isoString);
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        return `${hours}:${minutes}`;
-    };
-
-    // Định nghĩa màu sắc & tên trạng thái dựa trên ID số (TRANG_THAI: 1)
-    const getStatusDetails = (statusId: number) => {
-        switch (statusId) {
-            case 1:
-                return { text: 'Đang sử dụng', css: 'bg-emerald-50 text-emerald-700' };
-            case 2:
-                return { text: 'Đã thanh toán', css: 'bg-blue-50 text-blue-700' };
-            default:
-                return { text: 'Chờ xử lý', css: 'bg-slate-50 text-slate-700' };
-        }
-    };
-
     return (
         <>
             {/* Header tổng quan */}
+
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-xl font-bold tracking-tight text-slate-900">Bảng Quản Trị Hệ Thống</h1>
@@ -114,11 +75,11 @@ function Admin() {
                 </div>
                 <div className="flex items-center space-x-2.5 bg-white border border-slate-200/60 px-3 py-1.5 rounded-xl shadow-xs self-start sm:self-auto text-xs font-semibold text-slate-600">
                     <i className="fa-regular fa-calendar text-indigo-500"></i>
+
                     <span>{formattedDate}</span>
                 </div>
             </div>
 
-            {/* 4 Thẻ Thống Kê Tổng Quan */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
                 <div className="bg-white p-4 rounded-xl border border-slate-200/60 flex items-center justify-between shadow-xs">
                     <div>
@@ -160,13 +121,36 @@ function Admin() {
                     <div>
                         <span className="text-xs font-medium text-slate-400 block uppercase tracking-wider">Doanh thu tạm tính</span>
                         <span className="text-xl font-bold text-slate-800 tracking-tight mt-1.5 block">
-                            {isLoading ? '...' : formatCurrency(dashboardData.DoanhThu)}
+                            {isLoading ? '...' : fun.formatCurrency(dashboardData.DoanhThu)}
                         </span>
                     </div>
                     <div className="w-10 h-10 bg-sky-50 rounded-xl flex items-center justify-center text-sky-600">
                         <i className="fa-solid fa-wallet text-base"></i>
                     </div>
                 </div>
+                <div className="bg-white p-4 rounded-xl border border-slate-200/60 flex items-center justify-between shadow-xs">
+                    <div>
+                        <span className="text-xs font-medium text-slate-400 block uppercase tracking-wider">Tổng chi nhánh</span>
+                        <span className="text-xl font-bold text-slate-800 tracking-tight mt-1.5 block">
+                             {isLoading ? '...' : `${dashboardData.TongChiNhanh} chi nhánh` }
+                        </span>
+                    </div>
+                    <div className="w-10 h-10 bg-sky-50 rounded-xl flex items-center justify-center text-sky-600">
+                        <i className="fa-solid fa-wallet text-base"></i>
+                    </div>
+                </div>
+                                <div className="bg-white p-4 rounded-xl border border-slate-200/60 flex items-center justify-between shadow-xs">
+                    <div>
+                        <span className="text-xs font-medium text-slate-400 block uppercase tracking-wider">Tổng không gian</span>
+                        <span className="text-xl font-bold text-slate-800 tracking-tight mt-1.5 block">
+                            {isLoading ? '...' : `${dashboardData.TongKhongGian} không gian` }
+                        </span>
+                    </div>
+                    <div className="w-10 h-10 bg-sky-50 rounded-xl flex items-center justify-center text-sky-600">
+                        <i className="fa-solid fa-wallet text-base"></i>
+                    </div>
+                </div>
+                
             </div>
 
             {/* Khối Bảng Danh Sách và Tiến trình hiệu suất */}
@@ -197,17 +181,17 @@ function Admin() {
                                     <tr><td colSpan={3} className="text-center py-6 text-slate-400">Không có đơn nào trong hôm nay.</td></tr>
                                 ) : (
                                     dashboardData.DanhSach.map((item) => {
-                                        const status = getStatusDetails(item.TRANG_THAI);
+                                        const status = fun.getStatusDetails(item.TRANG_THAI);
                                         return (
                                             <tr key={item.ID_LICH_DAT} className="hover:bg-slate-50/50 transition-colors">
                                                 <td className="px-5 py-3.5 flex items-center space-x-2.5">
                                                     <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-[11px]">
-                                                        {getInitials(item.TenKhachHang)}
+                                                        {fun.getInitials(item.TenKhachHang)}
                                                     </div>
                                                     <span className="font-semibold text-slate-700">{item.TenKhachHang}</span>
                                                 </td>
                                                 <td className="px-5 py-3.5 text-slate-500">
-                                                    {formatTime(item.KHUNG_BATDAU)} - {formatTime(item.KHUNG_KETTHUC)}
+                                                    {fun.formatTime(item.KHUNG_BATDAU)} - {fun.formatTime(item.KHUNG_KETTHUC)}
                                                 </td>
                                                 <td className="px-5 py-3.5">
                                                     <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold ${status.css}`}>
@@ -224,6 +208,7 @@ function Admin() {
                 </div>
 
                 {/* Cột Tiến Trình Hiệu Suất bên phải */}
+
                 <div className="space-y-4">
                     <div className="bg-white border border-slate-200/60 rounded-xl p-5 space-y-4 shadow-xs">
                         <div>
@@ -234,28 +219,44 @@ function Admin() {
                             <div>
                                 <div className="flex justify-between text-xs font-semibold mb-1">
                                     <span className="text-slate-600">Ghế đơn (Hot Desk)</span>
+
                                     <span className="text-indigo-600">{dashboardData.ghe}%</span>
                                 </div>
                                 <div className="w-full bg-slate-100 h-1.5 rounded-full">
                                     <div className="bg-indigo-500 h-1.5 rounded-full transition-all duration-500" style={{ width: `${dashboardData.ghe}%` }}></div>
+
+                                </div>
+                                <div className="w-full bg-slate-100 h-1.5 rounded-full">
+                                    <div className="bg-indigo-500 h-1.5 rounded-full" style={{ width: `${dashboardData.ghe}%` }}></div>
                                 </div>
                             </div>
                             <div>
                                 <div className="flex justify-between text-xs font-semibold mb-1">
                                     <span className="text-slate-600">Phòng họp cố định</span>
-                                    <span className="text-amber-600">{dashboardData.phong}%</span>
+                                    <span className="text-indigo-600">{dashboardData.phong}%</span>
                                 </div>
                                 <div className="w-full bg-slate-100 h-1.5 rounded-full">
                                     <div className="bg-amber-500 h-1.5 rounded-full transition-all duration-500" style={{ width: `${dashboardData.phong}%` }}></div>
                                 </div>
+                                <div className="w-full bg-slate-100 h-1.5 rounded-full">
+                                    <div className="bg-amber-500 h-1.5 rounded-full" style={{ width: `${dashboardData.phong}` }}></div>
+
+                                </div>
                             </div>
                         </div>
                     </div>
+
                 </div>
 
             </div>
+
+            <div className="mt-6">
+                <ThongKe />
+            </div>
+
         </>
-    );
-}
+    )
+};
+
 
 export default Admin;

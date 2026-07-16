@@ -34,15 +34,28 @@ export function formatShortNumber(number : number) {
 }
 export const formatToBackendDateTime = (dateTimeLocalValue: string): string => {
   if (!dateTimeLocalValue) return "";
-  
-  // dateTimeLocalValue sẽ có dạng: "2026-07-02T09:00"
-  // Bước 1: Thay thế ký tự 'T' bằng một dấu cách ' '
   let formatted = dateTimeLocalValue.replace('T', ' ');
-  
-  // Bước 2: Nếu chuỗi thiếu phần giây (độ dài lúc này là 16 ký tự "YYYY-MM-DD HH:mm")
   if (formatted.length === 16) {
-    formatted += ':00'; // Cộng thêm giây vào cuối
+    formatted += ':00';
   }
   
-  return formatted; // Kết quả trả về: "2026-07-02 09:00:00"
+  return formatted; 
 };
+export const getInitials = (name: string) => {
+        if (!name) return "KH";
+        const parts = name.trim().split(' ');
+        if (parts.length >= 2) {
+            return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+        }
+        return name.substring(0, 2).toUpperCase();
+    };
+  export     const getStatusDetails = (statusId: number) => {
+        switch (statusId) {
+            case 1:
+                return { text: 'Đang sử dụng', css: 'bg-emerald-50 text-emerald-700' };
+            case 2:
+                return { text: 'Đã thanh toán', css: 'bg-blue-50 text-blue-700' };
+            default:
+                return { text: 'Chờ xử lý', css: 'bg-slate-50 text-slate-700' };
+        }
+    };

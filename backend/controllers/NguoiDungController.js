@@ -8,6 +8,9 @@ import { body, query, validationResult } from 'express-validator';
 import { taoMaOTP , guiEmailOTP , generateToken } from '../function.js';
 import { io } from '../server.js';
 import { xoaFileCu } from "../function.js";
+import ChiNhanhController from './ChiNhanhController.js';
+import ChiNhanhModel from '../models/ChiNhanhModel.js';
+import KhongGianModel from '../models/KhongGianModel.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
@@ -606,13 +609,15 @@ export default class NguoiDungController{
       }
       static async TongQuanAD(req,res){
          try {
-            const [ketqua1, tonglich, DoanhThu, KhachMoi, PhanTram_ghe , PhanTram_phong] = await Promise.all([
+            const [ketqua1, tonglich, DoanhThu, KhachMoi, PhanTram_ghe , PhanTram_phong, TongChiNhanh, TongKhongGian] = await Promise.all([
                DatLichModel.DanhSachHomnay(),
                DatLichModel.TongLich(),
                hoadonModel.DoanhThu(),
                NguoiDungModel.TongKhach(),
                DatLichModel.PhanTram_ghe(),
                DatLichModel.PhanTram_phong(),
+               ChiNhanhModel.TongChiNhanh(),
+               KhongGianModel.TongKhongGian()
             ])
             return res.status(200).json({
                success: true,
@@ -621,7 +626,9 @@ export default class NguoiDungController{
                DoanhThu:DoanhThu,
                KhachMoi:KhachMoi,
                ghe:PhanTram_ghe,
-               phong:PhanTram_phong
+               phong:PhanTram_phong,
+               TongChiNhanh:TongChiNhanh,
+               TongKhongGian:TongKhongGian
             })
          } catch (error) {
             return res.status(500).json({

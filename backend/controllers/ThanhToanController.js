@@ -60,7 +60,6 @@ export default class ThanhToanController {
         vnp_Params['vnp_ExpireDate'] = expireDate;
         vnp_Params = sortObject(vnp_Params);
 
-        // --- Đoạn code tạo chuỗi băm bảo mật SHA512 giữ nguyên như cũ của bạn ---
         let signData = "";
         let queryUrl = "";
         let isFirst = true;

@@ -349,6 +349,17 @@ export default class KhongGianModel {
         throw new Error('Database query failed: ' + error.message);
         }
     }
+    static async TongKhongGian(){
+        try {
+              const [TongKhongGian] = await execute(`
+                SELECT COUNT(ID_KHONG_GIAN) AS Tong_So_KhongGian
+                FROM khonggian;
+                `,[]);
+        return TongKhongGian[0].Tong_So_KhongGian;
+        } catch (error) {
+             throw new Error('Database query failed: ' + error.message);
+        }
+    }
     
 
 
