@@ -70,36 +70,94 @@ cron.schedule('*/15 * * * *', async () => {
 } catch (error) {
      console.error('Lỗi thực thi tác vụ 15 phút:', error.message);
 }
-    //Thông báo thời gian 
-try {
-    // 1. Phải có await để đợi database trả về mảng các IDND
-    const dsUserIDs = await DatLichModel.getUpcomingUserIDs(); 
-    
-    // 2. Kiểm tra nếu có phần tử trong mảng
-    if (dsUserIDs && dsUserIDs.length > 0) {
-        
-        // Tạo nội dung thông báo động hoặc cố định tùy bạn
-        const noiDungChiTiet = "Bạn có lịch đặt chỗ sắp diễn ra trong 15 phút tới. Vui lòng chuẩn bị thời gian!";
-        
-        // 3. Đổi tên biến kết quả trả về thành kếtQua để tránh trùng với dsUserIDs
-        const ketQua = await thongBaoModel.create(
-            'Nhắc nhở lịch đặt sắp diễn ra', 
-            noiDungChiTiet, 
-            4, 
-            dsUserIDs // Truyền mảng [1, 2, 3...] vào đây
-        );
-        
-        console.log("Đã gửi thông báo tự động thành công:", ketQua);
-    }
-     
-} catch (error) {
-    console.error("Lỗi trong quá trình quét và tạo thông báo tự động:", error);
-}
 
 }, {
     scheduled: true,
     timezone: "Asia/Ho_Chi_Minh" 
 });
+//Quets 1 phút 1 lần
+cron.schedule('* * * * *', async () => {
+     const ID_ADMIN = 1;
+try {
+    const kiemtra = await DatLichModel.lichDatTruoc15p();
+    
+    // Chỉ xử lý nếu mảng hợp lệ và có phần tử
+    if (kiemtra && kiemtra.length > 0) {
+        const noiDungChiTiet = "Bạn có lịch đặt chỗ sắp diễn ra trong 15 phút tới. Vui lòng chuẩn bị thời gian!";
+        const danhSachIdLoi = [];
+        
+        await Promise.all(kiemtra.map(async (id_nd) => {
+            // SỬA LỖI TẠI ĐÂY: Nếu id_nd bị null hoặc undefined, bỏ qua ngay lập tức không ném vào DB
+            if (id_nd === null || id_nd === undefined) return;
+
+            const kq = await thongBaoModel.create('Nhắc nhở lịch đặt sắp diễn ra', noiDungChiTiet, 4, id_nd);
+            if (!kq) {
+                danhSachIdLoi.push(id_nd);
+            }
+        }));
+
+        if (danhSachIdLoi.length > 0) {
+            const noiDungBaoAdmin = `Hệ thống gặp lỗi khi gửi thông báo nhắc lịch 15 phút cho các khách hàng có ID: ${danhSachIdLoi.join(', ')}. Vui lòng kiểm tra lại hệ thống!`;
+            // Thay đổi loại sang 5 cho Admin (để phân biệt với loại của khách) và ép kiểu an toàn cho ID_ADMIN
+            const kq = await thongBaoModel.create('HỆ THỐNG LỖI: Không thể gửi thông báo khách hàng', noiDungBaoAdmin, 5, ID_ADMIN || null);
+            if (!kq) {
+                console.log('Vui lòng kiểm tra hệ thống gửi thông báo!');
+            }
+        } 
+    }
+} catch (error) {
+     console.error("Lỗi trong quá trình quét và tạo thông báo tự động (Tác vụ 1):", error);
+}
+
+try {
+    const kiemtra = await DatLichModel.lichDatKetThucTruoc15p();
+    
+    if (kiemtra && kiemtra.length > 0) {
+        const noiDungChiTiet = "Bạn có lịch đặt chỗ sắp kết thúc trong 15 phút tới. Vui lòng chuẩn bị thời gian!";
+        const danhSachIdLoi = [];
+        
+        await Promise.all(kiemtra.map(async (id_nd) => {
+    
+            if (id_nd === null || id_nd === undefined) return;
+
+            const kq = await thongBaoModel.create('Nhắc nhở lịch đặt sắp kết thúc!', noiDungChiTiet, 4, id_nd);
+            if (!kq) {
+                danhSachIdLoi.push(id_nd);
+            }
+        }));
+
+        if (danhSachIdLoi.length > 0) {
+            const noiDungBaoAdmin = `Hệ thống gặp lỗi khi gửi thông báo nhắc lịch kết thúc 15 phút cho các khách hàng có ID: ${danhSachIdLoi.join(', ')}. Vui lòng kiểm tra lại hệ thống!`;
+            const kq = await thongBaoModel.create('HỆ THỐNG LỖI: Không thể gửi thông báo khách hàng', noiDungBaoAdmin, 5, ID_ADMIN || null);
+            if (!kq) {
+                console.log('Vui lòng kiểm tra hệ thống gửi thông báo!');
+            }
+        } 
+    }
+} catch (error) {
+    console.error("Lỗi trong quá trình quét và tạo thông báo tự động (Tác vụ 2):", error);
+}
+    // tác vụ 3: Hủy đơn nếu không check-in
+    try {
+        const danhSachLichQuaHan = await DatLichModel.LayDanhSachLichChuaCheckinQuaHan();
+        if (danhSachLichQuaHan && danhSachLichQuaHan.length > 0) {
+            for (const lich of danhSachLichQuaHan) {
+                const thanhCong = await DatLichModel.HuyLichTheoId(lich.ID_LICH_DAT);
+                if (thanhCong) {
+                    await thongBaoModel.create(`HỆ THỐNG: Lịch đặt #${lich.ID_LICH_DAT} đã bị hủy`, `Lịch đặt của khách hàng đã bị hủy tự động vì quá giờ mà không check-in!`,5, ID_ADMIN || null);
+                    await thongBaoModel.create('Lịch đặt của bạn đã bị hủy','Lịch đặt đã bị hệ thống hủy tự động do bạn không check-in đúng giờ.', 5,lich.IDND);
+                }
+            }
+        }
+    } catch (error) {
+        console.error("Lỗi trong quá trình tìm lịch chưa check-in và tạo thông báo tự động:", error);
+    }
+
+},{
+    scheduled: true,
+    timezone: "Asia/Ho_Chi_Minh" 
+})
+
 
 console.log('Cron Job đã được kích hoạt...');
 

@@ -62,8 +62,6 @@ export default class danhmucgheController {
           errors: errors.array().map((err) => err.msg),
         });
       }
-
-      // Thực hiện thêm mới (Loại bỏ khoảng trắng thừa bằng .trim())
       const insertId = await dmGhe.create(TEN_DANHMUC.trim());
       if (!insertId) {
         return res.status(500).json({

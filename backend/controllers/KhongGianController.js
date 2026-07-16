@@ -10,10 +10,10 @@ import { xoaFileCu } from "../function.js";
 import { body, query, validationResult } from 'express-validator';
 export default class KhongGianController{
     static async DanhSach_KhongGian(req, res) {
-          const page = parseInt(req.query.page) || 1;
-                const limit = parseInt(req.query.limit) || 3;
-                const offset = (page - 1) * limit;
-                const ID = parseInt(req.query.IDCN);
+        const page = parseInt(req.query.page) || 1;
+const limit = parseInt(req.query.limit) || 3;
+const offset = (page - 1) * limit;
+const ID = parseInt(req.query.IDCN);
                 try {
                     await Promise.all([
                         query('page')
@@ -351,7 +351,7 @@ export default class KhongGianController{
                 ChiTietThietBiModel.DanhSachThietBi_Khonggian(IDKG, 5, 0)
             ]);
             // Lấy loại không gian
-            const LoaiKG= thongTin_KhongGian[0].LOAI_KHONG_GIAN;
+          const LoaiKG = thongTin_KhongGian.khongGian?.LOAI_KHONG_GIAN ?? thongTin_KhongGian.KhongGian?.LOAI_KHONG_GIAN;
             if(LoaiKG===1){
                 const ghe = await GheModel.getIDkhongian(IDKG);
                 DanhSachGhe = ghe

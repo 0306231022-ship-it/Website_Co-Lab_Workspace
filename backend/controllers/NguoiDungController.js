@@ -2,6 +2,8 @@ import { hash, compare } from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import NguoiDungModel from '../models/NguoiDungModel.js';
 import XacThucOTPModel from '../models/XacThucOTPModel.js';
+import DatLichModel from '../models/LichDatModel.js';
+import hoadonModel from '../models/hoadonModel.js';
 import { body, query, validationResult } from 'express-validator';
 import { taoMaOTP , guiEmailOTP , generateToken } from '../function.js';
 import { io } from '../server.js';
@@ -120,6 +122,7 @@ export default class NguoiDungController{
             success: true,
             message: 'Đăng nhập thành công!',
             ThongTin_NguoiDung: user.LOAIND,
+            IDND:user.IDND
          });
         } catch (error) {
             return res.status(500).json({
@@ -596,6 +599,32 @@ export default class NguoiDungController{
              })
          } catch (error) {
              return res.status(500).json({
+                success: false,
+                message: 'Thông tin thống kê thất bại: ' + error.message
+            });
+         }
+      }
+      static async TongQuanAD(req,res){
+         try {
+            const [ketqua1, tonglich, DoanhThu, KhachMoi, PhanTram_ghe , PhanTram_phong] = await Promise.all([
+               DatLichModel.DanhSachHomnay(),
+               DatLichModel.TongLich(),
+               hoadonModel.DoanhThu(),
+               NguoiDungModel.TongKhach(),
+               DatLichModel.PhanTram_ghe(),
+               DatLichModel.PhanTram_phong(),
+            ])
+            return res.status(200).json({
+               success: true,
+               DanhSach: ketqua1,
+               TongLich: tonglich,
+               DoanhThu:DoanhThu,
+               KhachMoi:KhachMoi,
+               ghe:PhanTram_ghe,
+               phong:PhanTram_phong
+            })
+         } catch (error) {
+            return res.status(500).json({
                 success: false,
                 message: 'Thông tin thống kê thất bại: ' + error.message
             });

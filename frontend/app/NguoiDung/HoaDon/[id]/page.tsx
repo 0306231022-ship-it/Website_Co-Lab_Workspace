@@ -4,6 +4,7 @@ import { useParams } from 'next/navigation';
 import * as api from '@/API/API';
 import * as ThongBao from '@/FUNCTION/ThongBao';
 import { useRouter } from 'next/navigation';
+import * as fun from '@/FUNCTION/function';
 interface HoaDon {
     ID_HOADON: number;
     GIA_TIEN: string;
@@ -18,37 +19,6 @@ interface HoaDon {
     DIA_CHI: string;
     TEN_GHE: string | null;
 }
-
-interface HoaDonResponse {
-    success: boolean;
-    data: HoaDon[];
-}
-
-// Hàm định dạng tiền tệ VNĐ
-const formatCurrency = (amount: number | string): string => {
-    const num = typeof amount === 'string' ? parseFloat(amount) : amount;
-    if (isNaN(num)) return "0 đ";
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num).replace('₫', 'đ');
-};
-
-// Hàm định dạng ngày giờ (VD: 14/06/2026 · 07:45)
-const formatDate = (dateString: string | null): string => {
-    if (!dateString) return "Chưa cập nhật";
-    try {
-        const date = new Date(dateString);
-        return new Intl.DateTimeFormat('vi-VN', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
-        }).format(date).replace(',', ' ·');
-    } catch {
-        return dateString;
-    }
-};
-
 function ChitietHoaDon() {
     const [hoaDon, setHoaDon] = useState<HoaDon | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
@@ -59,7 +29,6 @@ const router = useRouter();
             if (!id) return;
             setLoading(true);
             try {
-                // Gọi API với id lịch đặt
                 const res = await api.CallAPI(undefined, { 
                     url: `/NguoiDung/chitiethoadon?ID_LICH_DAT=${id}`, 
                     PhuongThuc: 2 
@@ -80,16 +49,14 @@ const router = useRouter();
         fetchData();
     }, [id]);
 
-    // Tính toán tiền dịch vụ, VAT (10%) và tổng thanh toán
+
     const chiPhi = useMemo(() => {
         if (!hoaDon) return { giaGoc: 0, vat: 0, tongTien: 0 };
         const giaGoc = parseFloat(hoaDon.GIA_TIEN) || 0;
-        const vat = giaGoc * 0.1; // Giả sử thuế VAT 10%
-        const tongTien = giaGoc + vat;
-        return { giaGoc, vat, tongTien };
+        const tongTien = giaGoc;
+        return { giaGoc, tongTien };
     }, [hoaDon]);
 
-    // Màn hình Loading
     if (loading) {
         return (
             <div className="p-10 mx-auto w-full max-w-2xl text-center">
@@ -146,7 +113,7 @@ const router = useRouter();
                            #INV-2026-{(hoaDon?.ID_HOADON ?? 0).toString().padStart(4, '0')}
                         </p>
                         <div className="text-[11px] text-slate-400 font-medium pt-1">
-                            <p>Ngày lập: {formatDate(hoaDon.NGAY_TAO)}</p>
+                            <p>Ngày lập: {fun.formatDate(String(hoaDon.NGAY_TAO))}</p>
                             <p>Hạn thanh toán: Liền ngay</p>
                         </div>
                     </div>
@@ -186,14 +153,14 @@ const router = useRouter();
                                     <td className="py-4 px-3 max-w-sm">
                                         <div className="font-bold text-slate-900">{hoaDon.TEN_KHONG_GIAN}</div>
                                         <div className="text-[10px] text-slate-400 mt-1">
-                                            {hoaDon.TEN_CHI_NHANH} — Ngày tạo: {formatDate(hoaDon.NGAY_TAO)}
+                                            {hoaDon.TEN_CHI_NHANH} — Ngày tạo: {fun.formatDate(String(hoaDon.NGAY_TAO))}
                                         </div>
                                     </td>
                                     <td className="py-4 px-3 text-center font-semibold text-slate-800">
                                         {hoaDon.TEN_GHE ? `Ghế ${hoaDon.TEN_GHE}` : "Khu vực chung / Nguyên phòng"}
                                     </td>
                                     <td className="py-4 px-3 text-right font-bold text-slate-900 font-mono">
-                                        {formatCurrency(chiPhi.giaGoc)}
+                                        {fun.formatCurrency(chiPhi.giaGoc)}
                                     </td>
                                 </tr>
                             </tbody>
@@ -205,15 +172,11 @@ const router = useRouter();
                 <div className="border-t border-slate-100 pt-6 flex flex-col items-end space-y-2 text-xs">
                     <div className="w-full sm:w-64 flex justify-between text-slate-500">
                         <span>Cộng tiền dịch vụ:</span>
-                        <span className="font-semibold text-slate-800 font-mono">{formatCurrency(chiPhi.giaGoc)}</span>
-                    </div>
-                    <div className="w-full sm:w-64 flex justify-between text-slate-500">
-                        <span>Thuế giá trị gia tăng (VAT 10%):</span>
-                        <span className="font-semibold text-slate-800 font-mono">{formatCurrency(chiPhi.vat)}</span>
+                        <span className="font-semibold text-slate-800 font-mono">{fun.formatCurrency(chiPhi.giaGoc)}</span>
                     </div>
                     <div className="w-full sm:w-64 flex justify-between border-t border-slate-100 pt-3 text-slate-900 font-bold">
                         <span className="text-sm">Tổng cộng thực trả:</span>
-                        <span className="text-base font-extrabold text-indigo-600 font-mono">{formatCurrency(chiPhi.tongTien)}</span>
+                        <span className="text-base font-extrabold text-indigo-600 font-mono">{fun.formatCurrency(chiPhi.tongTien)}</span>
                     </div>
                     <div className="pt-2 text-[11px] text-slate-400 italic text-right w-full">
                         (Giá trên đã bao gồm các chi phí dịch vụ đi kèm tại không gian)

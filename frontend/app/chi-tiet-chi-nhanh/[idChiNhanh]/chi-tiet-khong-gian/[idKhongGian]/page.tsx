@@ -11,7 +11,7 @@ import * as fun from '@/FUNCTION/function';
 import { Ghe } from '@/interface/ghe';
 import SoDoGheCanvas from '@/component/Ghe';
 import { useModalContext } from "@/context/QuanLiMoal";
-import {  useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 interface LichDaDat{
     KHUNG_BATDAU:string,
     KHUNG_KETTHUC: string
@@ -149,7 +149,14 @@ function ChiTietKhongGian() {
                 return;
             }
             if(DatLich.success){
-                ThongBao.ThongBao_ThanhCong(DatLich.message)
+                  const XacNhan = await ThongBao.ThongBao_XacNhanTT('ĐẶT hàng thành công!, bạn có muốn thanh toán luôn không?');
+                            if(!XacNhan) return;
+                            const chuyenhuong_thanhtoan = await api.CallAPI(undefined,{url:`/NguoiDung/ThanhToan?id=${DatLich.ID_LICHDAT}`, PhuongThuc:2});
+                            if (chuyenhuong_thanhtoan && chuyenhuong_thanhtoan.success && chuyenhuong_thanhtoan.paymentUrl) {
+                               window.open(chuyenhuong_thanhtoan.paymentUrl, '_blank')
+                            } else {
+                              ThongBao.ThongBao_CanhBao(chuyenhuong_thanhtoan?.message || "Không thể khởi tạo link thanh toán từ hệ thống.");
+                            }
             }
             if(DatLich.success===false){
                 ThongBao.ThongBao_Loi(DatLich.message)

@@ -26,7 +26,7 @@ export default class thongBaoModel {
                 }
             };
         } catch (error) {
-            console.error("❌ Lỗi Database trong thongBaoModel.getAll:", error.message);
+            console.error(" Lỗi Database trong thongBaoModel.getAll:", error.message);
             throw new Error("Không thể lấy danh sách thông báo từ cơ sở dữ liệu!");
         }
     }
@@ -43,10 +43,6 @@ export default class thongBaoModel {
                  LIMIT ? OFFSET ?`,
                 [idnd, limit,offset]
             );
-           
-           
-
-
             const [totalRows] = await execute("SELECT COUNT(*) as total FROM thongbao WHERE IDND = ?", [idnd]);
             const total = totalRows[0]?.total || 0;
 
@@ -58,7 +54,7 @@ export default class thongBaoModel {
                 }
             };
         } catch (error) {
-            console.error(`❌ Lỗi Database trong thongBaoModel.getByUserId (${idnd}):`, error.message);
+            console.error(` Lỗi Database trong thongBaoModel.getByUserId (${idnd}):`, error.message);
             throw new Error("Không thể lấy thông tin thông báo của người dùng này!");
         }
     }
@@ -73,7 +69,7 @@ export default class thongBaoModel {
             );
             return result.affectedRows > 0;
         } catch (error) {
-            console.error("❌ Lỗi Database trong thongBaoModel.create:", error.message);
+            console.error(" Lỗi Database trong thongBaoModel.create:", error.message);
             throw new Error("Không thể thêm thông báo mới!");
         }
     }
@@ -84,7 +80,7 @@ export default class thongBaoModel {
             const [result] = await execute("DELETE FROM thongbao WHERE ID_THONGBAO = ?", [idThongBao]);
             return result.affectedRows > 0;
         } catch (error) {
-            console.error(`❌ Lỗi Database trong thongBaoModel.deleteById (${idThongBao}):`, error.message);
+            console.error(` Lỗi Database trong thongBaoModel.deleteById (${idThongBao}):`, error.message);
             throw new Error("Không thể xóa thông báo này!");
         }
     }
@@ -95,7 +91,7 @@ export default class thongBaoModel {
             const [result] = await execute("DELETE FROM thongbao WHERE IDND = ?", [idnd]);
             return result.affectedRows>0;
         } catch (error) {
-            console.error(`❌ Lỗi Database trong thongBaoModel.deleteAllByUserId (${idnd}):`, error.message);
+            console.error(` Lỗi Database trong thongBaoModel.deleteAllByUserId (${idnd}):`, error.message);
             throw new Error("Không thể xóa toàn bộ thông báo của người dùng này!");
         }
     }

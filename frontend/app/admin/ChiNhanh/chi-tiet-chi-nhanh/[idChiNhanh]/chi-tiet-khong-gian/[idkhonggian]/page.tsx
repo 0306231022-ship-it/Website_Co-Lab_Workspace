@@ -12,7 +12,8 @@ import { KhongGian } from '@/interface/KhongGian';
 import Image from "next/image";
 import * as fun from '@/FUNCTION/function';
 import Link from 'next/link';
-
+import {  LichDatItems } from "@/interface/LichDat";
+import {socket} from '@/FUNCTION/socket';
 
 function ChiTietKhongGian() {
     const { OpenMoDal } = useModalContext();
@@ -31,6 +32,8 @@ function ChiTietKhongGian() {
     const [tiLeLapDay, setTiLeLapDay] = useState<number>(0);
     const [DonGia, setDonGia] = useState<number>(0);
     const [tongghe, settongghe] = useState<number>(0);
+    const [gioketiep,setgioketiep] = useState< LichDatItems | null>(null);
+    const [id_hientai,setid_hientai] = useState<string>('');
 
     // Effect 1: Tải danh sách thiết bị khi chuyển trang (Phân trang)
     useEffect(() => {
@@ -63,7 +66,7 @@ function ChiTietKhongGian() {
             try {
                 const [dulieu1, dulieu2] = await Promise.all([
                     api.CallAPI(undefined, { url: `/admin/ChiTiet_KhongGian?IDKG=${idkhonggian}&IDCN=${idChiNhanh}`, PhuongThuc: 2 }),
-                    api.CallAPI(undefined, { url: `/admin/thongke?id=${idkhonggian}`, PhuongThuc: 2 })
+                    api.CallAPI(undefined, { url: `/admin/thongke?id=${idkhonggian}`, PhuongThuc: 2 }),
                 ]);
                 if (dulieu1.validate) {
                     setErr(dulieu1.errors);
@@ -71,12 +74,19 @@ function ChiTietKhongGian() {
                 }
                 if (dulieu1.success) {
                     setchinhanh(dulieu1.DanhSach.ChiNhanh);
-                    setkhonggian(dulieu1.DanhSach.KhongGian[0]);
+                    setkhonggian(dulieu1.DanhSach.KhongGian.KhongGian);
+                    socket.emit("join_space_room", {
+                        idKhongGian: idkhonggian,
+                        loaiKhongGian: dulieu1.DanhSach.KhongGian.KhongGian.LOAI_KHONG_GIAN
+                    });
                     setThietBi(dulieu1.DanhSach.ThietBi.DanhSach);
                     setTongDanhSach1(dulieu1.DanhSach.ThietBi.TongDanhSach);
-                    
                     const danhSachGheChuan = dulieu1.DanhSach.Ghe || dulieu1.DanhSach.ghe || dulieu1.DanhSach.DanhSachGhe || [];
                     setghe(danhSachGheChuan);
+                    const danhsach_lich_ketiep = dulieu1.DanhSach.KhongGian.lichKeTiep || null;
+                    setgioketiep(danhsach_lich_ketiep);
+                    const lich_hientai = dulieu1.DanhSach.KhongGian.lichHienTai || '';
+                    setid_hientai(lich_hientai)
                 }
                 if (dulieu2 && dulieu2.success) {
                     setTongGioThue(dulieu2.dulieu.TongGioThue || 0);
@@ -93,6 +103,49 @@ function ChiTietKhongGian() {
         };
         loadl();
     }, [idChiNhanh, idkhonggian]);
+      useEffect(() => {
+        socket.on("update_schedule", async(data) => {
+          if (data.success) {
+              const [dulieu1, dulieu2] = await Promise.all([
+                    api.CallAPI(undefined, { url: `/admin/ChiTiet_KhongGian?IDKG=${idkhonggian}&IDCN=${idChiNhanh}`, PhuongThuc: 2 }),
+                    api.CallAPI(undefined, { url: `/admin/thongke?id=${idkhonggian}`, PhuongThuc: 2 }),
+                ]);
+                if (dulieu1.validate) {
+                    setErr(dulieu1.errors);
+                    return;
+                }
+                if (dulieu1.success) {
+                    setchinhanh(dulieu1.DanhSach.ChiNhanh);
+                    setkhonggian(dulieu1.DanhSach.KhongGian.KhongGian);
+                    socket.emit("join_space_room", {
+                        idKhongGian: idkhonggian,
+                        loaiKhongGian: dulieu1.DanhSach.KhongGian.KhongGian.LOAI_KHONG_GIAN
+                    });
+                    setThietBi(dulieu1.DanhSach.ThietBi.DanhSach);
+                    setTongDanhSach1(dulieu1.DanhSach.ThietBi.TongDanhSach);
+                    const danhSachGheChuan = dulieu1.DanhSach.Ghe || dulieu1.DanhSach.ghe || dulieu1.DanhSach.DanhSachGhe || [];
+                    setghe(danhSachGheChuan);
+                    const danhsach_lich_ketiep = dulieu1.DanhSach.KhongGian.lichKeTiep || null;
+                    setgioketiep(danhsach_lich_ketiep);
+                    const lich_hientai = dulieu1.DanhSach.KhongGian.lichHienTai || '';
+                    setid_hientai(lich_hientai)
+                }
+                if (dulieu2 && dulieu2.success) {
+                    setTongGioThue(dulieu2.dulieu.TongGioThue || 0);
+                    setTiLeLapDay(dulieu2.dulieu.Tile_LapDay || 0);
+                    setDonGia(dulieu2.dulieu.DonGia || 0);
+                    settongghe(dulieu2.dulieu.TongSoGhe || 0);
+                } else {
+                    console.error("Không thể tải dữ liệu thống kê từ API 2");
+                }
+          } else {
+            ThongBao.ThongBao_CanhBao(data.message || data.mesage);
+          }
+        });
+        return () => {
+          socket.off("update_schedule");
+        };
+      }, [idkhonggian, idChiNhanh]);
 
     const handleDeleteAllocation = async (idThietBi: number) => {
         const XacNhan = await ThongBao.ThongBao_XacNhanTT('Bạn có chắn chắn muốn xóa thiết bị này?');
@@ -121,8 +174,7 @@ function ChiTietKhongGian() {
         OpenMoDal(thongTinGhe.ID_GHE,{TenTrang:'ThongTinGhe'})
     };
 
-
-    const soGheDangThue = ghe.filter(g => g.TRANG_THAI === 2).length;
+    const soGheDangThue = ghe.filter(g => g.DangCoNguoiDat === 1).length;
     const phanTramMatDo = tongghe > 0 ? (soGheDangThue / tongghe) * 100 : (ghe.length > 0 ? (soGheDangThue / ghe.length) * 100 : 0);
     
     return (
@@ -353,42 +405,75 @@ function ChiTietKhongGian() {
                      
                     
                     {/* LIVE DENSITY STATUS */}
-                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-4">
-                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center">
-                            <span className="w-2 h-2 rounded-full bg-rose-500 mr-2 animate-ping"></span> Live Status
-                        </h3>
-                        
-                        <div className="p-4 bg-slate-50/70 border border-slate-100 rounded-xl space-y-4 shadow-3xs">
-                            {khonggian?.LOAI_KHONG_GIAN === 1 ? (
-                                <>
-                                    <div className="flex items-center justify-between border-b border-slate-200/60 pb-2">
-                                        <span className="text-xs font-bold text-slate-600">Mật độ ghế hiện tại:</span>
-                                        <span className="text-xs font-mono font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">
-                                            {soGheDangThue} / {tongghe || ghe.length} Ghế
-                                        </span>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <div className="w-full bg-slate-200/80 rounded-full h-2.5 overflow-hidden shadow-inner">
-                                            <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 h-full rounded-full transition-all duration-700" style={{ width: `${phanTramMatDo}%` }}></div>
-                                        </div>
-                                        <div className="text-right text-[10px] font-bold text-indigo-600/80">{phanTramMatDo.toFixed(1)}% Đang sử dụng</div>
-                                    </div>
-                                    <div className="p-3 bg-white border border-slate-100 rounded-lg flex items-center justify-between text-[11px] font-bold shadow-3xs">
-                                        <span className="text-slate-500"><i className="fa-regular fa-calendar-check mr-2 text-indigo-500"></i>Khung giờ kế tiếp:</span>
-                                        <span className="font-mono text-slate-700">18:00 - 21:00</span>
-                                    </div>
-                                </>
-                            ) : (
-                                <div className="flex items-center justify-between p-1">
-                                    <span className="text-xs font-bold text-slate-600">Trạng thái sử dụng phòng:</span>
-                                    <span className="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-lg animate-pulse">
-                                        Đang có lịch họp
-                                    </span>
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-4">
+    {/* Live Status Header */}
+    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+        <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+        </span> 
+        Trạng thái thực tế
+    </h3>
+    
+    {/* Main Content Box */}
+    <div className="p-4 bg-slate-50/60 border border-slate-100/80 rounded-xl space-y-4">
+        {khonggian?.LOAI_KHONG_GIAN === 1 ? (
+            /* ================= GIAO DIỆN KHÔNG GIAN GHẾ NGỒI ================= */
+            <>
+                {/* Mật độ ghế */}
+                <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-600">Mật độ ghế hiện tại:</span>
+                    <span className="text-xs font-mono font-bold text-indigo-700 bg-indigo-50/80 px-2.5 py-1 rounded-lg border border-indigo-100/60 shadow-3xs">
+                        {soGheDangThue} / {tongghe || ghe.length} Ghế
+                    </span>
+                </div>
 
+                {/* Thanh Progress Bar */}
+                <div className="space-y-1.5">
+                    <div className="w-full bg-slate-200/70 rounded-full h-2.5 overflow-hidden p-[2px] border border-slate-300/30">
+                        <div 
+                            className="bg-gradient-to-r from-indigo-500 to-violet-600 h-full rounded-full transition-all duration-700 ease-out shadow-xs" 
+                            style={{ width: `${phanTramMatDo}%` }}
+                        ></div>
+                    </div>
+                    <div className="text-right text-[10px] font-bold text-indigo-600/90 tracking-wide">
+                        {phanTramMatDo.toFixed(1)}% Đang sử dụng
+                    </div>
+                </div>
+            </>
+        ) : (
+            /* ================= GIAO DIỆN KHÔNG GIAN PHÒNG HỌP ================= */
+            <>
+                {/* Trạng thái phòng */}
+                <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-600">Trạng thái sử dụng:</span>
+                    <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200/60 px-2.5 py-1 rounded-full flex items-center gap-1.5 animate-pulse shadow-3xs">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                        {
+                            id_hientai ==="" ? 'Phòng đang trống' : ' Đang có lịch họp'
+                        }
+                    </span>
+                </div>
+
+                {/* Khung giờ bận kế tiếp */}
+                <div className="flex items-center justify-between p-2.5 bg-white border border-slate-200/60 rounded-xl text-[11px] font-bold shadow-3xs">
+             {gioketiep && typeof gioketiep === 'object' && 'KHUNG_BATDAU' in gioketiep && (
+    <>
+        <span className="text-slate-500 flex items-center">
+            <i className="fa-regular fa-clock mr-2 text-amber-500 text-sm"></i>
+            Lịch bận kế tiếp:
+        </span>
+        <span className="font-mono text-slate-700 bg-slate-50 border border-slate-200/50 px-2 py-0.5 rounded-md">
+            {fun.formatTime(gioketiep.KHUNG_BATDAU)} {" - "}{fun.formatTime(gioketiep.KHUNG_KETTHUC)}
+        </span>
+    </>
+)}
+                
+                </div>
+            </>
+        )}
+    </div>
+</div>
                         {/* HIỆU SUẤT HOẠT ĐỘNG (DỮ LIỆU ĐỘNG) */}
                         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
                             <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest"><i className="fa-solid fa-chart-pie mr-1 text-indigo-500"></i> Hiệu suất hoạt động</h3>

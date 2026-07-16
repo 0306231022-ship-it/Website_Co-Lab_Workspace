@@ -4,6 +4,8 @@ import KhongGianModel from '../models/KhongGianModel.js';
 import DatLichModel from '../models/LichDatModel.js';
 import GheModel from '../models/gheModel.js';
 import moment from 'moment'
+import { io } from '../server.js';
+import hoadonModel from '../models/hoadonModel.js';
 export default class LichDatController{
     static async DatLich(req,res){
         const dulieu = req.body;
@@ -209,7 +211,6 @@ export default class LichDatController{
     static async ChiTiet_LichDat_theoIDDL(req, res) {
         const id = req.query.id;
         const userId = req.user.id;
-        console.log(id)
         try {
             const kiemtra = await DatLichModel.kiemtraid(id);
             if (!kiemtra) {
@@ -238,7 +239,6 @@ export default class LichDatController{
                     cHITiet_NguoiDung: lichDat.ChiTiet_NguoiDung,
                     ChiTiet_ThoiGian: lichDat.ChiTiet_ThoiGian,
                     ChiTiet_Ghe_KhongGian: lichDat.ChiTiet_Ghe_KhongGian,
-                    ChiTiet_HoaDon: lichDat.ChiTiet_HoaDon
                 } 
             });
         } catch (error) {
@@ -443,5 +443,101 @@ export default class LichDatController{
             });
         }
     }
-
+    static async Checkin(req,res){
+        const id = req.query.id;
+        try {
+            const kiemtra = await DatLichModel.kiemtraid(id);
+            if(!kiemtra){
+                io.to(id).emit('thong-bao-checkin', {
+                    success: false,
+                    message: "Không tồn tại lịch đặt này!"
+                });
+                res.end(); 
+                return;
+            }
+            const laythong_kiemtra = await DatLichModel.ThongTin(id);
+            const thongtin_batdau = moment(laythong_kiemtra.KHUNG_BATDAU).valueOf();
+            const timeHienTai = new Date().getTime();
+            const mocCheckInSom = thongtin_batdau - (15 * 60 * 1000);
+            if (timeHienTai >= mocCheckInSom && timeHienTai <= thongtin_batdau) {
+                //xem vị trị người đặt có đang tróng hay không
+                const kiemtra_ckeckin= await DatLichModel.kiemtra_trangthai_lichdat(id);
+                if(!kiemtra_ckeckin){
+                    io.to(id).emit('thong-bao-checkin', {
+                        success: false,
+                        message: "Hiện tại, lịch đặt của bạn đang được sử dụng cho khách trước. Vui lòng check-in sau ít phút!"
+                    });
+                }
+               const check = await DatLichModel.checkin(id);
+               if(!check){
+                    io.to(id).emit('thong-bao-checkin', {
+                        success: false,
+                        message: "Check-in thất bại! Vui lòng thực hiện trong giây lát"
+                    });
+               }
+               const loai = await KhongGianModel.LayLoai_KG(id)
+               
+               io.to(`space_type_${loai}_id_${id}`).emit('update_schedule', {success:true});
+               io.to(id).emit('thong-bao-checkin', {
+                    success: true,
+                    message: "Check-in thành công!"
+                });
+            } else if (timeHienTai < mocCheckInSom) {
+                io.to(id).emit('thong-bao-checkout', {
+                    success: false,
+                    message: "Check-in trước 15p!"
+                 });
+                 res.end();
+                return;
+            } 
+        } catch (error) {
+              return res.status(401).json({
+                success: false,
+                message: 'Check-in thất bại: ' + error.message
+            });
+        }
+    }
+    static async Checkout(req,res){
+        const id = req.query.id;
+        try {
+            const kiemtra = await DatLichModel.kiemtraid(id);
+            if(!kiemtra){
+                io.to(id).emit('thong-bao-checkout', {
+                    success: true,
+                    message: "Vui lòng kiểm tra thông tin"
+                });
+                res.end(); 
+                return;
+            }
+               const check = await DatLichModel.checkout(id);
+               if(!check){
+                    io.to(id).emit('thong-bao-checkout', {
+                        success: false,
+                        message: "Check-out thất bại!"
+                    });
+                    res.end();
+                     return;
+               }
+               const kiemtra_hoadon = await hoadonModel.kiemtraid_hoadon(id);
+               if(!kiemtra_hoadon){
+                     io.to(id).emit('thong-bao-checkout', {
+                        success: true,
+                        message: "Bạn chưa thanh toán cho lịch này, Vui lòng thanh toán để có trải nghiệm tốt hơn!"
+                    });
+                    res.end(); 
+                    return;
+               }
+              io.to(id).emit('thong-bao-checkout', {
+                success: true,
+                message: "Check-out thành công!"
+            });
+            res.end();
+            return;
+        } catch (error) {
+              return res.status(401).json({
+                success: false,
+                message: 'Check-out thất bại: ' + error.message
+            });
+        }
+    }
 }

@@ -18,7 +18,6 @@ import ThemGhe from "@/app/Modal/ThemGhe";
 import ThongTinGhe from "@/app/Modal/ThongTinGhe";
 import ChinhSuaGhe from "@/app/Modal/ChinhSuaGhe";
 import ThongTin from "@/app/Modal/ThongTin_Ghe_Dat";
-import ThanhToan from "@/app/Modal/ThanhToan";
 import Themthietbi from "@/app/Modal/ThemThietBi";
 import ChinhSuaThietBi from "@/app/Modal/ChinhSuaThietBi";
 
@@ -40,7 +39,6 @@ const MODAL_REGISTRY = {
     'ThongTinGhe' : ThongTinGhe,
     'ChinhSuaGhe' : ChinhSuaGhe,
     'ThongTin_ghe' : ThongTin,
-    'ThanhToan' : ThanhToan,
     'ThemThietBi' : Themthietbi,
     'ChinhSuaThietBi' : ChinhSuaThietBi
 
@@ -131,7 +129,6 @@ export function AppMDProvider({ children }: { children: ReactNode }) {
                                w-auto md:min-w-[400px] max-w-[95vw] max-h-[90vh]"
                     style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}
                 >
-                    {/* --- HEADER --- */}
                     <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white shrink-0 sticky top-0 z-10 gap-8">
                         <div className="flex items-center gap-4">
                             {modalStack.length > 1 && (

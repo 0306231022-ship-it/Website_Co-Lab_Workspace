@@ -175,18 +175,7 @@ export default function BaoCaoThongKe() {
             <div className="p-6 max-w-7xl w-full mx-auto space-y-6">
 
                 {/* 4 CARD TỔNG QUAN */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                    <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
-                        <div>
-                            <p className="text-sm text-gray-400 font-medium uppercase">Tổng Chi Nhánh</p>
-                            <h3 className="text-2xl font-bold mt-1">{loading ? "..." : (tongQuan?.TongChiNhanh || 0)}</h3>
-                            <span className="text-xs text-emerald-500 font-semibold"><i className="fa-solid fa-arrow-up"></i> +{tongQuan?.ChiNhanhMoi || 0} mới {kyThongKe.toLowerCase()}</span>
-                        </div>
-                        <div className="w-12 h-12 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
-                            <i className="fa-solid fa-network-wired"></i>
-                        </div>
-                    </div>
-                </div>
+                
 
                 {/* BIỂU ĐỒ */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -153,10 +153,9 @@ export default class gheController {
 
             // Lấy ID_GHE từ body ra cùng các trường khác giống hệt create
             const { ID_GHE, TEN_GHE } = req.body;
+           
 
-            const updated = await GheModel.update(ID_GHE, {
-                TEN_GHE: TEN_GHE.trim(),
-            });
+            const updated = await GheModel.CapNhat_TenGhe(ID_GHE,TEN_GHE.trim());
 
             if (!updated) {
                 return res.status(404).json({ success: false, message: "Ghế không tồn tại hoặc dữ liệu không có thay đổi!" });

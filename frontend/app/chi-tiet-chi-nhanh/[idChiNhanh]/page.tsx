@@ -41,13 +41,11 @@ function ChiTietChiNhanh() {
         };
         if (idChiNhanh) fetchChiNhanh();
     }, [idChiNhanh]);
-
-    // Hàm gọi API lấy danh sách không gian (Phân trang + Bộ lọc)
     const fetchKhongGian = async (HanhDong: 'next' | 'prev' | 'search', trangChiDinh?: number) => {
         let trangMoi = page;
         if (HanhDong === 'next') trangMoi = page + 1;
         else if (HanhDong === 'prev') trangMoi = Math.max(page - 1, 1);
-        else if (HanhDong === 'search') trangMoi = 1; // Tìm kiếm thì reset về trang 1
+        else if (HanhDong === 'search') trangMoi = 1; 
         if (trangChiDinh) trangMoi = trangChiDinh;
     
         setPage(trangMoi);
@@ -167,7 +165,7 @@ function ChiTietChiNhanh() {
                                 >
                                     <option value="all">Tất cả loại không gian</option>
                                     <option value="1">Không gian chung</option>
-                                    <option value="2">Không gian họp</option>
+                                    <option value="0">Không gian họp</option>
                                 </select>
                                 <i className="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] pointer-events-none"></i>
                             </div>

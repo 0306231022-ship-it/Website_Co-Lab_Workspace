@@ -79,6 +79,8 @@ function CapTrangThietBi() {
             }
         } catch (error) {
             console.error("Lỗi khi cấp danh sách thiết bị:", error);
+        } finally {
+            setLoading(false)
         }
     };
 

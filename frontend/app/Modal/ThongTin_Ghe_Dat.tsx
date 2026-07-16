@@ -4,7 +4,7 @@ import * as ThongBao from "@/FUNCTION/ThongBao";
 import * as fun from '@/FUNCTION/function';
 import { Ghe } from '@/interface/ghe';
 import { LichDat} from '@/interface/LichDat';
-import { useModalContext } from "@/context/QuanLiMoal";
+
 
 interface LichDaDat{
     KHUNG_BATDAU:string,
@@ -18,8 +18,7 @@ function ThongTin({DuLieu} : { DuLieu : LichDat}) {
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
-  };
-   const { OpenMoDal } = useModalContext();
+  }; 
   const todayDate = getTodayString();
   const [ngayDat, setNgayDat] = useState(todayDate);
   const [gioBatDau, setGioBatDau] = useState<string>('');
@@ -95,8 +94,15 @@ function ThongTin({DuLieu} : { DuLieu : LichDat}) {
             return;
         }
         if(DatLich.success){
-            ThongBao.ThongBao_ThanhCong(DatLich.message)
-            OpenMoDal({id:DatLich.ID_LICHDAT, TongTien: tongGio * Number(String(ThongTinGhe?.DON_GIA)) },{TenTrang:'ThanhToan'})
+            const XacNhan = await ThongBao.ThongBao_XacNhanTT('Đặt hàng thành công!, bạn có muốn thanh toán luôn không?');
+            if(!XacNhan) return;
+            const chuyenhuong_thanhtoan = await api.CallAPI(undefined,{url:`/NguoiDung/ThanhToan?id=${DatLich.ID_LICHDAT}`, PhuongThuc:2});
+            if (chuyenhuong_thanhtoan && chuyenhuong_thanhtoan.success && chuyenhuong_thanhtoan.paymentUrl) {
+               window.open(chuyenhuong_thanhtoan.paymentUrl, '_blank')
+            } else {
+              ThongBao.ThongBao_CanhBao(chuyenhuong_thanhtoan?.message || "Không thể khởi tạo link thanh toán từ hệ thống.");
+            }
+            
         }
         if(DatLich.success===false){
             ThongBao.ThongBao_Loi(DatLich.message)

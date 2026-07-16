@@ -7,7 +7,7 @@ export default class GheModel {
             
              const [rows] = await execute(`
            SELECT 
-    g.*, -- Lấy tất cả thuộc tính nguyên bản của bảng ghế (ID_GHE, TEN_GHE, ID_DANH_MUC, ID_KHONG_GIAN, TRANG_THAI...)
+    g.*,
     
     CASE 
         WHEN ld.ID_LICH_DAT IS NOT NULL THEN 1  
@@ -17,7 +17,7 @@ FROM ghe g
 LEFT JOIN 
     lichdat ld ON g.ID_GHE = ld.ID_GHE 
     AND NOW() BETWEEN ld.KHUNG_BATDAU AND ld.KHUNG_KETTHUC
-    AND ld.TRANG_THAI = 1 
+    AND ld.TRANG_THAI = 1 AND ld.THOIGIAN_VAO IS NOT NULL
 WHERE 
     g.ID_KHONG_GIAN = ? 
 ORDER BY 
@@ -29,8 +29,6 @@ ORDER BY
             throw new Error("Không thể kết nối đến cơ sở dữ liệu để lấy danh sách ghế!");
         }
     }
-
-    // 2. Lấy chi tiết một chiếc ghế theo ID
     static async getById(id) {
         try {
            const[rows]=await execute(`
@@ -65,7 +63,10 @@ ORDER BY
             console.error(" Lỗi Database trong GheModel.create:", error.message);
             throw new Error("Không thể thêm ghế mới vào cơ sở dữ liệu!");
         }
-    }           
+    }
+
+    
+    
 
     // 4. Cập nhật thông tin ghế
  static async update(idGia, tenGia, moTa, soTienMoi, idDanhMucGhe, phuongThuc) {
@@ -186,6 +187,19 @@ ORDER BY
         } catch (error) {
              console.error(` Lỗi Database:`, error.message);
             throw new Error("Không thể truy vấn cập nhật trạng thái ghe!");
+        }
+    }
+    static async CapNhat_TenGhe(id,ten){
+        try {
+            const [capnhat] = await execute(`
+                UPDATE ghe
+                SET TEN_GHE =? 
+                WHERE ID_GHE = ?
+                `,[ten,id]);
+            return capnhat.affectedRows>0;
+        } catch (error) {
+              console.error(` Lỗi Database:`, error.message);
+            throw new Error("Không thể truy vấn cập nhật tên ghế!");
         }
     }
 }

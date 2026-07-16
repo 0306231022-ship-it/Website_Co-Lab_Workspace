@@ -22,7 +22,10 @@ export default class hoadonModel {
             VALUES(?,1,?)`,
         [giatien, idlichdat],
       );
-      return create.affectedRows > 0;
+      if (create.affectedRows > 0) {
+         return create.insertId; // Trả về ID tự tăng (ID_HOA_DON) vừa sinh ra
+      }
+      return null;
     } catch (error) {
       console.error(" Lỗi Database trong hoadonModel.create:", error.message);
       throw new Error("Không thể thêm hóa đơn mới vào cơ sở dữ liệu!");
@@ -95,5 +98,19 @@ export default class hoadonModel {
       throw new Error("Không thể lấy dữ liệu thống kê tổng quan từ cơ sở dữ liệu!");
     }
   }
+
+    static async DoanhThu(){
+        try {
+            const [kq] = await execute(`
+              SELECT COALESCE(SUM(GIA_TIEN), 0) AS DoanhThuTamTinh 
+              FROM hoadon 
+              WHERE MONTH(NGAY_TAO) = MONTH(CURDATE()) AND YEAR(NGAY_TAO) = YEAR(CURDATE()) AND TRANG_THAI <> 0;
+              `,[]);
+            return kq[0].DoanhThuTamTinh;
+        } catch (error) {
+           throw new Error("Không thể truy vấn thông tin doanh thu!");
+        }
+    }
+
 }
 

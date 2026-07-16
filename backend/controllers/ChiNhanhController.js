@@ -4,6 +4,7 @@ import ChiNhanhModel from "../models/ChiNhanhModel.js";
 import KhongGianModel from "../models/KhongGianModel.js";
 import { xoaFileCu } from "../function.js";
 import { body, query, validationResult } from "express-validator";
+import DatLichModel from "../models/LichDatModel.js";
 
 export default class ChiNhanhController {
   static async DanhSach_ChiNhanh(req, res) {
@@ -396,6 +397,22 @@ export default class ChiNhanhController {
         success: false,
         message: "Lấy thống kê hiệu suất thất bại: " + error.message,
       });
+    }
+  }
+  static async thongtin_chinhanh_khonggian(req,res){
+    const id = req.query.id;
+    try {
+      const kiemtra = await DatLichModel.kiemtraid(id);
+      if(!kiemtra){
+        return res.status(401).json({
+          success:false,
+          message:'không tìm thấy thông tin lịch đặt!'
+        })
+      }
+      
+    } catch (error) {
+      
+
     }
   }
 }

@@ -3,7 +3,7 @@ import * as api from '@/API/API';
 import React, { useState, useEffect } from "react";
 import * as ThongBao from '@/FUNCTION/ThongBao';
 import * as fun from '@/FUNCTION/function';
-
+import Link from "next/link";
 interface ThongKe {
     TONG: number;
     HOATDONG: number;
@@ -203,21 +203,14 @@ function QuanLiDatDon() {
                                             </div>
                                         </td>
                                         <td className="py-4 px-5 font-bold text-slate-900">
-                                            {item.GIA_TIEN !== null ? `${item.GIA_TIEN.toLocaleString('vi-VN')}đ` : 'Chưa có hóa đơn'}
+                                            {item.GIA_TIEN !== null ? fun.formatCurrency(String(item.GIA_TIEN)) : 'Chưa có hóa đơn'}
                                         </td>
                                         <td className="py-4 px-5">
                                             {renderBadgeTrangThai(item.TRANG_THAI)}
                                         </td>
                                         <td className="py-4 px-5">
                                             <div className="flex items-center justify-center space-x-2">
-                                                {item.TRANG_THAI === 'Chờ xác nhận' ? (
-                                                    <>
-                                                        <button title="Xác nhận duyệt đơn" className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition cursor-pointer"><i className="fa-solid fa-circle-check text-sm"></i></button>
-                                                        <button title="Huỷ đơn" className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition cursor-pointer"><i className="fa-solid fa-circle-xmark text-sm"></i></button>
-                                                    </>
-                                                ) : (
-                                                    <button title="Xem chi tiết" className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition cursor-pointer"><i className="fa-solid fa-eye text-sm"></i></button>
-                                                )}
+                                             <Link href={`/admin/QuanLiDatDon/ch-tiet-don/${item.ID_LICH_DAT}`} className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition cursor-pointer"><i className="fa-solid fa-eye text-sm"></i></Link>
                                             </div>
                                         </td>
                                     </tr>
