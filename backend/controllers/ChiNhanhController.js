@@ -376,6 +376,13 @@ export default class ChiNhanhController {
   }
   static async thongtin_chinhanh_khonggian(req,res){
     const id = req.query.id;
+    console.log(id)
+    if(!id){
+      return res.status(401).json({
+        success:false,
+        message:'Vui lòng kiểm tra lại thông tin!'
+      })
+    }
     try {
       const kiemtra = await DatLichModel.kiemtraid(id);
       if(!kiemtra){
@@ -384,8 +391,16 @@ export default class ChiNhanhController {
           message:'không tìm thấy thông tin lịch đặt!'
         })
       }
-      
+      const ketqua = await ChiNhanhModel.thongtin_chinhanh_khonggian(id);
+      return res.status(200).json({
+        success:true,
+        dulieu:ketqua
+      })
     } catch (error) {
+       return res.status(500).json({
+        success: false,
+        message: "Không tìm thấy thông tin cần xem: " + error.message,
+      });
     }
   }
       

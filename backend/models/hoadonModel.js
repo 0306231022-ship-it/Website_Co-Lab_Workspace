@@ -65,6 +65,18 @@ export default class hoadonModel {
            throw new Error("Không thể truy vấn thông tin doanh thu!");
         }
     }
+    static async id(id){
+      try {
+        const [id_hd] = await execute(`
+          SELECT ID_HOADON 
+          FROM hoadon
+          WHERE ID_LICHDAT = ?
+          `,[id]);
+        return id_hd.length>0 ? id_hd[0].ID_HOADON : null;
+      } catch (error) {
+         throw new Error("Database query failed: " + error.message);
+      }
+    }
 
   
 }

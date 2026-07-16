@@ -6,6 +6,7 @@ import GheModel from '../models/gheModel.js';
 import moment from 'moment'
 import { io } from '../server.js';
 import hoadonModel from '../models/hoadonModel.js';
+import ThanhToanModal from '../models/ThanhToanModal.js';
 export default class LichDatController{
     static async DatLich(req,res){
         const dulieu = req.body;
@@ -537,6 +538,105 @@ export default class LichDatController{
               return res.status(401).json({
                 success: false,
                 message: 'Check-out thất bại: ' + error.message
+            });
+        }
+    }
+    static async thongtin_khachhang(req,res){
+        const id = req.query.id;
+        try {
+            const kiemtra = await DatLichModel.kiemtraid(id);
+            if(!kiemtra){
+                return res.status(401).json({
+                    success:false,
+                    message:'Không tìm thấy thông tin lịch đặt'
+                })
+            }
+            const thongtin = await DatLichModel.thongtin_khachhang(id);
+            if(thongtin=== null){
+                return res.status(401).json({
+                    success:false,
+                    message: 'Không tin thấy thông tin khách hàng!'
+                })
+            }
+            const nguoidung = await NguoiDungModel.findByid(thongtin);
+            return res.status(200).json({
+                success:true,
+                dulieu: {
+                    TENND: nguoidung.TENND,
+                    EMAIL:nguoidung.EMAIL,
+                    HINH_ANH:nguoidung.HINH_ANH
+                }
+            })
+        } catch (error) {
+             return res.status(401).json({
+                success: false,
+                message: 'Lấy thông tin người dùng thất bại: ' + error.message
+            });
+        }
+    }
+    static async thongtin_hoatdong(req,res){
+        const id = req.query.id;
+        try {
+            if(!id){
+                return res.status(401).json({
+                    success:false,
+                    message:'Vui lòng kiểm tra lại thông tin!'
+                })
+            }
+            const kiemtra = await DatLichModel.kiemtraid(id);
+            if(!kiemtra){
+                return res.status(401).json({
+                    success:false,
+                    message:'Không tồn tại lịch đặt này!'
+                })
+            }
+            const ketqua = await DatLichModel.thongtin_hoatdong(id);
+            return res.status(200).json({
+                success:true,
+                dulieu:ketqua
+            })
+        } catch (error) {
+             return res.status(401).json({
+                success: false,
+                message: 'Lấy thông tin đặt đơn thất bại: ' + error.message
+            });
+        }
+    }
+    static async laygiatien_thanhtoan(req,res){
+        const id = req.query.id;
+        try {
+             if(!id){
+                return res.status(401).json({
+                    success:false,
+                    message:'Vui lòng kiểm tra lại thông tin!'
+                })
+            }
+            const kiemtra = await DatLichModel.kiemtraid(id);
+            if(!kiemtra){
+                return res.status(401).json({
+                    success:false,
+                    message:'Không tồn tại lịch đặt này!'
+                })
+            }
+            const giatien = await DatLichModel.DonGia_idlichdat(id);
+            const id_hd = await hoadonModel.id(id);
+            if(id_hd===null){
+                return res.status(200).json({
+                    success:true,
+                    GiaTien:giatien,
+                    ThanhToan: null
+                })
+            }
+            const id_thanhtoan = await ThanhToanModal.laygiatien_thanhtoan(id_hd);
+            return res.status(200).json({
+                success:true,
+                GiaTien:giatien,
+                ThanhToan:id_thanhtoan
+            })
+        } catch (error) {
+             return res.status(401).json({
+                success: false,
+                message: 'Lấy thông tin đặt đơn thất bại: ' + error.message
             });
         }
     }

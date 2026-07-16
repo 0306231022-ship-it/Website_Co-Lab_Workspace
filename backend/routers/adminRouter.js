@@ -87,6 +87,9 @@ adminRouter.get('/lichdatghe_theothoigian', LichDatController.LichDatGhe_TheoNga
 adminRouter.get('/DanhSach_theo_khonggian', LichDatController.DanhSachLichDat_HienTai_KhongGian);
 adminRouter.get('/lichdatkhonggian_theothoigian',LichDatController.LichDatKhongGian_TheoNgay);
 adminRouter.get('/thongke_lichdat', LichDatController.thongke_lichdat);
+adminRouter.get('/thongtin_khachhang' ,LichDatController.thongtin_khachhang);
+adminRouter.get('/thongtin_hoatdong' , LichDatController.thongtin_hoatdong);
+adminRouter.get('/laygiatien_thanhtoan' ,LichDatController.laygiatien_thanhtoan);
 //==========================================
 //QUẢN LÝ GHẾ
 adminRouter.post("/themghe",upload.none(),gheController.createGhe);

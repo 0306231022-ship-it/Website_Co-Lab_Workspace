@@ -678,6 +678,47 @@ return tongTien;
         return false;
     }
 }
+    static async thongtin_khachhang(id){
+        try {
+            const [truyvan] = await execute(`
+                SELECT IDND
+                FROM lichdat
+                WHERE ID_LICH_DAT = ?
+                `,[id]);
+           return truyvan.length>0 ? truyvan[0].IDND : null;
+        } catch (error) {
+             throw new Error("Database query failed: " + error.message);
+        }
+    }
+    static async thongtin_hoatdong(id){
+        try {
+            const [truycvan] = await execute(`
+                SELECT 
+    ld.ID_LICH_DAT,
+    ld.TRANG_THAI AS MA_TRANG_THAI,
+    CASE 
+        WHEN ld.TRANG_THAI = 1 AND ld.THOIGIAN_VAO IS NOT NULL AND ld.THOIGIAN_RA IS NULL THEN N'Đang sử dụng'
+        WHEN ld.TRANG_THAI = 2 THEN N'Đã hủy'
+        WHEN ld.THOIGIAN_RA IS NOT NULL THEN N'Đã trả phòng'
+        ELSE N'Chờ sử dụng'
+    END AS TEN_TRANG_THAI,
+    IFNULL(hd.GIA_TIEN, 0) AS TONG_GIA_TRI_DON,
+    ld.NGAY_TAO AS MOC_DAT_DON_THANH_CONG,
+    tt.NGAY_THANH_TOAN AS MOC_DA_THANH_TOAN_ONLINE,
+    ld.THOIGIAN_VAO AS MOC_DA_NHAN_PHONG,
+    ld.THOIGIAN_RA AS MOC_TRA_PHONG
+FROM lichdat ld
+LEFT JOIN hoadon hd ON ld.ID_LICH_DAT = hd.ID_LICHDAT
+LEFT JOIN thanhtoan tt ON hd.ID_HOADON = tt.ID_HOA_DON AND tt.TRANG_THAI = 1
+WHERE ld.ID_LICH_DAT = ?
+LIMIT 1;
+                
+                `,[id]);
+            return truycvan[0]
+        } catch (error) {
+             throw new Error("Database query failed: " + error.message);
+        }
+    }
 
 
 
