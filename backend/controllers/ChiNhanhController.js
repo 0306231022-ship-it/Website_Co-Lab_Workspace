@@ -373,4 +373,29 @@ export default class ChiNhanhController {
       });
     }
   }
+  // [GET] /api/admin/chinhanh/thongke-hieusuat
+  static async getThongKeHieuSuat(req, res) {
+    try {
+      const kyThongKe = req.query.ky || "Tháng này";
+      
+      const data = await ChiNhanhModel.ThongKeHieuSuat(kyThongKe);
+      
+      if (!data) {
+        return res.status(500).json({
+          success: false,
+          message: "Không thể lấy thống kê hiệu suất chi nhánh!",
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        data: data,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Lấy thống kê hiệu suất thất bại: " + error.message,
+      });
+    }
+  }
 }

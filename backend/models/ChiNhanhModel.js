@@ -169,4 +169,45 @@ LIMIT ? OFFSET ?;`,
       throw new Error("Database query failed: " + error.message);
     }
   }
+  // [GET] THỐNG KÊ HIỆU SUẤT CHI NHÁNH
+  static async ThongKeHieuSuat(kyThongKe) {
+    try {
+      // JOIN các bảng: chinhanh -> khonggian -> lichdat -> hoadon
+      const sql = `
+        SELECT 
+            c.ID_CHI_NHANH, 
+            c.TEN_CHI_NHANH, 
+            'Chưa cập nhật' as NGUOI_QUAN_LY,
+            SUM(h.GIA_TIEN) as TONG_DOANH_THU
+        FROM chinhanh c
+        LEFT JOIN khonggian kg ON c.ID_CHI_NHANH = kg.ID_CHI_NHANH
+        LEFT JOIN lichdat ld ON kg.ID_KHONG_GIAN = ld.ID_KHONG_GIAN
+        LEFT JOIN hoadon h ON ld.ID_LICH_DAT = h.ID_LICHDAT AND h.TRANG_THAI = 1
+        GROUP BY c.ID_CHI_NHANH, c.TEN_CHI_NHANH
+      `;
+      
+      const [rows] = await execute(sql, []);
+
+      // Mức doanh thu mục tiêu (Ví dụ: 1 Tỷ / chi nhánh)
+      const mucTieu = 1000000000; 
+
+      return rows.map(row => {
+        let doanhThu = row.TONG_DOANH_THU || 0;
+        let tienDo = Math.round((doanhThu / mucTieu) * 100);
+        
+        return {
+          ID_CHI_NHANH: row.ID_CHI_NHANH,
+          TEN_CHI_NHANH: row.TEN_CHI_NHANH,
+          NGUOI_QUAN_LY: row.NGUOI_QUAN_LY,
+          TONG_DOANH_THU: doanhThu,
+          // Đảm bảo tiến độ hiển thị tối đa là 100% trên giao diện UI
+          TIEN_DO: tienDo > 100 ? 100 : tienDo 
+        };
+      });
+
+    } catch (error) {
+      console.error("Lỗi Database trong ChiNhanhModel.ThongKeHieuSuat:", error.message);
+      throw new Error("Không thể lấy thống kê hiệu suất chi nhánh từ cơ sở dữ liệu!");
+    }
+  }
 }

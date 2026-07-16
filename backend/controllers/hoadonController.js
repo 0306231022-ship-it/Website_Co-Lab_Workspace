@@ -108,4 +108,30 @@ export default class hoadonController {
       res.status(500).json({ success: false, message: error.message });
     }
   }
+  // [GET] /api/admin/hoadon/thongke-tongquan
+  static async getThongKeTongQuan(req, res) {
+    try {
+      // Lấy kỳ thống kê từ query, mặc định là "Tháng này" nếu không truyền
+      const kyThongKe = req.query.ky || "Tháng này";
+      
+      const data = await hoadonModel.ThongKeTongQuan(kyThongKe);
+      
+      if (!data) {
+        return res.status(500).json({
+          success: false,
+          message: "Không thể lấy dữ liệu thống kê tổng quan!",
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        data: data,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Lấy thống kê tổng quan thất bại: " + error.message,
+      });
+    }
+  }
 }

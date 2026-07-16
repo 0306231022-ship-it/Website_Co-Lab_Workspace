@@ -110,5 +110,9 @@ adminRouter.post("/themgiamoi",upload.none(),giaController.createGia);
 adminRouter.get("/layDS_Gia",giaController.getAllGia);
 adminRouter.get('/ChonGia' , giaController.LayBangGia_KhongGian);
 
+
+adminRouter.get("/thongke-tongquan",hoadonController.getThongKeTongQuan);
+adminRouter.get("/thongke-hieusuat",ChiNhanhController.getThongKeHieuSuat);
 console.log(" adminRouter loaded");
 export default adminRouter;
+

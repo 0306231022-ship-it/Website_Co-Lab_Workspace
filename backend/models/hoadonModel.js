@@ -55,5 +55,45 @@ export default class hoadonModel {
             throw new Error("Không thể truy vấn thông tin hóa đơn!");
         }
     }
+    // [GET] THỐNG KÊ TỔNG QUAN
+  static async ThongKeTongQuan(kyThongKe) {
+    try {
+      // 1. Lấy tổng doanh thu và tổng đơn hàng (Chỉ tính hóa đơn đã thanh toán - Giả sử TRANG_THAI = 1)
+      const [doanhThu] = await execute(
+        `SELECT 
+            SUM(GIA_TIEN) as DoanhThuThang,
+            COUNT(ID_HOADON) as TongDonHang
+         FROM hoadon 
+         WHERE TRANG_THAI = 1`, 
+         [] // Bạn có thể thêm biến kyThongKe vào đây để lọc ngày tháng (WHERE NGAY_TAO...)
+      );
+
+      // 2. Lấy tổng số lượng chi nhánh
+      const [chiNhanh] = await execute(
+        `SELECT COUNT(*) as TongChiNhanh FROM chinhanh`, 
+        []
+      );
+
+      // 3. Lấy tổng số khách hàng (Giả sử dựa vào bảng nguoidung, bạn điều chỉnh WHERE LOAIND cho khớp)
+      const [khachHang] = await execute(
+        `SELECT COUNT(*) as KhachHangMoi FROM nguoidung`, 
+        []
+      );
+
+      return {
+        TongChiNhanh: chiNhanh[0]?.TongChiNhanh || 0,
+        ChiNhanhMoi: 0, 
+        DoanhThuThang: doanhThu[0]?.DoanhThuThang || 0,
+        PhanTramDoanhThu: 0, 
+        TongDonHang: doanhThu[0]?.TongDonHang || 0,
+        PhanTramDonHang: 0,
+        KhachHangMoi: khachHang[0]?.KhachHangMoi || 0,
+        PhanTramKhachHang: 0
+      };
+    } catch (error) {
+      console.error("Lỗi Database trong hoadonModel.ThongKeTongQuan:", error.message);
+      throw new Error("Không thể lấy dữ liệu thống kê tổng quan từ cơ sở dữ liệu!");
+    }
+  }
 }
 
