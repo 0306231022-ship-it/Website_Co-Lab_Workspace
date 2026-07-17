@@ -2,7 +2,7 @@ import { execute } from "../config/db.js";
 
 export default class thongBaoModel {
 
-    // 1. Lấy danh sách thông báo phân trang chung (Admin quản lý)
+  
     static async getAll(offset, limit) {
         try {
            
@@ -26,12 +26,12 @@ export default class thongBaoModel {
                 }
             };
         } catch (error) {
-            console.error("❌ Lỗi Database trong thongBaoModel.getAll:", error.message);
+            console.error(" Lỗi Database trong thongBaoModel.getAll:", error.message);
             throw new Error("Không thể lấy danh sách thông báo từ cơ sở dữ liệu!");
         }
     }
 
-    // 2. Lấy danh sách thông báo PHÂN TRANG theo ID người dùng (Dùng cho trang cá nhân/Frontend)
+    
     static async getByUserId(idnd, offset, limit) {
         try {
             
@@ -54,12 +54,11 @@ export default class thongBaoModel {
                 }
             };
         } catch (error) {
-            console.error(`❌ Lỗi Database trong thongBaoModel.getByUserId (${idnd}):`, error.message);
+            console.error(` Lỗi Database trong thongBaoModel.getByUserId (${idnd}):`, error.message);
             throw new Error("Không thể lấy thông tin thông báo của người dùng này!");
         }
     }
 
-    // 3. Tạo mới thông báo (Mặc định trạng thái = 0: Chưa đọc, tự động sinh thời gian thực)
     static async create(tieuDe, noiDung, loaiThongBao, idnd) {
         try {
             const [result] = await execute(
@@ -69,12 +68,12 @@ export default class thongBaoModel {
             );
             return result.affectedRows > 0;
         } catch (error) {
-            console.error("❌ Lỗi Database trong thongBaoModel.create:", error.message);
+            console.error(" Lỗi Database trong thongBaoModel.create:", error.message);
             throw new Error("Không thể thêm thông báo mới!");
         }
     }
 
-    // 4. Xóa 1 thông báo theo ID_THONGBAO
+    
     static async deleteById(idThongBao) {
         try {
             const [result] = await execute("DELETE FROM thongbao WHERE ID_THONGBAO = ?", [idThongBao]);
@@ -85,18 +84,18 @@ export default class thongBaoModel {
         }
     }
 
-    // 5. Xóa tất cả thông báo của 1 người dùng theo IDND
+    
     static async deleteAllByUserId(idnd) {
         try {
             const [result] = await execute("DELETE FROM thongbao WHERE IDND = ?", [idnd]);
             return result.affectedRows>0;
         } catch (error) {
-            console.error(`❌ Lỗi Database trong thongBaoModel.deleteAllByUserId (${idnd}):`, error.message);
+            console.error(` Lỗi Database trong thongBaoModel.deleteAllByUserId (${idnd}):`, error.message);
             throw new Error("Không thể xóa toàn bộ thông báo của người dùng này!");
         }
     }
 
-    // Kiểm tra ID thông báo tồn tại thực tế
+ 
     static async testId(idThongBao) {
         try {
             const [rows] = await execute("SELECT ID_THONGBAO FROM thongbao WHERE ID_THONGBAO = ?", [idThongBao]);

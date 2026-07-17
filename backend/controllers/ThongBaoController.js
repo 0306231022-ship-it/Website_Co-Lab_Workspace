@@ -4,9 +4,7 @@ import { body, query, validationResult } from "express-validator";
 
 export default class thongBaoController {
 
-    // ========================================================
-    // 1. [GET] /api/admin/thongbao/user (CHI TIẾT THEO IDND + PHÂN TRANG)
-    // ========================================================
+
     static async getThongBaoByUser(req, res) {
         const userId = req.user.id;
 
@@ -56,9 +54,7 @@ export default class thongBaoController {
         }
     }
 
-    // ========================================================
-    // 4. [DELETE] /api/admin/thongbao/all (XÓA TOÀN BỘ THEO IDND)
-    // ========================================================
+   
     static async deleteAllThongBaoByUserId(req, res) {
         try {
              const userId = req.user.id;

@@ -49,14 +49,11 @@ function ChinhSuaKhongGian() {
             if (laydl.success) {
                 const dataKg = laydl.dulieu?.KhongGian?.[0];
                 
-                // Tránh lỗi khi alert chuỗi null/undefined
-                if (laydl.dulieu?.LichDatCuoi) {
-                    alert(JSON.stringify(laydl.dulieu.LichDatCuoi));
-                }
+     
 
                 setkhonggian(dataKg || null);
                 
-                // Sửa tại đây: An toàn 100% kể cả khi LichDatCuoi không tồn tại
+
                 setLichDatCuoi(laydl.dulieu?.LichDatCuoi?.[0] || null);
                 
                 setTenKhongGian(dataKg?.TEN_KHONG_GIAN || "");

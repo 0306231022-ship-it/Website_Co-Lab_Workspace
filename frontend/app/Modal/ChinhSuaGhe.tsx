@@ -14,11 +14,10 @@ function ChinhSuaGhe({ DuLieu }: { DuLieu: gheProps }) {
     const [DanhMuc, setdanhmuc] = useState<DanhMucGhe[]>([]);
     const [ThongTin, setThongTin] = useState<Ghe | null>(null);
      const {  CloseMoDal } = useModalContext();
-    // States quản lý dữ liệu chỉnh sửa form
+   
     const [tenGhe, setTenGhe] = useState<string>('');
     const [idDanhMuc, setIdDanhMuc] = useState<number>(0);
 
-    // Tải dữ liệu ban đầu
     useEffect(() => {
         const laydl = async () => {
             try {
@@ -44,7 +43,7 @@ function ChinhSuaGhe({ DuLieu }: { DuLieu: gheProps }) {
         laydl();
     }, [DuLieu.id]);
 
-    // URL 1: Xử lý thay đổi tên ghế
+
     const handleDoiTen = async () => {
         if (!tenGhe.trim()) return ThongBao.ThongBao_Loi("Tên ghế không được để trống!");
         if(tenGhe===ThongTin?.TEN_GHE){
@@ -67,7 +66,7 @@ function ChinhSuaGhe({ DuLieu }: { DuLieu: gheProps }) {
         }
     };
 
-    // URL 2: Xử lý thay đổi danh mục ghế
+    
     const handleDoiDanhMuc = async () => {
         try {
             const formData = new FormData();
@@ -85,7 +84,7 @@ function ChinhSuaGhe({ DuLieu }: { DuLieu: gheProps }) {
         }
     };
 
-    // URL 3: Xử lý đổi trạng thái vận hành (1: Hoạt động, 2: Ngưng hoạt động)
+    
     const handleDoiTrangThai = async (statusHienTai: number) => {
         const XacNhan = await ThongBao.ThongBao_XacNhanTT('Bạn có muốn thay đổi trạng thái vận hành không?');
         if(!XacNhan) return;
@@ -109,7 +108,7 @@ function ChinhSuaGhe({ DuLieu }: { DuLieu: gheProps }) {
 
     return (
         <div className="w-full max-w-xl bg-white rounded-2xl overflow-hidden shadow-xs">
-            {/* Header thông tin vị trí cố định */}
+       
             <div className="p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
                 <div>
                     <h3 className="text-base font-black text-slate-800">Cấu hình thiết lập</h3>
@@ -121,7 +120,7 @@ function ChinhSuaGhe({ DuLieu }: { DuLieu: gheProps }) {
             </div>
 
             <div className="p-6 space-y-6">
-                {/* PHÂN ĐOẠN 1: CHỈNH SỬA TÊN */}
+              
                 <div className="space-y-2">
                     <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">
                         Tên ghế (Tên tài sản) <span className="text-rose-500">*</span>
@@ -149,7 +148,7 @@ function ChinhSuaGhe({ DuLieu }: { DuLieu: gheProps }) {
                     </div>
                 </div>
 
-                {/* PHÂN ĐOẠN 2: CHỈNH SỬA DANH MỤC */}
+              
                 <div className="space-y-2">
                     <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">
                         Danh mục ghế <span className="text-rose-500">*</span>
@@ -188,7 +187,7 @@ function ChinhSuaGhe({ DuLieu }: { DuLieu: gheProps }) {
                     </div>
                 </div>
 
-                {/* PHÂN ĐOẠN 3: ĐỔI TRẠNG THÁI VẬN HÀNH */}
+                
                 <div className="space-y-2 pt-2 border-t border-slate-100">
                     <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">Trạng thái vận hành hiện tại</label>
                     {ThongTin?.TRANG_THAI === 1 ? (
@@ -223,7 +222,7 @@ function ChinhSuaGhe({ DuLieu }: { DuLieu: gheProps }) {
                 </div>
             </div>
 
-            {/* Khối đóng modal */}
+           
             <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end">
                 <button type="button"  onClick={()=>{CloseMoDal()}} className="px-5 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl transition cursor-pointer">
                     Đóng cửa sổ

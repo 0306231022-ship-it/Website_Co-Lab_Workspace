@@ -1,13 +1,8 @@
-// backend/models/thietBiModel.js
-import {
-  execute,
-  beginTransaction,
-  rollbackTransaction,
-  commitTransaction,
-} from "../config/db.js";
+import {execute,beginTransaction,rollbackTransaction,commitTransaction,} 
+from "../config/db.js";
 
 export default class ThietBi {
-  // Mặc định nếu không truyền page thì là trang 1, không truyền limit thì lấy 10 cái
+ 
   static async getAll(offset, limit) {
     try {
       const [rows] = await execute("SELECT * FROM thietbi LIMIT ? OFFSET ?", [
@@ -37,7 +32,7 @@ export default class ThietBi {
     }
   }
 
-  // 2. Lấy thiết bị theo ID (Không cần LIMIT/OFFSET vì ID là duy nhất)
+
   static async getById(id) {
     console.log(id);
     try {
@@ -54,7 +49,7 @@ export default class ThietBi {
     }
   }
 
-  // 3. Thêm thiết bị mới
+ 
   static async create(tenThietBi, hinhAnh) {
     try {
       const [result] = await execute(
@@ -68,7 +63,7 @@ export default class ThietBi {
     }
   }
 
-  // 4. Cập nhật thiết bị
+  
   static async updateten(id, tenThietBi) {
     try {
       const [result] = await execute(
@@ -93,7 +88,7 @@ export default class ThietBi {
       throw new Error("Không thể cập nhật thông tin thiết bị!");
     }
   }
-  //kiểm tra id
+  
   static async testid(id) {
     try {
       const [rows] = await execute(

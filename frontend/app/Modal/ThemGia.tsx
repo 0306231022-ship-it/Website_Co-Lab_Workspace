@@ -50,7 +50,7 @@ export default function ThemGiaMoi() {
     >,
   ) => {
     const { name, value } = e.target;
-    setErr([]); // Xóa lỗi cũ khi người dùng bắt đầu nhập lại
+    setErr([]);
 
     setFormData((prev) => ({
       ...prev,
@@ -78,7 +78,7 @@ export default function ThemGiaMoi() {
 
     setLoading(true);
     try {
-      // Truyền submitData (đã là new FormData) vào API
+      
       const res = await api.CallAPI(submitData, {
         url: "/admin/themgiamoi",
         PhuongThuc: 1,

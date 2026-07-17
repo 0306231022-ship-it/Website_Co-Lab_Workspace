@@ -67,39 +67,43 @@ const io = new Server(server, {
 });
 
 io.on('connection', (socket) => {
-  
+    socket.on('join_space_room_seat' , (data)=>{
+       const { idKhongGian} = data;
+       const ten = `khonggian-${idKhongGian}_ghe`;
+       socket.join(ten);
+    })
+    socket.on('ChiTiet_LichDat', (data)=>{
+      const {idlichdat} = data;
+      const ten = `QuanLi_khunggio-${idlichdat}`;
+      socket.join(ten);
+    })
+    //ĐÃ CHWCK SOCKET phía trên
     socket.on('lich-dat', (idNguoiDung) => {
         socket.join(idNguoiDung); 
-        console.log(`lịch đặt ${idNguoiDung} đã vào phòng riêng thành công.`);
     });
 
     socket.on('thong-bao-thanhtoan', (idNguoiDung) => {
         socket.join(idNguoiDung); 
-        console.log(`lịch đặt ${idNguoiDung} đã vào phòng riêng.`);
     });
 
     socket.on('khach-dang-su-dung', (idNguoiDung) => {
         socket.join(idNguoiDung); 
-        console.log(`không gian ${idNguoiDung} đã vào phòng riêng.`);
     });
 
     socket.on("join-room", (userId) => {
         socket.join(userId.toString());
-        console.log(`User ${userId} đã join room`);
     });
     socket.on("join_space_room", (data) => {
         const { idKhongGian, loaiKhongGian } = data;
         const roomName = `space_type_${loaiKhongGian}_id_${idKhongGian}`;
         socket.join(roomName);
-        console.log(`Socket ${socket.id} đã vào phòng: ${roomName} (Loại: ${loaiKhongGian})`);
     });
     socket.on("leave_space", (data) => {
         const { idKhongGian, loaiKhongGian } = data;
         const roomName = `space_type_${loaiKhongGian}_id_${idKhongGian}`;
-        
         socket.leave(roomName);
-        console.log(`⬅️  Socket [${socket.id}] đã RỜI phòng: ${roomName}`);
     });
+ 
 
 });
 //ngrok http 3001 --domain=bacteria-widely-sizing.ngrok-free.dev

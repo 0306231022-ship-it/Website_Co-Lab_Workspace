@@ -15,9 +15,8 @@ export default class GheModel {
     END AS DangCoNguoiDat
 FROM ghe g
 LEFT JOIN 
-    lichdat ld ON g.ID_GHE = ld.ID_GHE 
-    AND NOW() BETWEEN ld.KHUNG_BATDAU AND ld.KHUNG_KETTHUC
-    AND ld.TRANG_THAI = 1 AND ld.THOIGIAN_VAO IS NOT NULL
+    lichdat ld ON g.ID_GHE = ld.ID_GHE AND ld.TRANG_THAI <> 2
+    AND NOW() BETWEEN ld.KHUNG_BATDAU AND ld.KHUNG_KETTHUC 
 WHERE 
     g.ID_KHONG_GIAN = ? 
 ORDER BY 
@@ -50,7 +49,7 @@ ORDER BY
         }
     }
 
-    // 3. Thêm ghế mới
+    
     static async create(data) {
         try {
             const[create]=await execute(`INSERT INTO ghe (TEN_GHE,TOA_X,TOA_Y,TRANG_THAI,ID_KHONG_GIAN,ID_DANH_MUC) 
@@ -68,7 +67,7 @@ ORDER BY
     
     
 
-    // 4. Cập nhật thông tin ghế
+    
  static async update(idGia, tenGia, moTa, soTienMoi, idDanhMucGhe, phuongThuc) {
     // TH1: Admin chọn ghi đè bất chấp hoặc phương thức yêu cầu trực tiếp
     if (phuongThuc === 'overwrite') {

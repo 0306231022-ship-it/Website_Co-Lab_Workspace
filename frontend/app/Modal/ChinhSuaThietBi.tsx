@@ -9,13 +9,13 @@ export interface THIETBI {
     hinhanh: string;
 }
 export default function ChinhSuaThietBi({ DuLieu}: {DuLieu : THIETBI}) {
-    // 1. Tạo các biến State và khởi tạo bằng giá trị gốc
+  
      const {  CloseMoDal } = useModalContext();
     const [ten, setTen] = useState<string>(DuLieu?.ten || "");
     const [hinhanh, setHinhAnh] = useState<string>(DuLieu?.hinhanh || "");
     const [loading, setLoading] = useState<boolean>(false);
     const [err, setErr] = useState<string[]>([]);
-    // 2. Hàm xử lý gửi dữ liệu lên Server
+ 
     const handleSubmit = async () => {
         let ThayDoi = false;
         if(ten !== DuLieu.ten){

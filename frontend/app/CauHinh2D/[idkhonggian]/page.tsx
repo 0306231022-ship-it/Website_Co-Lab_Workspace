@@ -17,11 +17,12 @@ function CauHinh2D() {
 
   useEffect(() => {
     const loadGhe = async () => {
+      socket.emit("join_space_room_seat", {idKhongGian: idkhonggian});
       setLoading(true);
       try {
         const [response1,response2] = await Promise.all([
            api.CallAPI(undefined, {url: `/admin/danhsachghe_idkg?id=${idkhonggian}`,PhuongThuc: 2}),
-            api.CallAPI(undefined,{url:`/admin/layten_khonggian?id=${idkhonggian}`, PhuongThuc:2})
+           api.CallAPI(undefined,{url:`/admin/layten_khonggian?id=${idkhonggian}`, PhuongThuc:2})
         ])
         if (response1.success) {
           setGhe(response1.dulieu);
@@ -41,12 +42,11 @@ function CauHinh2D() {
   }, [idkhonggian]);
 
     useEffect(() => {
-      socket.on('ThemGhe', (item) => {
+      socket.on('themghe', (item) => {
         setGhe(item.ThongTinGhe)
   });
-
   return () => {
-    socket.off('ThemGhe');
+    socket.off('themghe');
   };
 }, []);
 
@@ -142,6 +142,7 @@ function CauHinh2D() {
             <ul className="text-[11px] text-gray-500 space-y-1.5 list-disc pl-3.5 leading-relaxed font-medium">
               <li><b className="text-gray-700">Kéo thả:</b> Nhấn giữ chuột vào ghế và di chuyển để đổi vị trí 2D.</li>
               <li><b className="text-gray-700">Chỉnh sửa:</b> Click chuột vào ghế bất kỳ để bật cửa sổ cấu hình chi tiết.</li>
+              <li><b className="text-gray-700">Chú ý:</b> Không thể chỉnh sửa tọa độ ghế khi có khách đang thuê.</li>
             </ul>
           </div>
         </div>

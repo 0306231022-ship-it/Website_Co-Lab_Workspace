@@ -3,14 +3,14 @@ import React, { useState } from "react";
 import * as api from "@/API/API";
 import * as ThongBao from "@/FUNCTION/ThongBao";
 export default function Themthietbi() {
-    // 1. Khai báo các State lưu trữ dữ liệu
+    
     const [tenThietBi, setTenThietBi] = useState<string>("");
     const [hinhAnh, setHinhAnh] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
 
-    // 2. Hàm xử lý gửi dữ liệu lên Server
+    
     const handleSubmit = async () => {
-        // KIỂM TRA ĐIỀU KIỆN (Validation)
+        
         if (!tenThietBi.trim()) {
             ThongBao.ThongBao_Loi("Vui lòng nhập tên thiết bị!");
             return;
@@ -20,14 +20,14 @@ export default function Themthietbi() {
             return;
         }
 
-        // Đóng gói dữ liệu bằng FormData (Chuẩn theo form-data trên Postman)
+        
         const submitData = new FormData();
         submitData.append("TEN_THIET_BI", tenThietBi.trim());
         submitData.append("HINH_ANH", hinhAnh.trim());
 
         setLoading(true);
         try {
-            // Gọi API (PhuongThuc: 1 tương đương với phương thức POST)
+            
             const res = await api.CallAPI(submitData, {
                 url: "/admin/themthietbi",
                 PhuongThuc: 1 
@@ -35,13 +35,8 @@ export default function Themthietbi() {
 
             if (res && res.success) {
                 ThongBao.ThongBao_ThanhCong(res.message || "Thêm thiết bị thành công!");
-                
-                // Reset form sau khi thêm thành công
                 setTenThietBi("");
                 setHinhAnh("");
-                
-                // Nếu 컴 Component này là Modal, gọi hàm onClose để đóng
-              
             } else {
                 ThongBao.ThongBao_Loi(res?.message || "Thêm thiết bị thất bại, vui lòng thử lại!");
             }
@@ -54,7 +49,7 @@ export default function Themthietbi() {
     };
 
     return (
-        // Đã thay đổi thẻ <form> thành <div>
+        
         <div className="p-6 space-y-5 flex flex-col h-full bg-white">
             
             {/* TÊN THIẾT BỊ */}
@@ -95,7 +90,7 @@ export default function Themthietbi() {
                         />
                     </div>
                     <div className="w-11 h-11 bg-indigo-50 border border-indigo-100 rounded-xl flex items-center justify-center text-indigo-600 text-lg shrink-0" title="Icon Xem trước">
-                        {/* Biến Icon tĩnh thành động: Render realtime mã người dùng nhập */}
+                        
                         <i className={hinhAnh || "fa-solid fa-desktop"}></i>
                     </div>
                 </div>

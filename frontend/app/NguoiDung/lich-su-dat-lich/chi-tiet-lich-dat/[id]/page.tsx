@@ -74,9 +74,9 @@ if (strKetThuc && strBatDau) {
       ThongBao.ThongBao_Loi('ID lịch đặt không hợp lệ.');
       return;
     }
+
     try {
       const res = await api.CallAPI(undefined, { url: `/NguoiDung/lich-dat?id=${id}`, PhuongThuc: 2 });
-      alert(JSON.stringify(res))
       if (res && res.success) {
         setLichDat(res.lichDat);
       } else {
@@ -90,14 +90,14 @@ if (strKetThuc && strBatDau) {
 
   useEffect(() => {
     const laydl1 = async () => {
+      socket.emit('ChiTiet_LichDat', {idlichdat: id} )
       await fetchLichDat1();
     };
     laydl1();
-  }, [fetchLichDat1]);
+  }, [fetchLichDat1,id]);
   useEffect(()=>{
     const vnpResponseCode = searchParams.get('vnp_ResponseCode');
     if (!vnpResponseCode) return;
-    socket.emit('thong-bao-thanhtoan', id)
     const query = searchParams.toString();
     const themhoa_don = async()=>{
       try {

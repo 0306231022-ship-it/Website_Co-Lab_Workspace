@@ -30,7 +30,7 @@ export interface ThietBiDetailResponse {
 
 export default function QuanLyThietBi() {
      
-  // 1. Khai báo các State quản lý dữ liệu và giao diện
+  
   const [danhSachThietBi, setDanhSachThietBi] = useState<ThietBi[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
     totalItems: 0,
@@ -42,7 +42,7 @@ export default function QuanLyThietBi() {
   const { OpenMoDal } = useModalContext();
   const [TongsuDung, setTongSuDung] = useState<number>(0);
 
-  // 2. Gọi API lấy dữ liệu từ Backend
+  
   useEffect(() => {
     const laydl = async () => {
       setIsLoading(true);
@@ -70,7 +70,7 @@ export default function QuanLyThietBi() {
     laydl();
   }, [page]);
 
-  // 3. Lọc dữ liệu phía Client (Tìm kiếm theo tên hoặc mã ID)
+  
   const filteredData = useMemo(() => {
     if (!searchTerm.trim()) return danhSachThietBi;
     return danhSachThietBi.filter(
@@ -80,7 +80,7 @@ export default function QuanLyThietBi() {
     );
   }, [danhSachThietBi, searchTerm]);
 
-  // Tính toán số hiển thị phân trang (Ví dụ: 1 đến 10 trong số 239)
+ 
   const itemStart = pagination.totalItems > 0 ? (page - 1) * 10 + 1 : 0;
   const itemEnd = Math.min(page * 10, pagination.totalItems);
 
@@ -195,7 +195,7 @@ export default function QuanLyThietBi() {
                   >
                     <td className="p-4 pl-6">
                       <div className="flex items-center space-x-3">
-                        {/* Kiểm tra hình ảnh, nếu có thì hiện ảnh, không thì hiện icon */}
+                        
                       <i className={`${item.HINH_ANH}`}></i>
                         <div>
                           <p className="font-black text-gray-900">

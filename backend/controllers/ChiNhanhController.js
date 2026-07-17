@@ -405,7 +405,7 @@ export default class ChiNhanhController {
   }
       
 
-  // [GET] /api/admin/chinhanh/thongke-hieusuat
+ 
   static async getThongKeHieuSuat(req, res) {
     try {
       const kyThongKe = req.query.ky || "Tháng này";

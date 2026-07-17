@@ -29,7 +29,7 @@ export default class giaModel {
     }
   }
 
-  // 2. Lấy giá  theo ID (Không cần LIMIT/OFFSET vì ID là duy nhất)
+  
   static async getById(id) {
     try {
       const [rows] = await execute("SELECT * FROM banggia WHERE ID_GIA = ?", [
@@ -44,7 +44,7 @@ export default class giaModel {
     }
   }
 
-  // 3. Thêm thiết bị mới
+ 
   static async create(tengia, mota, dongia, danhmucghe) {
     try {
       const [result] = await execute(
@@ -58,7 +58,7 @@ export default class giaModel {
     }
   }
 
-  // 4. Cập nhật thiết bị
+  
   static async update(id, tengia, mota, dongia, danhmucghe) {
 
     try {
@@ -72,7 +72,7 @@ export default class giaModel {
       throw new Error("Không thể cập nhật thông tin gia!");
     }
   }
-  //kiểm tra id
+ 
   static async testid(id) {
     try {
       const [rows] = await execute("SELECT * FROM banggia WHERE ID_GIA = ?", [
@@ -86,7 +86,7 @@ export default class giaModel {
   }
   static async updatePriceForDanhMucGhe(idDanhMuc, soTienMoi) {
     try {
-        // 1. Lấy thông tin ID_GIA hiện tại của Danh mục ghế này
+        
         const [danhMuc] = await execute(
             `SELECT ID_GIA FROM danhmucghe WHERE ID_DANHMUC = ?`, 
             [idDanhMuc]
@@ -95,7 +95,7 @@ export default class giaModel {
         if (!danhMuc || danhMuc.length === 0) return false;
         const idGiaHienTai = danhMuc[0].ID_GIA;
 
-        // 2. Kiểm tra xem mã giá này có đang bị bên bảng 'khonggian' hoặc danh mục khác dùng chung không
+        
         const [dungChungPhong] = await execute(
             `SELECT COUNT(*) AS count FROM khonggian WHERE ID_GIA = ?`, 
             [idGiaHienTai]
@@ -113,7 +113,7 @@ export default class giaModel {
                 `UPDATE banggia SET GIA = ? WHERE ID_GIA = ?`, 
                 [soTienMoi, idGiaHienTai]
             );
-            console.log("Sửa trực tiếp giá cũ vì không có phòng/danh mục nào dùng chung.");
+        
         } else {
             // TRƯỜNG HỢP 2: Có phòng hoặc danh mục khác dùng chung -> Phải tách giá ra để bảo vệ bảng không gian
             // Tạo bản ghi giá mới tinh

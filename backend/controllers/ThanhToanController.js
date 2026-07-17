@@ -11,7 +11,7 @@ import qs from 'qs';
 
 export default class ThanhToanController {
  static async ThanhToan(req, res) {
-    const id = req.query.id; // Đây là ID lịch đặt (ID_LICHDAT)
+    const id = req.query.id; 
     
     try {
         if (!id) {
@@ -23,7 +23,7 @@ export default class ThanhToanController {
             return res.status(404).json({ success: false, message: 'Không tìm thấy lịch đặt!' });
         }
 
-        // Kiểm tra xem lịch đặt này thực sự đã có hóa đơn thành công chưa để chặn
+      
         const dathanhtoan = await hoadonModel.kiemtraid_hoadon(id); 
         if (dathanhtoan) {
             return res.status(400).json({ success: false, message: 'Lịch đặt này đã được thanh toán trước đó!' });
@@ -91,15 +91,28 @@ export default class ThanhToanController {
         return res.status(500).json({ success: false, message: 'Đã xảy ra lỗi kết nối!' });
     }
 }
+
   static async XacNhan_ThanhToan(req, res) {
     let id = req.query.id;
     try {
+        const kiemtra = await DatLichModel.kiemtraid(id);
+        if(!kiemtra){
+            io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-thanhtoan', {
+                success: false,
+                message: "Không tồn tại lịch đặt này!"
+            })
+             res.end();
+            return;
+
+        }
          const dathanhtoan = await hoadonModel.kiemtraid_hoadon(id); 
         if (dathanhtoan) {
-             io.to(id).emit('thong-bao-thanhtoan', {
+             io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-thanhtoan', {
                     success: false,
                     message: "Hóa đơn đã được thanh toán trước đó!"
                 })
+                 res.end();
+            return;
         }
         let vnp_Params = { ...req.query };
         const secureHash = vnp_Params['vnp_SecureHash'];
@@ -112,10 +125,12 @@ export default class ThanhToanController {
         const checkSum = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");
         const vnp_ResponseCode = vnp_Params['vnp_ResponseCode'];
         if (secureHash !== checkSum) {
-            io.to(id).emit('thong-bao-thanhtoan', {
+            io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-thanhtoan', {
                 success: false,
                 message: "Vui lòng kiểm tra thông tin"
             })
+             res.end();
+            return;
         }
         const idlichdat = parseInt(vnp_Params['vnp_TxnRef']); 
         const maGiaoDich = vnp_Params['vnp_TransactionNo'];
@@ -131,33 +146,43 @@ export default class ThanhToanController {
         if (vnp_ResponseCode === '00'){
             const them = await hoadonModel.create(soTienVnPay,idlichdat);
             if(them===null){
-                io.to(id).emit('thong-bao-thanhtoan', {
+                io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-thanhtoan', {
                     success: false,
                     message: "Vui lòng kiểm tra thông tin"
                 })
+                 res.end();
+                 return;
             }
             const themthanhtoan = await ThanhToanModal.Them(maGiaoDich,maNganHang,soTienVnPay,1,them);
             if(!themthanhtoan){
-                 io.to(id).emit('thong-bao-thanhtoan', {
+                 io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-thanhtoan', {
                     success: false,
                     message: "Vui lòng kiểm tra thông tin"
                  })
+                 res.end();
+                 return;
             }
-             io.to(id).emit('thong-bao-thanhtoan', {
+             io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-thanhtoan', {
                 success: true,
                 message: "Bạn đã thanh toán thành công!"
              });
+            res.end();
+            return;
         }else{
-             io.to(id).emit('thong-bao-thanhtoan', {
+             io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-thanhtoan', {
                 success: false,
                 message: "Thanh toán thất bại, Vui lòng kiểm tra lại!"
             })
+            res.end();
+            return;
         }
     } catch (error) {
-         io.to(id).emit('thong-bao-thanhtoan', {
+         io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-thanhtoan', {
             success: false,
             message: "Thanh toán thất bại, Vui lòng kiểm tra lại!"
         })
+         res.end();
+         return;
     }
   }
 }

@@ -39,7 +39,7 @@ export default class giaController {
 
   static async getGiaById(req, res) {
     try {
-      // Validate ID_GIA truyền trên Query params (?ID_GIA=...)
+      
       await Promise.all([
         query("ID_GIA")
           .notEmpty()
@@ -113,7 +113,7 @@ export default class giaController {
           .isInt({ min: 1 })
           .withMessage("Danh mục ghế phải là số nguyên dương!")
           .custom(async (value) => {
-              // Tự động kiểm tra danh mục ghế tồn tại nếu em có Model danh mục ghế
+              
              const check = await dmGhe.testid(value);
                if (!check) throw new Error('ID danh mục ghế không tồn tại!');
               return true;
@@ -121,7 +121,7 @@ export default class giaController {
           .run(req),
       ]);
     
-      // Thực hiện thêm mới dựa theo Model (đã hỗ trợ trim() tên bảng giá)
+      
       const insertSuccess = await giaModel.create(
         TEN_GIA.trim(),
         MOTA ? MOTA.trim() : null,
@@ -147,19 +147,18 @@ export default class giaController {
 
  static async updateGia(req, res) {
   try {
-    // 1. Lấy dữ liệu từ req.body (FormData đẩy lên chuỗi string nên cần ép kiểu số cho các trường ID/Giá)
+ 
     const ID_GIA = req.body.ID_GIA ? Number(req.body.ID_GIA) : undefined;
     const DON_GIA = req.body.DON_GIA ? Number(req.body.DON_GIA) : undefined;
     const DANHMUC_GHE = req.body.DANHMUC_GHE ? Number(req.body.DANHMUC_GHE) : undefined;
     
     const { TEN_GIA, MOTA, PHUONG_THUC_CAP_NHAT } = req.body;
 
-    // Đẩy ngược lại vào req.body các giá trị đã ép kiểu số để express-validator kiểm tra chính xác
+    
     req.body.ID_GIA = ID_GIA;
     req.body.DON_GIA = DON_GIA;
     req.body.DANHMUC_GHE = DANHMUC_GHE;
 
-    // 2. Validate toàn bộ các trường cập nhật khớp theo Frontend
     await Promise.all([
       body("ID_GIA")
         .notEmpty()
@@ -203,19 +202,18 @@ export default class giaController {
         .run(req),
     ]);
 
-    // Trả về lỗi nếu dữ liệu không qua được vòng kiểm tra
+  
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(200).json({
-        validate: true, // Đồng bộ với Frontend: if (res.validate)
+        validate: true, 
         success: false,
         message: "Dữ liệu cấu hình không hợp lệ!",
         errors: errors.array().map((err) => err.msg),
       });
     }
 
-    // 3. Gọi Tầng Model xử lý nghiệp vụ kiểm tra chung đụng với Không gian/Phòng họp
-    // (Truyền thêm tham số PHUONG_THUC_CAP_NHAT vào hàm xử lý giá)
+    
     const updateSuccess = await giaModel.update(
       ID_GIA,
       TEN_GIA.trim(),

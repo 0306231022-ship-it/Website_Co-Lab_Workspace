@@ -5,8 +5,8 @@ import * as api from "@/API/API";
 import { useRouter } from "next/navigation";
 import { DanhMucGhe } from "@/interface/DanhMucGhe";
 import { useModalContext } from "@/context/QuanLiMoal";
-// Định nghĩa interface rõ ràng cho dữ liệu cũ truyền vào từ bảng
-export interface GiaDữLiệuGốc {
+
+export interface GiaDuLieuGoc {
   ID_GIA: number;
   TEN_GIA?: string;
   MOTA?: string;
@@ -24,26 +24,26 @@ export interface UpdateGiaRequest {
   PHUONG_THUC_CAP_NHAT: "overwrite" | "history";
 }
 
-// KHÔNG DÙNG ANY: Khai báo kiểu dữ liệu chuẩn cho Props
+
 export default function SuaGia({
   DuLieu,
   onClose,
 }: {
-  DuLieu: GiaDữLiệuGốc;
+  DuLieu: GiaDuLieuGoc;
   onClose: () => void;
 }) {
   const router = useRouter();
   const [DanhMuc, setdanhmuc] = useState<DanhMucGhe[]>([]);
   
-  // Lấy ID an toàn từ Props đã định kiểu
+  
   const id = DuLieu?.ID_GIA || "";
 
-  // State quản lý trạng thái tải
+ 
   const [loading, setLoading] = useState<boolean>(false);
   const [fetching, setFetching] = useState<boolean>(true);
   const [err, setErr] = useState<string[]>([]);
    const {  CloseMoDal } = useModalContext();
-  // State quản lý Form Data
+ 
   const [formData, setFormData] = useState<UpdateGiaRequest>({
     ID_GIA: 0,
     TEN_GIA: "",
@@ -53,7 +53,7 @@ export default function SuaGia({
     PHUONG_THUC_CAP_NHAT: "history",
   });
 
-  // --- BƯỚC 1: GỌI API LẤY DỮ LIỆU CŨ ---
+
   useEffect(() => {
     const fetchChiTietGia = async () => {
       if (!id) {
@@ -106,7 +106,6 @@ export default function SuaGia({
     fetchChiTietGia();
   }, [id]);
 
-  // --- BƯỚC 2: HÀM XỬ LÝ KHI NHẬP LIỆU ---
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
@@ -122,7 +121,7 @@ export default function SuaGia({
     }));
   };
 
-  // --- BƯỚC 3: HÀM GỬI DỮ LIỆU BẰNG NEW FORMDATA() ---
+
   const handleSubmit = async () => {
     setErr([]);
 
@@ -135,7 +134,7 @@ export default function SuaGia({
       return;
     }
 
-    // KHỞI TẠO NEW FORMDATA() THEO YÊU CẦU CỦA BẠN
+    
     const dataGuiDi = new FormData();
     dataGuiDi.append("ID_GIA", String(formData.ID_GIA));
     dataGuiDi.append("TEN_GIA", formData.TEN_GIA.trim());
@@ -146,10 +145,10 @@ export default function SuaGia({
 
     setLoading(true);
     try {
-      // Truyền đối tượng dataGuiDi (FormData) vào vị trí tham số thứ nhất
+    
       const res = await api.CallAPI(dataGuiDi, {
         url: "/admin/suagia",
-        PhuongThuc: 1, // POST
+        PhuongThuc: 1, 
       });
 
       if (res && res.validate) {

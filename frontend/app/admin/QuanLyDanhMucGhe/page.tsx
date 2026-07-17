@@ -23,7 +23,7 @@ export interface DanhMucResponse {
 }
 
 export default function DanhMucGhe() {
-  // 1. Khai báo các State quản lý dữ liệu
+ 
   const { OpenMoDal } = useModalContext();
   const [danhSachs, setDanhSachs] = useState<DanhMuc[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -33,11 +33,11 @@ export default function DanhMucGhe() {
     totalPages: 1,
   });
 
-  // State cho bộ lọc và tìm kiếm
+  
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [filterStatus, setFilterStatus] = useState<string>("");
 
-  // 2. Gọi API lấy dữ liệu
+ 
   useEffect(() => {
     const laydl = async () => {
       setIsLoading(true);
@@ -64,7 +64,6 @@ export default function DanhMucGhe() {
     laydl();
   }, [page]);
 
-  // 3. Tính toán số liệu thống kê (dựa trên dữ liệu trang hiện tại)
   const totalActive = useMemo(
     () => danhSachs.filter((item) => item.TRANG_THAI === 1).length,
     [danhSachs],
@@ -74,7 +73,7 @@ export default function DanhMucGhe() {
     [danhSachs],
   );
 
-  // 4. Lọc dữ liệu theo từ khóa tìm kiếm và trạng thái (Client-side filtering)
+
   const filteredData = useMemo(() => {
     return danhSachs.filter((item) => {
       const matchName = item.TEN_DANHMUC.toLowerCase().includes(
@@ -117,7 +116,7 @@ export default function DanhMucGhe() {
         </button>
       </div>
 
-      {/* Thẻ thống kê (Metrics) */}
+      
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-3xs flex items-center justify-between">
           <div className="space-y-1">
@@ -162,9 +161,9 @@ export default function DanhMucGhe() {
         </div>
       </div>
 
-      {/* Bảng dữ liệu & Bộ lọc */}
+      
       <div className="bg-white rounded-2xl border border-slate-100 shadow-xs overflow-hidden flex flex-col">
-        {/* Bộ lọc */}
+       
         <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row gap-3 items-center justify-between">
           <div className="relative w-full md:max-w-xs flex items-center">
             <i className="fa-solid fa-magnifying-glass absolute left-3.5 text-slate-400 text-xs pointer-events-none"></i>
@@ -190,7 +189,7 @@ export default function DanhMucGhe() {
           </div>
         </div>
 
-        {/* Bảng hiển thị */}
+       
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse whitespace-nowrap">
             <thead>
@@ -292,7 +291,7 @@ export default function DanhMucGhe() {
           </table>
         </div>
 
-        {/* Footer Phân trang */}
+       
         <div className="px-6 py-3.5 border-t border-slate-100 bg-slate-50/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-semibold text-slate-500">
           <span>
             Hiển thị {danhSachs.length > 0 ? 1 : 0} - {danhSachs.length} trên

@@ -9,7 +9,7 @@ export default class hoadonModel {
       throw new Error("Database query failed: " + error.message);
     }
   }
-  // Thêm hóa đơn mới
+ 
   static async create(giatien, idlichdat) {
     try {
       const [create] = await execute(
@@ -18,7 +18,7 @@ export default class hoadonModel {
         [giatien, idlichdat],
       );
       if (create.affectedRows > 0) {
-         return create.insertId; // Trả về ID tự tăng (ID_HOA_DON) vừa sinh ra
+         return create.insertId; 
       }
       return null;
     } catch (error) {
@@ -26,7 +26,7 @@ export default class hoadonModel {
       throw new Error("Không thể thêm hóa đơn mới vào cơ sở dữ liệu!");
     }
   }
-  // 5. Kiểm tra xem ID_HOADON có tồn tại thực tế hay không
+ 
   static async testId(id) {
     try {
       const [test] = await execute("SELECT * FROM hoadon WHERE ID_HOADON = ?", [

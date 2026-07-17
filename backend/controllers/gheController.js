@@ -50,7 +50,7 @@ export default class gheController {
         }
     }
 
-    // [POST] /api/admin/ghe
+  
     static async createGhe(req, res) {
         try {
             const { TEN_GHE, TOA_X, TOA_Y, ID_KHONG_GIAN, ID_DANH_MUC } = req.body;
@@ -98,7 +98,7 @@ export default class gheController {
                 });
             }
 
-            // Thực hiện thêm mới dựa theo mẫu (Loại bỏ khoảng trắng thừa bằng .trim())
+          
             const insertId = await GheModel.create({
                 TEN_GHE: TEN_GHE.trim(),
                 TOA_X,
@@ -114,15 +114,13 @@ export default class gheController {
                 });
             }
             const Ghe = await GheModel.getIDkhongian(ID_KHONG_GIAN);
-            console.log(Ghe)
-            io.emit('ThemGhe', { ThongTinGhe: Ghe });
+            io.to(`khonggian-${ID_KHONG_GIAN}_ghe`).emit(`themghe`, {ThongTinGhe: Ghe});
             res.status(200).json({ success: true, message: "Thêm ghế thành công!" });
         } catch (error) {
             res.status(500).json({ success: false, message: error.message });
         }
     }
 
-    // [PUT] /api/admin/ghe/:id
    static async updatetenGhe(req, res) {
         try {
             await Promise.all([
@@ -151,7 +149,7 @@ export default class gheController {
                 });
             }
 
-            // Lấy ID_GHE từ body ra cùng các trường khác giống hệt create
+           
             const { ID_GHE, TEN_GHE } = req.body;
            
 

@@ -4,10 +4,10 @@ import LichDatController from "./LichDatController.js";
 import { query, body, validationResult } from "express-validator";
 import moment from "moment";
 export default class hoadonController {
-  // [POST] /api/admin/hoadon/detail (LẤY CHI TIẾT ẨN ID TRONG BODY)
+ 
   static async getHoaDonById(req, res) {
     try {
-      // Validate ID_HOADON được truyền trên URL Query params (?ID_HOADON=...)
+     
       await Promise.all([
         query("ID_LICH_DAT")
           .notEmpty()
@@ -45,7 +45,6 @@ export default class hoadonController {
           });
       }
 
-      // Trả về cục dữ liệu đã JOIN hoàn chỉnh, Frontend chỉ việc lôi ra dùng
       return res.status(200).json({
         success: true,
         data: item,
@@ -55,7 +54,7 @@ export default class hoadonController {
     }
   }
 
-  // [POST] /api/admin/hoadon (TẠO HÓA ĐƠN)
+  
   static async createHoaDon(req, res) {
     try {
       const { GIA_TIEN, ID_LICHDAT } = req.body;
@@ -75,7 +74,7 @@ export default class hoadonController {
           .isInt()
           .withMessage("id lịch đặt phải là số nguyên")
           .custom(async (value, { req }) => {
-            const testid = await DatLichModel.kiemtraid(value); // Hãy đảm bảo LichDatModel có hàm check id này
+            const testid = await DatLichModel.kiemtraid(value);
             if (!testid) throw new Error("ID lịch đặt không tồn tại!");
             return true;
           })
@@ -91,7 +90,7 @@ export default class hoadonController {
         });
       }
 
-      // Thực hiện thêm mới dựa theo mẫu của ghế
+     
       const insertSuccess = await hoadonModel.create(GIA_TIEN, ID_LICHDAT);
 
       if (!insertSuccess) {

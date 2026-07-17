@@ -24,14 +24,12 @@ export interface ILichDatChiTiet {
 }
 
 function QuanLiDatDon() {
-    const limit = 3; // Cấu hình limit = 3 theo yêu cầu
+    const limit = 3;
     const [page, setpage] = useState<number>(1);
     const [ThongKe, setThongKe] = useState<ThongKe | null>(null);
     const [danhsach, setDanhSach] = useState<ILichDatChiTiet[]>([]);
     const [tongDanhSach, setTongDanhSach] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(false);
-
-    // 1. useEffect lấy thống kê (chạy 1 lần khi component mount)
     useEffect(() => {
         const loadThongKe = async () => {
             try {
@@ -45,9 +43,6 @@ function QuanLiDatDon() {
         };
         loadThongKe();
     }, []);
-
-    // 2. useEffect lấy danh sách lịch đặt (Chạy lại mỗi khi `page` thay đổi)
-    // Gửi page và limit dưới dạng Query Params trong cấu hình của tham số thứ 2
     useEffect(() => {
         const loadDanhSach = async () => {
             setLoading(true);
@@ -56,17 +51,15 @@ function QuanLiDatDon() {
                     url: `/admin/danhsach_lichdat?page=${page}&limit=${limit}`, 
                     PhuongThuc: 2, 
                 });
-              
-
                 if (response.success) {
                     setDanhSach(response.danhsach);
-                    setTongDanhSach(response.TongDanhSach[0].total);
+                    setTongDanhSach(response.TongDanhSach);
                 } else {
                     ThongBao.ThongBao_CanhBao(response.message || "Không thể tải danh sách");
                 }
             } catch (error) {
                 console.error("Lỗi hệ thống danh sách:", error);
-                ThongBao.ThongBao_CanhBao( "Lỗi kết nối máy chủ");
+                ThongBao.ThongBao_CanhBao( "Lỗi kết nối máy chủ" + error);
             } finally {
                 setLoading(false);
             }
@@ -78,27 +71,21 @@ function QuanLiDatDon() {
     const totalPages = Math.ceil(tongDanhSach / limit) || 1;
 
     // Hàm phụ trợ tạo giao diện Badge trạng thái đơn hàng
-    const renderBadgeTrangThai = (status: string) => {
+    const renderBadgeTrangThai = (status: number) => {
         switch (status) {
-            case 'Đang sử dụng':
+            case 0:
                 return (
                     <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                         <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></span> Đang sử dụng
                     </span>
                 );
-            case 'Chờ xác nhận':
-                return (
-                    <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                        Chờ xác nhận
-                    </span>
-                );
-            case 'Đã hoàn thành':
+            case 1:
                 return (
                     <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
                         Đã hoàn thành
                     </span>
                 );
-            case 'Đã huỷ':
+            case 2:
                 return (
                     <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-200">
                         Đã huỷ
@@ -206,7 +193,7 @@ function QuanLiDatDon() {
                                             {item.GIA_TIEN !== null ? fun.formatCurrency(String(item.GIA_TIEN)) : 'Chưa có hóa đơn'}
                                         </td>
                                         <td className="py-4 px-5">
-                                            {renderBadgeTrangThai(item.TRANG_THAI)}
+                                            {renderBadgeTrangThai(Number(item.TRANG_THAI))}
                                         </td>
                                         <td className="py-4 px-5">
                                             <div className="flex items-center justify-center space-x-2">

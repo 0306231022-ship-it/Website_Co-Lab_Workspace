@@ -10,9 +10,9 @@ export interface Gia {
   ID_GIA: number;
   TEN_GIA: string;
   MOTA: string;
-  NGAY_TAO: string; // ISO 8601
+  NGAY_TAO: string; 
   NGAY_KET_THUC: string | null;
-  DON_GIA: string; // API trả về dạng string
+  DON_GIA: string; 
   DANHMUC_GHE: number;
 }
 
@@ -26,10 +26,9 @@ export default function ChiTietGia() {
   const router = useRouter();
   const params = useParams();
   const { OpenMoDal } = useModalContext();
-  // Lấy ID chuẩn xác từ URL
   const id = params?.ID_GIA || params?.idGia || params?.id || "";
 
-  // State quản lý dữ liệu và loading
+  
   const [gia, setGia] = useState<Gia | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -87,7 +86,7 @@ export default function ChiTietGia() {
     fetchChiTietGia();
   }, [id]);
 
-  // --- HÀM BỔ TRỢ FORMAT DỮ LIỆU ---
+ 
   const formatCurrency = (amountStr?: string) => {
     if (!amountStr) return "0 đ";
     const num = Number(amountStr);
@@ -111,7 +110,7 @@ export default function ChiTietGia() {
     return endDate ? new Date(endDate) < new Date() : false;
   };
 
-  // --- GIAO DIỆN LOADING ---
+ 
   if (loading) {
     return (
       <div className="w-full h-64 flex flex-col items-center justify-center space-y-3">
@@ -123,7 +122,7 @@ export default function ChiTietGia() {
     );
   }
 
-  // --- GIAO DIỆN KHI KHÔNG TÌM THẤY DỮ LIỆU ---
+ 
   if (!gia) {
     return (
       <div className="w-full bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-4">
@@ -141,11 +140,9 @@ export default function ChiTietGia() {
       </div>
     );
   }
-
-  // --- GIAO DIỆN CHÍNH ---
   return (
     <div className="space-y-3">
-      {/* Breadcrumbs */}
+      
       <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-gray-400">
         <button
           type="button"
@@ -176,7 +173,7 @@ export default function ChiTietGia() {
         <span className="text-gray-700">Chi tiết đơn giá #{gia.ID_GIA}</span>
       </div>
 
-      {/* Header Info & Actions */}
+   
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center space-x-4">
           <div className="w-12 h-12 bg-indigo-600 rounded-2xl ring-4 ring-indigo-50 flex items-center justify-center text-white text-xl shrink-0 shadow-sm">
@@ -200,7 +197,7 @@ export default function ChiTietGia() {
 
         <div className="flex items-center space-x-2 self-start sm:self-auto">
           <button
-            // ĐÃ SỬA: Thay 'undefined' bằng biến 'gia' để truyền toàn bộ dữ liệu qua Modal
+           
             onClick={() => {
               OpenMoDal(gia, {
                 TenTrang: "SuaGia",
@@ -218,9 +215,9 @@ export default function ChiTietGia() {
         </div>
       </div>
 
-      {/* Grid Content */}
+     
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        {/* Cột trái: Thông tin giá & Mô tả */}
+       
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden divide-y divide-slate-100">
             <div className="p-6 sm:p-8 space-y-4">
@@ -254,7 +251,7 @@ export default function ChiTietGia() {
           </div>
         </div>
 
-        {/* Cột phải: Trạng thái & Nhật ký */}
+      
         <div className="lg:col-span-1 space-y-6">
           <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs p-6 space-y-5">
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-3 flex items-center gap-1.5">
@@ -262,7 +259,7 @@ export default function ChiTietGia() {
               Trạng thái
             </h3>
 
-            {/* Trạng thái hiện tại */}
+            
             <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
                 Trạng thái hiện tại
@@ -280,7 +277,7 @@ export default function ChiTietGia() {
               )}
             </div>
 
-            {/* Ngày tạo */}
+            
             <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
                 Ngày khởi tạo

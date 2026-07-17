@@ -59,18 +59,19 @@ export default class LichDatController{
                 });
             }
             const DatLich = await DatLichModel.DatLich(dulieu,userId);
-           
-            
             if(!DatLich){
                 return res.status(409).json({
                     success:false,
                     message:'Đặt lịch thất bại!'
                 })
             }
+            //phát sự kiện
+              const loai = await KhongGianModel.LayLoai_KG(dulieu.ID_KHONG_GIAN)
+              io.to(`space_type_${loai}_id_${dulieu.ID_KHONG_GIAN}`).emit('update_schedule', {success:true});
             return res.status(200).json({
                 success:true,
                 ID_LICHDAT: DatLich,
-                message:'Đặt lịch thành công!'
+                message:                                                                                   'Đặt lịch thành công!'
             })
 
         } catch (error) {
@@ -464,27 +465,24 @@ export default class LichDatController{
                 //xem vị trị người đặt có đang tróng hay không
                 const kiemtra_ckeckin= await DatLichModel.kiemtra_trangthai_lichdat(id);
                 if(!kiemtra_ckeckin){
-                    io.to(id).emit('thong-bao-checkin', {
+                    io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-checkin', {
                         success: false,
                         message: "Hiện tại, lịch đặt của bạn đang được sử dụng cho khách trước. Vui lòng check-in sau ít phút!"
                     });
                 }
                const check = await DatLichModel.checkin(id);
                if(!check){
-                    io.to(id).emit('thong-bao-checkin', {
+                    io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-checkin', {
                         success: false,
                         message: "Check-in thất bại! Vui lòng thực hiện trong giây lát"
                     });
                }
-               const loai = await KhongGianModel.LayLoai_KG(id)
-               
-               io.to(`space_type_${loai}_id_${id}`).emit('update_schedule', {success:true});
-               io.to(id).emit('thong-bao-checkin', {
+               io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-checkin', {
                     success: true,
                     message: "Check-in thành công!"
                 });
             } else if (timeHienTai < mocCheckInSom) {
-                io.to(id).emit('thong-bao-checkout', {
+                io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-checkin', {
                     success: false,
                     message: "Check-in trước 15p!"
                  });
@@ -503,7 +501,7 @@ export default class LichDatController{
         try {
             const kiemtra = await DatLichModel.kiemtraid(id);
             if(!kiemtra){
-                io.to(id).emit('thong-bao-checkout', {
+                io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-checkout', {
                     success: true,
                     message: "Vui lòng kiểm tra thông tin"
                 });
@@ -512,7 +510,7 @@ export default class LichDatController{
             }
                const check = await DatLichModel.checkout(id);
                if(!check){
-                    io.to(id).emit('thong-bao-checkout', {
+                    io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-checkout', {
                         success: false,
                         message: "Check-out thất bại!"
                     });
@@ -521,14 +519,14 @@ export default class LichDatController{
                }
                const kiemtra_hoadon = await hoadonModel.kiemtraid_hoadon(id);
                if(!kiemtra_hoadon){
-                     io.to(id).emit('thong-bao-checkout', {
+                     io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-checkout', {
                         success: true,
                         message: "Bạn chưa thanh toán cho lịch này, Vui lòng thanh toán để có trải nghiệm tốt hơn!"
                     });
                     res.end(); 
                     return;
                }
-              io.to(id).emit('thong-bao-checkout', {
+              io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-checkout', {
                 success: true,
                 message: "Check-out thành công!"
             });

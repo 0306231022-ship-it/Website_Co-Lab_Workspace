@@ -22,15 +22,14 @@ export default function Chinhsuadmghe({ DuLieu, onClose }: ChinhsuadmgheProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const [err, setErr] = useState<string[]>([]);
 
-  // 1. Khởi tạo state BAN ĐẦU trực tiếp từ Props
+ 
   const [formData, setFormData] = useState<UpdateDanhMucGheRequest>({
     id: Number(DuLieu?.id) || 0,
     ten: DuLieu?.ten || "",
     trangthai: DuLieu?.trangthai !== undefined ? Number(DuLieu.trangthai) : 1,
   });
 
-  // 2. GIẢI PHÁP THAY THẾ EFFECT: Kiểm tra xem props DuLieu từ bên ngoài có thay đổi không
-  // Nếu thay đổi (ví dụ bấm chọn sang dòng khác ở bảng), cập nhật thẳng state trong lúc render
+
   const [prevDuLieu, setPrevDuLieu] = useState<UpdateDanhMucGheRequest>(DuLieu);
 
   if (DuLieu && (DuLieu.id !== prevDuLieu?.id || DuLieu.ten !== prevDuLieu?.ten || DuLieu.trangthai !== prevDuLieu?.trangthai)) {
@@ -42,7 +41,7 @@ export default function Chinhsuadmghe({ DuLieu, onClose }: ChinhsuadmgheProps) {
     });
   }
 
-  // 3. Hàm xử lý khi gõ input
+ 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
@@ -54,7 +53,7 @@ export default function Chinhsuadmghe({ DuLieu, onClose }: ChinhsuadmgheProps) {
     }));
   };
 
-  // 4. HÀM LƯU THAY ĐỔI
+ 
   const handleSubmit = async () => {
     setErr([]);
     if (!formData.ten.trim()) {
@@ -89,7 +88,7 @@ export default function Chinhsuadmghe({ DuLieu, onClose }: ChinhsuadmgheProps) {
         );
       }
     } catch (error) {
-      console.error("❌ Lỗi khi cập nhật danh mục:", error);
+      console.error(" Lỗi khi cập nhật danh mục:", error);
       ThongBao.ThongBao_Loi?.("Đã xảy ra lỗi kết nối đến máy chủ!");
     } finally {
       setLoading(false);
@@ -98,7 +97,7 @@ export default function Chinhsuadmghe({ DuLieu, onClose }: ChinhsuadmgheProps) {
 
   return (
     <div className="space-y-4">
-      {/* HIỂN THỊ LỖI NẾU BACKEND BÁO VỀ */}
+      
       {err && err.length > 0 && (
         <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl space-y-1">
           <p className="text-xs font-bold text-rose-700 flex items-center gap-1.5">
@@ -112,7 +111,7 @@ export default function Chinhsuadmghe({ DuLieu, onClose }: ChinhsuadmgheProps) {
         </div>
       )}
 
-      {/* MÃ DANH MỤC */}
+      
       <div className="space-y-1.5">
         <label className="text-xs font-bold text-slate-500 uppercase tracking-wide flex items-center gap-1">
           Mã danh mục (ID_DANHMUC)
@@ -131,7 +130,7 @@ export default function Chinhsuadmghe({ DuLieu, onClose }: ChinhsuadmgheProps) {
         </div>
       </div>
 
-      {/* TÊN DANH MỤC GHẾ */}
+     
       <div className="space-y-1.5">
         <label
           htmlFor="ten"
@@ -153,7 +152,7 @@ export default function Chinhsuadmghe({ DuLieu, onClose }: ChinhsuadmgheProps) {
         />
       </div>
 
-      {/* TRẠNG THÁI HOẠT ĐỘNG */}
+    
       <div className="space-y-1.5">
         <label
           htmlFor="trangthai"
@@ -174,7 +173,7 @@ export default function Chinhsuadmghe({ DuLieu, onClose }: ChinhsuadmgheProps) {
         </select>
       </div>
 
-      {/* FOOTER ACTIONS */}
+      
       <div className="pt-4 border-t border-slate-100 flex items-center justify-end space-x-2">
         <button
           type="button"

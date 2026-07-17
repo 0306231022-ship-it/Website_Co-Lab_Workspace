@@ -7,7 +7,7 @@ import { useModalContext } from "@/context/QuanLiMoal";
 export interface ThietBiDetail {
   ID_THIET_BI: number;
   TEN_THIET_BI: string;
-  HINH_ANH?: string; // Đã thêm ? để chống lỗi nếu HINH_ANH bị null từ database
+  HINH_ANH?: string; 
 }
 
 export interface ThietBiKhongGian {
@@ -22,35 +22,34 @@ export default function ChiTietThietBi() {
   const router = useRouter();
   const params = useParams();
   const { OpenMoDal } = useModalContext();
-  // FIX CHỐNG SẬP 1: Dùng optional chaining (?.) để tránh crash khi params bị null
-  // Hỗ trợ cả trường hợp bạn đặt tên thư mục là [idthietbi] hoặc [id]
+  
   const idthietbi = params?.idthietbi || "";
 
-  // State quản lý dữ liệu
+ 
   const [loading, setLoading] = useState<boolean>(true);
   const [chiTiet, setChiTiet] = useState<ThietBiDetail | null>(null);
   const [danhSach, setDanhSach] = useState<ThietBiKhongGian[]>([]);
 
-  // Gọi API
+ 
   useEffect(() => {
     const laydl = async () => {
       if (!idthietbi) return;
 
-      console.log("Đang gọi API với ID:", idthietbi); // Kiểm tra xem ID nhận được là gì
+      console.log("Đang gọi API với ID:", idthietbi); 
       setLoading(true);
       try {
-        const response: any = await api.CallAPI(undefined, {
+        const response = await api.CallAPI(undefined, {
           url: `/admin/layid?ID_THIET_BI=${idthietbi}`,
           PhuongThuc: 2,
         });
 
-        console.log("Dữ liệu API trả về:", response); // Kiểm tra xem server trả về cái gì
+        console.log("Dữ liệu API trả về:", response); 
 
         if (response && response.success && response.data) {
           setChiTiet(response.data.ChiTiet || null);
           setDanhSach(response.data.DanhSach || []);
         } else {
-          // Có thể server trả về data nằm ở chỗ khác
+          
           ThongBao.ThongBao_Loi("API trả về thất bại!");
         }
       } catch (error) {
@@ -62,12 +61,12 @@ export default function ChiTietThietBi() {
     laydl();
   }, [idthietbi]);
 
-  // FIX CHỐNG SẬP 3: Đảm bảo danhSach luôn là mảng trước khi dùng .length hay .filter
+  
   const safeDanhSach = Array.isArray(danhSach) ? danhSach : [];
   const tongCapPhat = safeDanhSach.length;
   const soHoatDongTot = safeDanhSach.filter((item) => item.TRANG_THAI === 1).length;
 
-  // Hàm render badge trạng thái
+  
   const renderTrangThai = (trangThai: number) => {
     switch (trangThai) {
       case 1:
@@ -92,7 +91,7 @@ export default function ChiTietThietBi() {
     }
   };
 
-  // --- GIAO DIỆN KHU VỰC 1: LOADING ---
+
   if (loading) {
     return (
       <div className="w-full h-screen flex flex-col items-center justify-center space-y-3">
@@ -102,7 +101,7 @@ export default function ChiTietThietBi() {
     );
   }
 
-  // --- GIAO DIỆN KHU VỰC 2: KHÔNG TÌM THẤY DỮ LIỆU ---
+  
   if (!chiTiet) {
     return (
       <div className="max-w-4xl mx-auto p-12 text-center space-y-4">
@@ -116,7 +115,7 @@ export default function ChiTietThietBi() {
     );
   }
 
-  // --- GIAO DIỆN KHU VỰC 3: DỮ LIỆU CHÍNH ---
+
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="space-y-2">

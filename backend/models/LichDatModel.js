@@ -15,17 +15,17 @@ export default class DatLichModel{
             throw error;
         }
     }
-    static async DanhSach(limit,offset){
-        try {
-            const [danhsach] = await execute(`
-    SELECT 
+ static async DanhSach(limit, offset) {
+    try {
+        const [danhsach] = await execute(`
+          SELECT 
         ld.ID_LICH_DAT,
         ld.TRANG_THAI,
         ld.KHUNG_BATDAU,
         ld.KHUNG_KETTHUC,
         nd.TENND,
         nd.EMAIL,
-        hd.GIA_TIEN,
+        MAX(hd.GIA_TIEN) AS GIA_TIEN, -- Sử dụng MAX đề phòng đơn 127 có nhiều hơn 1 hóa đơn rác trong DB
         CASE 
             WHEN ld.ID_GHE IS NOT NULL THEN g.TEN_GHE
             ELSE kg.TEN_KHONG_GIAN
@@ -49,20 +49,24 @@ export default class DatLichModel{
 
     LEFT JOIN khonggian kg ON ld.ID_KHONG_GIAN = kg.ID_KHONG_GIAN
     LEFT JOIN chinhanh cn_kg ON kg.ID_CHI_NHANH = cn_kg.ID_CHI_NHANH
-
+    GROUP BY ld.ID_LICH_DAT
+    
+    ORDER BY ld.ID_LICH_DAT DESC
     LIMIT ? OFFSET ?
-`, [limit, offset]);
-             const [tong] = await execute(`
-                SELECT COUNT(*) AS total FROM lichdat
-            `);
-            return {
-                DanhSach: danhsach,
-                TongDanhSach: tong
-            };
-        } catch (error) {
-             throw new Error('Database query failed: ' + error.message);
-        }
+        `, [Number(limit), Number(offset)]);
+
+        // 2. Lấy ra số lượng tổng (Lấy trực tiếp số thay vì bọc trong Object)
+        const [tongRows] = await execute(`SELECT COUNT(*) AS total FROM lichdat`);
+        const tongSoLuong = tongRows[0]?.total || 0; 
+
+        return {
+            DanhSach: danhsach,
+            TongDanhSach: tongSoLuong
+        };
+    } catch (error) {
+         throw new Error('Database query failed: ' + error.message);
     }
+}
     static async NguoiDat_ghe_HienTai(IDGHE){
         try {
             const [layttt] = await execute(`
@@ -337,7 +341,10 @@ LIMIT ? OFFSET ?;
             const [kq] = await execute(`
                 SELECT KHUNG_BATDAU, KHUNG_KETTHUC 
                 FROM lichdat
-                WHERE ID_GHE = ? AND DATE(KHUNG_BATDAU) = CURDATE() AND KHUNG_KETTHUC > NOW()
+                WHERE ID_GHE = ? 
+                AND DATE(KHUNG_BATDAU) = CURDATE() 
+                AND KHUNG_KETTHUC > NOW() 
+                AND TRANG_THAI <> 2
                 ORDER BY KHUNG_BATDAU ASC;
                 `,[id]);
             return kq;
@@ -353,6 +360,7 @@ LIMIT ? OFFSET ?;
                 WHERE ID_GHE = ? 
                 AND DATE(KHUNG_BATDAU) = ?
                 AND KHUNG_KETTHUC > NOW()
+                AND TRANG_THAI <> 2
                 ORDER BY KHUNG_BATDAU ASC;
                 `,[ID_GHE,THOIGIAN]);
             return kq;
@@ -365,7 +373,10 @@ LIMIT ? OFFSET ?;
              const [kq] = await execute(`
                 SELECT KHUNG_BATDAU, KHUNG_KETTHUC 
                 FROM lichdat
-                WHERE ID_KHONG_GIAN = ? AND DATE(KHUNG_BATDAU) = CURDATE() AND KHUNG_KETTHUC > NOW()
+                WHERE ID_KHONG_GIAN = ? 
+                    AND DATE(KHUNG_BATDAU) = CURDATE() 
+                    AND KHUNG_KETTHUC > NOW()
+                    AND TRANG_THAI <> 2
                 ORDER BY KHUNG_BATDAU ASC;
                 `,[dulieu]);
             return kq;
@@ -381,6 +392,7 @@ LIMIT ? OFFSET ?;
                 WHERE ID_KHONG_GIAN = ? 
                 AND DATE(KHUNG_BATDAU) = ?
                 AND KHUNG_KETTHUC > NOW()
+                AND TRANG_THAI <> 2
                 ORDER BY KHUNG_BATDAU ASC;
                 `,[IDkg,THOIGIAN]);
             return kq;
@@ -618,6 +630,12 @@ if (!truyvan || truyvan.length === 0) return 0;
 const data = truyvan[0];
 const donGia = data.DON_GIA || 0;
 const isValidDate = (dateStr) => {
+    if (dateStr instanceof Date) {
+        return !isNaN(dateStr.getTime()); 
+    }
+    if (typeof dateStr !== 'string') {
+        return false; 
+    }
     return dateStr && dateStr !== 'NULL' && !dateStr.startsWith('0000-00-00');
 };
 
@@ -636,6 +654,7 @@ if (isValidDate(data.THOIGIAN_RA)) {
 const diffMs = thoiGianKetThuc - thoiGianBatDau; 
 const soGio = diffMs > 0 ? diffMs / (1000 * 60 * 60) : 0;
 const tongTien = soGio * donGia;
+
 
 return tongTien;
         } catch (error) {

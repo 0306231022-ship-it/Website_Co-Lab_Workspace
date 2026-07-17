@@ -7,7 +7,6 @@ import { Ghe } from '@/interface/ghe';
 interface SoDoGheCanvasProps {
     danhSachGhe: Ghe[];
     onGheClick?: (ghe: Ghe) => void;
-    // 🟢 ĐÃ THÊM: Định nghĩa onDragGhe để tránh lỗi TypeScript compile 
     onDragGhe?: (idGhe: number, newX: number, newY: number) => void;
     isReadOnly?: boolean;
     setGhe?: React.Dispatch<React.SetStateAction<Ghe[]>>;
@@ -16,13 +15,13 @@ interface SoDoGheCanvasProps {
 export default function SoDoGheCanvas({ 
     danhSachGhe, 
     onGheClick, 
-    onDragGhe, // 🟢 Nhận prop xử lý kéo thả từ file cha
+    onDragGhe, 
     isReadOnly = false 
 }: SoDoGheCanvasProps) {
 
     const layMauGhe = (trangThai: number) => {
-        if (trangThai === 1) return '#ef4444'; 
-        return '#10b981';
+        if (trangThai === 1) return '#ef4444'; // Đỏ (Đang có người đặt)
+        return '#10b981'; // Xanh (Trống)
     };
 
     if (!danhSachGhe || !Array.isArray(danhSachGhe) || danhSachGhe.length === 0) {
@@ -35,16 +34,13 @@ export default function SoDoGheCanvas({
 
     return (
         <div className="w-full overflow-auto flex justify-center bg-slate-50/50 p-2 rounded-xl">
-            {/* Tạo khung Canvas đủ rộng để chứa sơ đồ */}
             <Stage width={600} height={400} className="border border-slate-100 rounded-lg bg-white shadow-2xs">
                 <Layer>
                     {danhSachGhe.map((item, index) => {
                         
-                        // Đảm bảo tọa độ luôn là số hợp lệ, mặc định là 0 nếu thiếu dữ liệu
                         const xChuan = Number(item.TOA_X) || 0;
                         const yChuan = Number(item.TOA_Y) || 0;
 
-                        // Định dạng ngắn gọn tên hiển thị trên ô ghế
                         let nhanGhe = "G";
                         if (item.TEN_GHE) {
                             if (item.TEN_GHE.includes("A-")) {
@@ -56,25 +52,26 @@ export default function SoDoGheCanvas({
                             }
                         }
 
+                        // Kiểm tra ghế có đang màu đỏ (đã đặt) hay không
+                        const laGheDaDat = Number(item.DangCoNguoiDat) === 1;
+
                         return (
                             <Group
                                 key={item.ID_GHE || index}
                                 x={xChuan}
                                 y={yChuan}
-                                draggable={!isReadOnly} // Khóa di chuyển nếu là chế độ xem chi tiết
+                                draggable={!isReadOnly && !laGheDaDat} 
+                                
                                 onClick={() => onGheClick && onGheClick(item)}
                                 onTap={() => onGheClick && onGheClick(item)}
                                 
-                                // 🟢 ĐÃ THÊM: Lắng nghe sự kiện thả chuột sau khi dịch chuyển ghế
                                 onDragEnd={(e) => {
-                                    const node = e.target; // Lấy phần tử Group hiện tại
+                                    const node = e.target; 
                                     if (onDragGhe && item.ID_GHE) {
-                                        // Gửi ID ghế kèm tọa độ thực tế X, Y vừa thả về file cha để cập nhật mảng state
                                         onDragGhe(item.ID_GHE, node.x(), node.y());
                                     }
                                 }}
                             >
-                                {/* Khối bo góc mô phỏng ghế ngồi */}
                                 <Rect
                                     width={50}
                                     height={50}
@@ -88,7 +85,6 @@ export default function SoDoGheCanvas({
                                     shadowOffset={{ x: 1, y: 2 }}
                                 />
                                 
-                                {/* Nhãn tên ghế */}
                                 <Text
                                     text={nhanGhe}
                                     width={50}

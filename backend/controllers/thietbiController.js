@@ -38,7 +38,7 @@ export default class thietbiController {
       res.status(500).json({ success: false, message: error.message });
     }
   }
-  // [GET] /api/admin/thietbi
+ 
   static async getThietBiById(req, res) {
     try {
       await Promise.all([
@@ -69,7 +69,7 @@ export default class thietbiController {
         ThietBi.getById(id),
         ChiTietThietBiModel.DanhSach_thietbi_cap_khonggian(id),
       ]);
-      //trả về danh sách các thiết bị đc cấp phát
+     
       if (!item1) {
         return res
           .status(404)
@@ -87,7 +87,7 @@ export default class thietbiController {
     }
   }
 
-  // [POST] /api/admin/thietbi
+  
   static async createThietBi(req, res) {
     try {
       const { TEN_THIET_BI, HINH_ANH } = req.body;
@@ -112,7 +112,7 @@ export default class thietbiController {
         });
       }
 
-      // Thực hiện thêm mới (Loại bỏ khoảng trắng thừa bằng .trim())
+ 
       const insertId = await ThietBi.create(
         TEN_THIET_BI.trim(),
         HINH_ANH ? HINH_ANH.trim() : null,

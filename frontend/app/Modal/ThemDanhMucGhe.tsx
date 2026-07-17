@@ -22,18 +22,18 @@ export default function ThemDanhMucGhe() {
   const [loading, setLoading] = useState<boolean>(false);
   const [err, setErr] = useState<string[]>([]);
 
-  // 1. State lưu trữ dữ liệu form
+
   const [formData, setFormData] = useState<CreateDanhMucGheRequest>({
     TEN_DANHMUC: "",
     TRANG_THAI: 1,
   });
 
-  // 2. Hàm xử lý khi gõ/chọn input (Tự động chuyển TRANG_THAI về dạng Số)
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
-    setErr([]); // Xóa lỗi cũ khi người dùng bắt đầu chỉnh sửa lại
+    setErr([]); 
 
     setFormData((prev) => ({
       ...prev,
@@ -41,36 +41,35 @@ export default function ThemDanhMucGhe() {
     }));
   };
 
-  // 3. Hàm gửi dữ liệu lên Server (sử dụng FormData chuẩn như ThemGiaMoi)
+  
   const handleSubmit = async () => {
     setErr([]);
 
-    // Validate phía Client
+   
     if (!formData.TEN_DANHMUC.trim()) {
       ThongBao.ThongBao_Loi("Vui lòng nhập tên danh mục ghế!");
       return;
     }
 
-    // Đóng gói dữ liệu vào FormData (Tránh lỗi Payload bị Server từ chối)
+    
     const submitData = new FormData();
     submitData.append("TEN_DANHMUC", formData.TEN_DANHMUC.trim());
     submitData.append("TRANG_THAI", String(formData.TRANG_THAI));
 
     setLoading(true);
     try {
-      // Gọi API thêm mới (PhuongThuc: 1 là POST)
+      
       const res: CreateDanhMucGheResponse = await api.CallAPI(submitData, {
         url: "/admin/themdanhmucghe",
         PhuongThuc: 1,
       });
 
-      // Xử lý lỗi Validate từ Backend gửi về (Ví dụ: Trùng tên, thiếu trường...)
       if (res.validate) {
         setErr(res.errors || ["Dữ liệu không hợp lệ!"]);
         return;
       }
 
-      // Xử lý khi thành công
+      
       if (res && res.success) {
         if (ThongBao.ThongBao_ThanhCong) {
           ThongBao.ThongBao_ThanhCong(
@@ -80,7 +79,7 @@ export default function ThemDanhMucGhe() {
           alert(res.message || "Thêm danh mục ghế mới thành công!");
         }
 
-        // Điều hướng về trang danh sách ghế và làm mới dữ liệu
+        
         router.push("/admin/danhmucghe");
         router.refresh();
       } else {
@@ -100,7 +99,7 @@ export default function ThemDanhMucGhe() {
     <div className="">
       <div className="flex flex-col flex-1">
         <div className="p-6 space-y-4 flex-1">
-          {/* HỘP THOẠI HIỂN THỊ LỖI TỪ BACKEND (ERRORS BANNER) */}
+        
           {err && err.length > 0 && (
             <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl space-y-1">
               <p className="text-xs font-bold text-rose-700 flex items-center gap-1.5">
@@ -115,7 +114,7 @@ export default function ThemDanhMucGhe() {
             </div>
           )}
 
-          {/* MÁ DANH MUC (READ ONLY) */}
+         
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wide flex items-center gap-1">
               Mã danh mục ghế (ID_DANHMUC)
@@ -133,7 +132,7 @@ export default function ThemDanhMucGhe() {
             </div>
           </div>
 
-          {/* TÊN DANH MỤC GHẾ */}
+        
           <div className="space-y-1.5">
             <label
               htmlFor="TEN_DANHMUC"
@@ -159,7 +158,6 @@ export default function ThemDanhMucGhe() {
             </div>
           </div>
 
-          {/* TRẠNG THÁI HOẠT ĐỘNG */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-600 uppercase tracking-wide flex items-center gap-1">
               Trạng thái hoạt động (TRANG_THAI)
@@ -183,7 +181,7 @@ export default function ThemDanhMucGhe() {
           </div>
         </div>
 
-        {/* FOOTER ACTIONS */}
+       
         <div className="px-6 py-3.5 border-t border-slate-100 bg-slate-50/50 flex items-center justify-end space-x-2 shrink-0">
           <button
             type="button"

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import * as api from "@/API/API";
 import * as ThongBao from "@/FUNCTION/ThongBao";
 
-// Import các thư viện vẽ biểu đồ
+
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -76,7 +76,7 @@ export default function BaoCaoThongKe() {
             {
                 label: 'Doanh thu (VNĐ)',
                 data: danhSachHieuSuat.map(item => item.TONG_DOANH_THU),
-                backgroundColor: 'rgba(16, 185, 129, 0.8)', // Xanh Emerald
+                backgroundColor: 'rgba(16, 185, 129, 0.8)',
                 borderRadius: 6,
             },
         ],
@@ -86,15 +86,15 @@ export default function BaoCaoThongKe() {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-            legend: { display: false }, // Ẩn chú thích vì chỉ có 1 cột
+            legend: { display: false }, 
         },
     };
     const pieColors = [
-        'rgba(16, 185, 129, 0.8)', // Emerald
-        'rgba(245, 158, 11, 0.8)', // Amber
-        'rgba(59, 130, 246, 0.8)', // Blue
-        'rgba(239, 68, 68, 0.8)',  // Red
-        'rgba(139, 92, 246, 0.8)', // Violet
+        'rgba(16, 185, 129, 0.8)', 
+        'rgba(245, 158, 11, 0.8)', 
+        'rgba(59, 130, 246, 0.8)', 
+        'rgba(239, 68, 68, 0.8)',  
+        'rgba(139, 92, 246, 0.8)', 
     ];
 
     const doughnutChartData = {

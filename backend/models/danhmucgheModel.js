@@ -1,9 +1,4 @@
-import {
-  execute,
-  beginTransaction,
-  rollbackTransaction,
-  commitTransaction,
-} from "../config/db.js";
+import {execute,beginTransaction,rollbackTransaction,commitTransaction,} from "../config/db.js";
 export default class dmGhe {
   static async getAll(offset, limit) {
     try {
@@ -14,7 +9,7 @@ export default class dmGhe {
                 GROUP BY d.ID_DANHMUC, d.TEN_DANHMUC, d.TRANG_THAI
                 ORDER BY d.ID_DANHMUC ASC
                 LIMIT ? OFFSET ?`,
-        [limit, offset], // <-- Ép kiểu số để MySQL không bị lỗi chuỗi
+        [limit, offset],
       );
       const [totalRows] = await execute(
         "SELECT COUNT(*) as total FROM danhmucghe",
@@ -44,7 +39,7 @@ export default class dmGhe {
       throw new Error("Không thể thêm danh mục ghế mới vào cơ sở dữ liệu!");
     }
   }
-  // 4. Cập nhật thiết bị
+ 
   static async update(id, tenDanhMuc, trangthai) {
     try {
       const [result] = await execute(
@@ -57,7 +52,7 @@ export default class dmGhe {
       throw new Error("Không thể cập nhật thông tin danh mục ghế!");
     }
   }
-  //kiểm tra id
+  
   static async testid(id) {
     try {
       const [rows] = await execute(

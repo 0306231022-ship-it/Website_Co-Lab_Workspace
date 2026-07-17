@@ -66,7 +66,6 @@ const router = useRouter();
         );
     }
 
-    // Màn hình khi không có dữ liệu
     if (!hoaDon) {
         return (
             <div className="p-8 mx-auto w-full max-w-md text-center bg-white rounded-2xl border border-slate-200 mt-10 shadow-sm">
@@ -77,7 +76,7 @@ const router = useRouter();
         );
     }
 
-    const isPaid = hoaDon.TRANG_THAI === 1; // Giả sử 1 là Đã thanh toán
+    const isPaid = hoaDon.TRANG_THAI === 1;
 
     return (
         <div className="p-4 mx-auto w-full max-w-2xl">

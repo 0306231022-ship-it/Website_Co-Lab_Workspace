@@ -38,11 +38,7 @@ export default class danhmucgheController {
       res.status(500).json({ success: false, message: error.message });
     }
   }
-  // =================================================================
-  // CONTROLLER: Lấy chi tiết 1 danh mục ghế để phục vụ trang Chỉnh sửa
-  // =================================================================
-
-  // [POST] /api/admin/danh mục ghế
+ 
   static async createDanhMucGhe(req, res) {
     try {
       const { TEN_DANHMUC } = req.body;
