@@ -119,7 +119,7 @@ cron.schedule('* * * * *', async () => {
         const danhSachLichQuaHan = await DatLichModel.LayDanhSachLichChuaCheckinQuaHan();
         if (danhSachLichQuaHan && danhSachLichQuaHan.length > 0) {
             for (const lich of danhSachLichQuaHan) {
-                const thanhCong = await DatLichModel.HuyLichTheoId(lich.ID_LICH_DAT);
+                const thanhCong = await DatLichModel.CapNhat_TrangThai(lich.ID_LICH_DAT,2);
                 if (thanhCong) {
                     await thongBaoModel.create(`HỆ THỐNG: Lịch đặt #${lich.ID_LICH_DAT} đã bị hủy`, `Lịch đặt của khách hàng đã bị hủy tự động vì quá giờ mà không check-in!`,5, ID_ADMIN || null);
                     await thongBaoModel.create('Lịch đặt của bạn đã bị hủy','Lịch đặt đã bị hệ thống hủy tự động do bạn không check-in đúng giờ.', 5,lich.IDND);
@@ -132,11 +132,11 @@ cron.schedule('* * * * *', async () => {
     // Tác vụ 4: Hủy đơn nếu quá 15 không thanh toán 
     try {
         const danhsach = await DatLichModel.LichDat_ChuaThanhToan_sau15p();
-        const mangID_LichDat = rows.map(item => item.ID_LICH_DAT);
+        const mangID_LichDat = danhsach.map(item => item.ID_LICH_DAT);
         const danhSachIdLoi = [];
         await Promise.all(mangID_LichDat.map(async (id_nd) => {
             if (id_nd === null || id_nd === undefined) return;
-            const HuyDon = await DatLichModel.HuyDon(id_nd);
+            const HuyDon = await DatLichModel.HuyLichTheoId(id_nd);
             if(!HuyDon){
                 danhSachIdLoi.push(id_nd);
             }
@@ -146,7 +146,7 @@ cron.schedule('* * * * *', async () => {
             const kq = await thongBaoModel.create('HỆ THỐNG LỖI: Không thể hủy đơn do chưa thanh toán', noiDungBaoAdmin, 5, ID_ADMIN || null);
             if (!kq) console.log('Vui lòng kiểm tra hệ thống gửi thông báo!');
         }
-        const mangID_nd = rows.map(item => item.IDND);
+        const mangID_nd = danhsach.map(item => item.IDND);
         await Promise.all(mangID_nd.map(async (id_nd) => {
             const noiDungBaoAdmin = `Hệ thống đã hủy đơn của bạn do bạn chưa thanh toán!`;
             const kq = await thongBaoModel.create('Thống báo về đơn hàng cúa bạn', noiDungBaoAdmin, 5, id_nd || null);
@@ -155,6 +155,7 @@ cron.schedule('* * * * *', async () => {
     } catch (error) {
         console.error("Lỗi trong quá trình hủy đơn do chưa thanh toán quá thời gian quy định:", error);
     }
+    
 },{
     scheduled: true,
     timezone: "Asia/Ho_Chi_Minh" 

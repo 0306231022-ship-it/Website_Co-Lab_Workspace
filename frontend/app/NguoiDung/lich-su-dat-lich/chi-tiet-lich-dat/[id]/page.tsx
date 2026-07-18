@@ -44,6 +44,8 @@ interface LichDat {
   ChiTiet_ThoiGian: ChiTietThoiGian;
   ChiTiet_Ghe_KhongGian: ChiTietGheKhongGian;
   ChiTiet_HoaDon: ChiTietHoaDon;
+  TrangThai_ThanhToan: boolean
+
 }
 
 export interface ResponseChiTietLichDat {
@@ -66,7 +68,7 @@ if (strKetThuc && strBatDau) {
   const dateKetThuc = new Date(strKetThuc).getTime();
   const dateBatDau = new Date(strBatDau).getTime();
   const soGio = (dateKetThuc - dateBatDau) / (1000 * 60 * 60);
-  TongThanhToan = Math.max(0, soGio) * donGia;
+  TongThanhToan = parseFloat(soGio.toFixed(2)) * donGia;
 }
   const fetchLichDat1 = useCallback(async () => {
 
@@ -102,6 +104,7 @@ if (strKetThuc && strBatDau) {
     const themhoa_don = async()=>{
       try {
         await api.CallAPI(undefined,{url:`/NguoiDung/XacNhan_ThanhToan?${query}&id=${id}`, PhuongThuc:2});
+       
       } catch (error) {
            console.error('Lỗi khi tạo hóa đơn từ lịch đặt:', error);
            ThongBao.ThongBao_Loi('Đã xảy ra lỗi khi tạo hóa đơn từ lịch đặt.');
@@ -229,18 +232,7 @@ if (strKetThuc && strBatDau) {
       };
     }
   };
-  const ThanhToan = async()=>{
-    try {
-      const chuyenhuong_thanhtoan = await api.CallAPI(undefined,{url:`/NguoiDung/ThanhToan?id=${id}`, PhuongThuc:2});
-                  if (chuyenhuong_thanhtoan && chuyenhuong_thanhtoan.success && chuyenhuong_thanhtoan.paymentUrl) {
-                     window.open(chuyenhuong_thanhtoan.paymentUrl, '_blank')
-                  } else {
-                    ThongBao.ThongBao_CanhBao(chuyenhuong_thanhtoan?.message || "Không thể khởi tạo link thanh toán từ hệ thống.");
-                  }
-    } catch (error) {
-       console.error("Lỗi lấy lịch sử đặt lịch:", error);
-    }
-  }
+
 
   const { day, month, fullDate } = renderDateDetails();
 
@@ -444,14 +436,14 @@ if (strKetThuc && strBatDau) {
                 <div className="pt-3 border-t border-slate-200 border-dashed flex justify-between items-baseline">
                   <span className="text-slate-800 font-bold">Tổng thanh toán</span>
                   <span className="text-2xl font-black text-brand-600">
-                    {fun.formatCurrency(lichDat.ChiTiet_HoaDon?.GIA_TIEN)}
+                     {fun.formatCurrency(TongThanhToan)}
                   </span>
                 </div>
               </div>
 
               <div className="mt-4 flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-2.5 rounded-xl text-xs font-bold border border-emerald-100 shadow-sm">
                 <i className="fa-solid fa-circle-check text-emerald-500 text-sm"></i>
-                {lichDat.ChiTiet_HoaDon?.TRANG_THAI === 1 ? 'Đã thanh toán' : 'Chưa thanh toán'}
+                {lichDat.TrangThai_ThanhToan ? 'Đã thanh toán' : 'Chưa thanh toán'}
               </div>
             </div>
 
@@ -477,13 +469,7 @@ if (strKetThuc && strBatDau) {
               </Link>
             </>
           )}
-          {
-            lichDat.ChiTiet_ThoiGian.TRANG_THAI === 0 && (
-               <button onClick={()=>{ThanhToan();}} className="px-5 py-3 font-bold rounded-xl hover:bg-brand-700 transition-all shadow-sm flex items-center justify-center gap-2 text-sm">
-                  <i className="fa-solid fa-check"></i> Thanh toán
-                </button>
-            )
-          }
+     
         </div>
 
       </div>

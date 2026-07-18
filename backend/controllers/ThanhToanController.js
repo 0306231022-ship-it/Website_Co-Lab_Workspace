@@ -92,97 +92,124 @@ export default class ThanhToanController {
     }
 }
 
-  static async XacNhan_ThanhToan(req, res) {
+static async XacNhan_ThanhToan(req, res) {
     let id = req.query.id;
+   
     try {
+       
         const kiemtra = await DatLichModel.kiemtraid(id);
         if(!kiemtra){
             io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-thanhtoan', {
                 success: false,
                 message: "Không tồn tại lịch đặt này!"
-            })
-             res.end();
+            });
+            res.end();
             return;
+        }
 
-        }
-         const dathanhtoan = await hoadonModel.kiemtraid_hoadon(id); 
+        // 2. Kiểm tra xem lịch này đã được thanh toán trước đó chưa
+        const dathanhtoan = await hoadonModel.kiemtraid_hoadon(id);
         if (dathanhtoan) {
-             io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-thanhtoan', {
-                    success: false,
-                    message: "Hóa đơn đã được thanh toán trước đó!"
-                })
-                 res.end();
-            return;
-        }
-        let vnp_Params = { ...req.query };
-        const secureHash = vnp_Params['vnp_SecureHash'];
-        delete vnp_Params['vnp_SecureHash'];
-        delete vnp_Params['vnp_SecureHashType'];
-        vnp_Params = sortObject(vnp_Params);
-        const secretKey = process.env.VNP_HASHSECRET; 
-        const signData = qs.stringify(vnp_Params, { encode: false });
-       const hmac = crypto.createHmac("sha512", secretKey);
-        const checkSum = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");
-        const vnp_ResponseCode = vnp_Params['vnp_ResponseCode'];
-        if (secureHash !== checkSum) {
             io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-thanhtoan', {
                 success: false,
-                message: "Vui lòng kiểm tra thông tin"
-            })
-             res.end();
+                message: "Hóa đơn đã được thanh toán trước đó!"
+            });
+            res.end();
             return;
         }
+        
+        // 3. Xử lý dữ liệu VNPay và kiểm tra chữ ký bảo mật (CheckSum)
+        let vnp_Params = { ...req.query };
+        const secureHash = vnp_Params['vnp_SecureHash'];
+        
+        // Loại bỏ các tham số không tham gia vào chuỗi ký băm SHA512
+        delete vnp_Params['vnp_SecureHash'];
+        delete vnp_Params['vnp_SecureHashType'];
+        delete vnp_Params['id']; // 🌟 Xóa tham số id tự chế để tránh lệch chữ ký
+
+        // Sắp xếp các tham số còn lại theo thứ tự bảng chữ cái alphabet của Key
+        const sortedKeys = Object.keys(vnp_Params).sort();
+        let signData = "";
+
+        // Tự dựng chuỗi dữ liệu ký chuẩn hóa theo thuật toán của VNPay (thay thế hoàn toàn thư viện qs)
+        sortedKeys.forEach((key, index) => {
+            if (index === sortedKeys.length - 1) {
+                signData += encodeURIComponent(key) + '=' + encodeURIComponent(vnp_Params[key]).replace(/%20/g, "+");
+            } else {
+                signData += encodeURIComponent(key) + '=' + encodeURIComponent(vnp_Params[key]).replace(/%20/g, "+") + '&';
+            }
+        });
+
+        // Thực hiện băm chuỗi bằng mã bảo mật VNP_HASHSECRET
+        const secretKey = process.env.VNP_HASHSECRET; 
+        const hmac = crypto.createHmac("sha512", secretKey);
+        const checkSum = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");
+        
+        const vnp_ResponseCode = vnp_Params['vnp_ResponseCode'];
+        
+        // Kiểm tra hai chữ ký hash có khớp nhau không
+        if (secureHash !== checkSum) {
+            console.error("❌ Lỗi: Chữ ký không khớp! checkSum tính ra:", checkSum, " - secureHash của VNPay:", secureHash);
+            io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-thanhtoan', {
+                success: false,
+                message: "Sai chữ ký bảo mật. Vui lòng kiểm tra lại thông tin!"
+            });
+            res.end();
+            return;
+        }
+        
+    
         const idlichdat = parseInt(vnp_Params['vnp_TxnRef']); 
         const maGiaoDich = vnp_Params['vnp_TransactionNo'];
         const maNganHang = vnp_Params['vnp_BankCode'];
-        const soTienVnPay = parseFloat(vnp_Params['vnp_Amount']) / 100; // Chia 100 lấy tiền thực tế
-        const payDateRaw = vnp_Params['vnp_PayDate'];
-        let formattedPayDate = null;
-        if (payDateRaw && payDateRaw.length === 14) {
-            formattedPayDate = `${payDateRaw.slice(0, 4)}-${payDateRaw.slice(4, 6)}-${payDateRaw.slice(6, 8)} ${payDateRaw.slice(8, 10)}:${payDateRaw.slice(10, 12)}:${payDateRaw.slice(12, 14)}`;
-        } else {
-            formattedPayDate = new Date().toISOString().slice(0, 19).replace('T', ' '); // Backup ngày hiện tại
-        }
+        const soTienVnPay = parseFloat(vnp_Params['vnp_Amount']) / 100; // Chia 100 ra số tiền thực tế
+    
         if (vnp_ResponseCode === '00'){
-            const them = await hoadonModel.create(soTienVnPay,idlichdat);
-            if(them===null){
+            // Tạo hóa đơn trong hệ thống database
+            const them = await hoadonModel.create(soTienVnPay, idlichdat);
+            console.log("Hóa đơn mới tạo:", them);
+            
+            if (them === null) {
                 io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-thanhtoan', {
                     success: false,
-                    message: "Vui lòng kiểm tra thông tin"
-                })
-                 res.end();
-                 return;
+                    message: "Tạo hóa đơn thất bại. Vui lòng kiểm tra thông tin!"
+                });
+                res.end();
+                return;
             }
-            const themthanhtoan = await ThanhToanModal.Them(maGiaoDich,maNganHang,soTienVnPay,1,them);
-            if(!themthanhtoan){
-                 io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-thanhtoan', {
+            const themthanhtoan = await ThanhToanModal.Them(maGiaoDich, maNganHang, soTienVnPay, 1, them);
+            if (!themthanhtoan) {
+                io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-thanhtoan', {
                     success: false,
-                    message: "Vui lòng kiểm tra thông tin"
-                 })
-                 res.end();
-                 return;
+                    message: "Ghi nhận lịch sử thanh toán thất bại!"
+                });
+                res.end();
+                return;
             }
-             io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-thanhtoan', {
+            io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-thanhtoan', {
                 success: true,
                 message: "Bạn đã thanh toán thành công!"
-             });
+            });
             res.end();
             return;
-        }else{
-             io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-thanhtoan', {
+
+        } else {
+            io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-thanhtoan', {
                 success: false,
-                message: "Thanh toán thất bại, Vui lòng kiểm tra lại!"
-            })
+                message: `Thanh toán thất bại! Mã lỗi: ${vnp_ResponseCode}`
+            });
             res.end();
             return;
         }
+
     } catch (error) {
-         io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-thanhtoan', {
+        console.error("❌ Hệ thống gặp exception:", error);
+        io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-thanhtoan', {
             success: false,
-            message: "Thanh toán thất bại, Vui lòng kiểm tra lại!"
-        })
-         res.end();
-         return;
+            message: "Hệ thống gặp lỗi trong quá trình xử lý thanh toán!"
+        });
+        res.end();
+        return;
     }
-  }
+}
 }

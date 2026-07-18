@@ -4,10 +4,12 @@ import React, { useState, useEffect } from "react";
 import * as ThongBao from '@/FUNCTION/ThongBao';
 import * as fun from '@/FUNCTION/function';
 import Link from "next/link";
+
 interface ThongKe {
     TONG: number;
     HOATDONG: number;
     DOANHTHU: number;
+    HUYDON: number;
 }
 
 export interface ILichDatChiTiet {
@@ -30,6 +32,17 @@ function QuanLiDatDon() {
     const [danhsach, setDanhSach] = useState<ILichDatChiTiet[]>([]);
     const [tongDanhSach, setTongDanhSach] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(false);
+    const [Loc, setLoc] = useState<string>('TatCa');
+    const [tuKhoaTimKiem, setTuKhoaTimKiem] = useState<string>('');
+    const handleTimKiem = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setTuKhoaTimKiem(e.target.value);
+        setpage(1); 
+    };
+    const handleThayDoiBoLoc = (trangThaiMoi: string) => {
+        setLoc(trangThaiMoi);
+        setpage(1);
+    };
+
     useEffect(() => {
         const loadThongKe = async () => {
             try {
@@ -43,12 +56,13 @@ function QuanLiDatDon() {
         };
         loadThongKe();
     }, []);
+
     useEffect(() => {
         const loadDanhSach = async () => {
             setLoading(true);
             try {
                 const response = await api.CallAPI(undefined, { 
-                    url: `/admin/danhsach_lichdat?page=${page}&limit=${limit}`, 
+                    url: `/admin/danhsach_lichdat?page=${page}&limit=${limit}&trangthai=${Loc}&search=${tuKhoaTimKiem}`, 
                     PhuongThuc: 2, 
                 });
                 if (response.success) {
@@ -59,18 +73,14 @@ function QuanLiDatDon() {
                 }
             } catch (error) {
                 console.error("Lỗi hệ thống danh sách:", error);
-                ThongBao.ThongBao_CanhBao( "Lỗi kết nối máy chủ" + error);
+                ThongBao.ThongBao_CanhBao("Lỗi kết nối máy chủ" + error);
             } finally {
                 setLoading(false);
             }
         };
         loadDanhSach();
-    }, [page]);
-
-    // Tính tổng số trang dựa trên tổng số bản ghi và limit
+    }, [page, Loc, tuKhoaTimKiem]);
     const totalPages = Math.ceil(tongDanhSach / limit) || 1;
-
-    // Hàm phụ trợ tạo giao diện Badge trạng thái đơn hàng
     const renderBadgeTrangThai = (status: number) => {
         switch (status) {
             case 0:
@@ -121,24 +131,52 @@ function QuanLiDatDon() {
                     </div>
                     <div className="w-10 h-10 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center text-sm"><i className="fa-solid fa-dollar-sign"></i></div>
                 </div>
+                      <div className="bg-white border border-slate-200/60 rounded-2xl p-4 shadow-xs flex items-center justify-between">
+                    <div>
+                        <p className="text-xs font-medium text-slate-400">TTổng đơn đã hủy</p>
+                        <p className="text-xl font-bold text-slate-900 mt-1">{fun.formatShortNumber(Number(ThongKe?.HUYDON || 0))}</p>
+                    </div>
+                    <div className="w-10 h-10 bg-slate-100 text-red-600 rounded-xl flex items-center justify-center text-sm"><i className="fa-solid fa-ban text-red"></i></div>
+                </div>
             </div>
 
             {/* Khối Bảng Danh Sách & Tìm Kiếm */}
             <div className="bg-white border border-slate-200/60 rounded-2xl shadow-xs overflow-hidden flex flex-col">
                 <div className="p-5 border-b border-slate-100 bg-white flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    
+                    {/* ĐÃ TỐI ƯU UI: Thêm hiệu ứng Class động để Tab được active sẽ sáng màu Indigo */}
                     <div className="flex flex-wrap items-center gap-1.5 bg-slate-100 p-1 rounded-xl max-w-max border border-slate-200/40">
-                        <button className="bg-white shadow-xs text-indigo-600 px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer">Tất cả</button>
-                        <button className="text-slate-500 hover:text-slate-800 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer">Chờ xác nhận</button>
-                        <button className="text-slate-500 hover:text-slate-800 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer">Đang sử dụng</button>
-                        <button className="text-slate-500 hover:text-slate-800 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer">Đã hoàn thành</button>
-                        <button className="text-slate-500 hover:text-slate-800 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer">Đã huỷ</button>
+                        <button 
+                            onClick={() => handleThayDoiBoLoc('TatCa')} 
+                            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${Loc === 'TatCa' ? 'bg-white shadow-xs text-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
+                        >
+                            Tất cả
+                        </button>
+                        <button 
+                            onClick={() => handleThayDoiBoLoc('DangSuDung')} 
+                            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${Loc === 'DangSuDung' ? 'bg-white shadow-xs text-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
+                        >
+                            Đang sử dụng
+                        </button>
+                        <button 
+                            onClick={() => handleThayDoiBoLoc('DaHoanThanh')} 
+                            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${Loc === 'DaHoanThanh' ? 'bg-white shadow-xs text-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
+                        >
+                            Đã hoàn thành
+                        </button>
+                        <button 
+                            onClick={() => handleThayDoiBoLoc('DaHuy')} 
+                            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${Loc === 'DaHuy' ? 'bg-white shadow-xs text-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
+                        >
+                            Đã huỷ
+                        </button>
                     </div>
                     
                     <div className="relative w-full md:w-72">
                         <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                             <i className="fa-solid fa-magnifying-glass text-xs"></i>
                         </span>
-                        <input type="text" placeholder="Tìm kiếm mã đơn, khách hàng..." className="w-full text-xs font-medium bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2.5 focus:bg-white focus:border-indigo-500 focus:outline-none transition-all"/>
+                        <input type="text" value={tuKhoaTimKiem} onChange={handleTimKiem} placeholder="Tìm kiếm mã đơn" className="w-full text-xs font-medium bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2.5 focus:bg-white focus:border-indigo-500 focus:outline-none transition-all"/>
                     </div>
                 </div>
 
@@ -197,7 +235,7 @@ function QuanLiDatDon() {
                                         </td>
                                         <td className="py-4 px-5">
                                             <div className="flex items-center justify-center space-x-2">
-                                             <Link href={`/admin/QuanLiDatDon/ch-tiet-don/${item.ID_LICH_DAT}`} className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition cursor-pointer"><i className="fa-solid fa-eye text-sm"></i></Link>
+                                                <Link href={`/admin/QuanLiDatDon/ch-tiet-don/${item.ID_LICH_DAT}`} className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition cursor-pointer"><i className="fa-solid fa-eye text-sm"></i></Link>
                                             </div>
                                         </td>
                                     </tr>
@@ -222,15 +260,10 @@ function QuanLiDatDon() {
                         >
                             <i className="fa-solid fa-chevron-left"></i>
                         </button>
-                                <span
-                    
-                                    className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition cursor-pointer bg-indigo-600 text-white border-indigo-600 shadow-xs`}
-                                >
-                                {page}
-                                </span>
-                
 
-                        {/* Nút tiến trang */}
+                        <span className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition cursor-pointer bg-indigo-600 text-white border-indigo-600 shadow-xs`}>
+                            {page}
+                        </span>
                         <button 
                             disabled={page === totalPages}
                             onClick={() => setpage(prev => Math.min(prev + 1, totalPages))}

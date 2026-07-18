@@ -15,56 +15,77 @@ export default class DatLichModel{
             throw error;
         }
     }
- static async DanhSach(limit, offset) {
+   static async DanhSach(limit, offset, trangthai, search) {
     try {
-        const [danhsach] = await execute(`
-          SELECT 
-        ld.ID_LICH_DAT,
-        ld.TRANG_THAI,
-        ld.KHUNG_BATDAU,
-        ld.KHUNG_KETTHUC,
-        nd.TENND,
-        nd.EMAIL,
-        MAX(hd.GIA_TIEN) AS GIA_TIEN, -- Sử dụng MAX đề phòng đơn 127 có nhiều hơn 1 hóa đơn rác trong DB
-        CASE 
-            WHEN ld.ID_GHE IS NOT NULL THEN g.TEN_GHE
-            ELSE kg.TEN_KHONG_GIAN
-        END AS TEN_DOI_TUONG,
-        CASE 
-            WHEN ld.ID_GHE IS NOT NULL THEN 'GHE'
-            ELSE 'KHONG_GIAN'
-        END AS LOAI_DAT,
-        CASE 
-            WHEN ld.ID_GHE IS NOT NULL THEN cn_ghe.TEN_CHI_NHANH
-            ELSE cn_kg.TEN_CHI_NHANH
-        END AS TEN_CHI_NHANH
+        let querySql = `
+            SELECT 
+                ld.ID_LICH_DAT, ld.TRANG_THAI, ld.KHUNG_BATDAU, ld.KHUNG_KETTHUC,
+                nd.TENND, nd.EMAIL, MAX(hd.GIA_TIEN) AS GIA_TIEN, 
+                CASE WHEN ld.ID_GHE IS NOT NULL THEN g.TEN_GHE ELSE kg.TEN_KHONG_GIAN END AS TEN_DOI_TUONG,
+                CASE WHEN ld.ID_GHE IS NOT NULL THEN 'GHE' ELSE 'KHONG_GIAN' END AS LOAI_DAT,
+                CASE WHEN ld.ID_GHE IS NOT NULL THEN cn_ghe.TEN_CHI_NHANH ELSE cn_kg.TEN_CHI_NHANH END AS TEN_CHI_NHANH
+            FROM lichdat ld
+            INNER JOIN nguoidung nd ON ld.IDND = nd.IDND
+            LEFT JOIN hoadon hd ON ld.ID_LICH_DAT = hd.ID_LICHDAT
+            LEFT JOIN ghe g ON ld.ID_GHE = g.ID_GHE
+            LEFT JOIN khonggian kg_ghe ON g.ID_KHONG_GIAN = kg_ghe.ID_KHONG_GIAN
+            LEFT JOIN chinhanh cn_ghe ON kg_ghe.ID_CHI_NHANH = cn_ghe.ID_CHI_NHANH
+            LEFT JOIN khonggian kg ON ld.ID_KHONG_GIAN = kg.ID_KHONG_GIAN
+            LEFT JOIN chinhanh cn_kg ON kg.ID_CHI_NHANH = cn_kg.ID_CHI_NHANH
+        `;
 
-    FROM lichdat ld
-    INNER JOIN nguoidung nd ON ld.IDND = nd.IDND
-    LEFT JOIN hoadon hd ON ld.ID_LICH_DAT = hd.ID_LICHDAT
+        let countSql = `SELECT COUNT(*) AS total FROM lichdat ld`;
+        
+        // Mảng chứa các điều kiện WHERE
+        let whereClauses = [];
+        let queryParams = [];
+        let countParams = [];
 
-    LEFT JOIN ghe g ON ld.ID_GHE = g.ID_GHE
-    LEFT JOIN khonggian kg_ghe ON g.ID_KHONG_GIAN = kg_ghe.ID_KHONG_GIAN
-    LEFT JOIN chinhanh cn_ghe ON kg_ghe.ID_CHI_NHANH = cn_ghe.ID_CHI_NHANH
+        // 1. Lọc theo trạng thái
+        if (trangthai && trangthai !== 'TatCa') {
+            let trangThaiSo = trangthai === 'DangSuDung' ? 0 : trangthai === 'DaHoanThanh' ? 1 : 2;
+            whereClauses.push(`ld.TRANG_THAI = ?`);
+            queryParams.push(trangThaiSo);
+            countParams.push(trangThaiSo);
+        }
 
-    LEFT JOIN khonggian kg ON ld.ID_KHONG_GIAN = kg.ID_KHONG_GIAN
-    LEFT JOIN chinhanh cn_kg ON kg.ID_CHI_NHANH = cn_kg.ID_CHI_NHANH
-    GROUP BY ld.ID_LICH_DAT
-    
-    ORDER BY ld.ID_LICH_DAT DESC
-    LIMIT ? OFFSET ?
-        `, [Number(limit), Number(offset)]);
+        // 2. Lọc theo Tìm kiếm ID lịch đặt
+        if (search && search.trim() !== "") {
+            // Xử lý trường hợp người dùng nhập cả chữ dạng "#CLB-12" hoặc chỉ nhập số "12"
+            let idTimKiem = search.replace(/[^0-9]/g, ""); // Chỉ giữ lại các chữ số
+            
+            if (idTimKiem) {
+                whereClauses.push(`ld.ID_LICH_DAT = ?`);
+                queryParams.push(Number(idTimKiem));
+                countParams.push(Number(idTimKiem));
+            }
+        }
 
-        // 2. Lấy ra số lượng tổng (Lấy trực tiếp số thay vì bọc trong Object)
-        const [tongRows] = await execute(`SELECT COUNT(*) AS total FROM lichdat`);
-        const tongSoLuong = tongRows[0]?.total || 0; 
+        // Gộp các điều kiện WHERE nếu có
+        if (whereClauses.length > 0) {
+            const clauseStr = " WHERE " + whereClauses.join(" AND ");
+            querySql += clauseStr;
+            countSql += clauseStr;
+        }
 
+        // Thêm các cú pháp phân trang và sắp xếp
+        querySql += `
+            GROUP BY ld.ID_LICH_DAT
+            ORDER BY ld.ID_LICH_DAT DESC
+            LIMIT ? OFFSET ?
+        `;
+        queryParams.push(Number(limit), Number(offset));
+
+        // Thực thi DB
+        const [danhsach] = await execute(querySql, queryParams);
+        const [tongRows] = await execute(countSql, countParams);
+        
         return {
             DanhSach: danhsach,
-            TongDanhSach: tongSoLuong
+            TongDanhSach: tongRows[0]?.total || 0
         };
     } catch (error) {
-         throw new Error('Database query failed: ' + error.message);
+        throw new Error('Database query failed: ' + error.message);
     }
 }
     static async NguoiDat_ghe_HienTai(IDGHE){
@@ -410,17 +431,23 @@ LIMIT ? OFFSET ?;
             const [DangHoatDong] = await execute(`
                 SELECT COUNT(ID_LICH_DAT) as HOATDONG
                 FROM lichdat
-                WHERE ? BETWEEN KHUNG_BATDAU AND KHUNG_KETTHUC;
+                WHERE ? BETWEEN KHUNG_BATDAU AND KHUNG_KETTHUC AND TRANG_THAI = 1
                 `,[thoigian]);
             const [DoanhThuThang] = await execute(`
                 SELECT SUM(GIA_TIEN) AS DOANHTHU
                 FROM hoadon
                 WHERE DATE_FORMAT(NGAY_TAO, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m');
                 `,[])
+            const [TongHuy] = await execute(`
+                  SELECT COUNT(ID_LICH_DAT) as HUYDON
+                  FROM lichdat
+                  WHERE TRANG_THAI = 2
+                `)
             return {
                 TONG : TongLichDat[0].TONG,
                 HOATDONG: DangHoatDong[0].HOATDONG,
-                DOANHTHU: DoanhThuThang[0].DOANHTHU
+                DOANHTHU: DoanhThuThang[0].DOANHTHU,
+                HUYDON: TongHuy[0].HUYDON
             }
         } catch (error) {
              throw new Error('Database query failed: ' + error.message);
@@ -535,12 +562,12 @@ WHERE DATE(KHUNG_BATDAU) = CURDATE()
             if (!rows || rows.length === 0) {
                 return [];
             }
-            const mangID_LichDat = rows.map(item => item.ID_LICH_DAT);
-            await execute(`
+           const mangID_LichDat = rows.map(item => item.ID_LICH_DAT);
+           await execute(`
                 UPDATE lichdat 
                 SET THONGBAO_TRUOC = 1 
-                WHERE ID IN (?);
-            `, [mangID_LichDat]);
+                WHERE ID_LICH_DAT IN (?);
+        `, [[mangID_LichDat]]);
             const mangIDND = rows.map(item => item.IDND);
             return mangIDND;
         } catch (error) {
@@ -564,7 +591,7 @@ WHERE DATE(KHUNG_BATDAU) = CURDATE()
             await execute(`
                 UPDATE lichdat 
                 SET THONGBAO_SAU = 1 
-                WHERE ID IN (?);
+                WHERE ID_LICH_DAT IN (?);
             `, [mangID_LichDat]);
              const mangIDND = ketqua.map(item => item.IDND);
              return mangIDND;
@@ -673,7 +700,7 @@ if (isValidDate(data.THOIGIAN_RA)) {
 
 const diffMs = thoiGianKetThuc - thoiGianBatDau; 
 const soGio = diffMs > 0 ? diffMs / (1000 * 60 * 60) : 0;
-const tongTien = soGio * donGia;
+const tongTien = soGio.toFixed(2) * donGia;
 
 
 return tongTien;
@@ -698,7 +725,6 @@ return tongTien;
             FROM lichdat
             WHERE NOW() >= KHUNG_BATDAU
               AND THOIGIAN_VAO IS NULL
-              AND TRANG_THAI = 0;
         `, []);
         return rows;
     } catch (error) {
@@ -763,7 +789,7 @@ LIMIT 1;
           const [kq] = await execute(`
             SELECT ld.IDND, ld.ID_LICH_DAT
             FROM lichdat ld
-            LEFT JOIN hoadon hd ON ld.ID_LICH_DAT = hd.ID_LICH_DAT
+            LEFT JOIN hoadon hd ON ld.ID_LICH_DAT = hd.ID_LICHDAT
             WHERE ld.NGAY_TAO < DATE_SUB(NOW(), INTERVAL 15 MINUTE)
             AND ld.TRANG_THAI = 0
             AND hd.ID_LICHDAT IS NULL; 
@@ -773,18 +799,19 @@ LIMIT 1;
              throw new Error("Database query failed: " + error.message);
         }
     }
-    static async HuyLichTheoId(id){
+    static async CapNhat_TrangThai(id,trangthai){
         try {
             const [update] = await execute(`
                 UPDATE lichdat
-                SET TRANG_THAI = 2
+                SET TRANG_THAI = ?
                 WHERE ID_LICH_DAT = ?
-                `,[id]);
+                `,[trangthai,id]);
             return update.affectedRows>0 
         } catch (error) {
             throw new Error("Database query failed: " + error.message);
         }
     }
+  
     
 
 

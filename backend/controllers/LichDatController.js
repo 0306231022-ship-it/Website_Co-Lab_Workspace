@@ -83,6 +83,8 @@ export default class LichDatController{
     }
     static async DanhSachDatLich(req,res){
         try {
+          const trangthai = req.query.trangthai;
+          const search = req.query.search;
           const page = parseInt(req.query.page) || 1;
           const limit = parseInt(req.query.limit) || 3;
           const offset = (page - 1) * limit;
@@ -102,7 +104,7 @@ export default class LichDatController{
                     errors: errors.array().map(err => err.msg)
                 });
             }
-            const DanhSach = await DatLichModel.DanhSach(limit,offset);
+            const DanhSach = await DatLichModel.DanhSach(limit,offset,trangthai,search);
             return res.status(200).json({
                 success:true,
                 danhsach:DanhSach.DanhSach,
@@ -228,6 +230,7 @@ export default class LichDatController{
                     message: 'Bạn không có quyền truy cập chi tiết lịch đặt này.'
                 });
             }
+            const kiemtra3 = await hoadonModel.kiemtraid_hoadon(id)
             const lichDat = await DatLichModel.ChiTiet_LichDat_theoIDDL(id);
             if (!lichDat.success) {
                 return res.status(404).json({
@@ -241,6 +244,7 @@ export default class LichDatController{
                     cHITiet_NguoiDung: lichDat.ChiTiet_NguoiDung,
                     ChiTiet_ThoiGian: lichDat.ChiTiet_ThoiGian,
                     ChiTiet_Ghe_KhongGian: lichDat.ChiTiet_Ghe_KhongGian,
+                    TrangThai_ThanhToan: kiemtra3
                 } 
             });
         } catch (error) {
@@ -435,7 +439,8 @@ export default class LichDatController{
                 dulieu : {
                     TONG:thongke.TONG,
                     HOATDONG:thongke.HOATDONG,
-                    DOANHTHU:thongke.DOANHTHU
+                    DOANHTHU:thongke.DOANHTHU,
+                    HUYDON:thongke.HUYDON
                 }
             })
         } catch (error) {
@@ -481,10 +486,12 @@ export default class LichDatController{
                     success: true,
                     message: "Check-in thành công!"
                 });
+                res.end();
+                return;
             } else if (timeHienTai < mocCheckInSom) {
                 io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-checkin', {
                     success: false,
-                    message: "Check-in trước 15p!"
+                    message: "Vui lòng Check-in trước 15p!"
                  });
                  res.end();
                 return;
@@ -524,6 +531,15 @@ export default class LichDatController{
                         message: "Bạn chưa thanh toán cho lịch này, Vui lòng thanh toán để có trải nghiệm tốt hơn!"
                     });
                     res.end(); 
+                    return;
+               }
+               const capnhat = await DatLichModel.CapNhat_TrangThai(id,1);
+               if(!capnhat){
+                     io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-checkout', {
+                        success: false,
+                        message: "Check-out thất bại, Vui lòng thử lại sau!"
+                    });
+                    res.end();
                     return;
                }
               io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-checkout', {
