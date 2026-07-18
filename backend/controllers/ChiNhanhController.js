@@ -376,7 +376,6 @@ export default class ChiNhanhController {
   }
   static async thongtin_chinhanh_khonggian(req,res){
     const id = req.query.id;
-    console.log(id)
     if(!id){
       return res.status(401).json({
         success:false,
@@ -404,8 +403,6 @@ export default class ChiNhanhController {
     }
   }
       
-
- 
   static async getThongKeHieuSuat(req, res) {
     try {
       const kyThongKe = req.query.ky || "Tháng này";

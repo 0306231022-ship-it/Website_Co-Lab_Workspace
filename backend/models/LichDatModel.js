@@ -526,11 +526,21 @@ WHERE DATE(KHUNG_BATDAU) = CURDATE()
     static async lichDatTruoc15p(){
         try {
             const [rows] = await execute(`
-                SELECT DISTINCT IDND 
+                SELECT DISTINCT IDND, ID_LICH_DAT
                 FROM lichdat
                 WHERE KHUNG_BATDAU BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 15 MINUTE)
-                AND TRANG_THAI = 0;
+                    AND TRANG_THAI <> 2
+                    AND THONGBAO_TRUOC = 0;
             `, []);
+            if (!rows || rows.length === 0) {
+                return [];
+            }
+            const mangID_LichDat = rows.map(item => item.ID_LICH_DAT);
+            await execute(`
+                UPDATE lichdat 
+                SET THONGBAO_TRUOC = 1 
+                WHERE ID IN (?);
+            `, [mangID_LichDat]);
             const mangIDND = rows.map(item => item.IDND);
             return mangIDND;
         } catch (error) {
@@ -539,13 +549,23 @@ WHERE DATE(KHUNG_BATDAU) = CURDATE()
     }
     static async lichDatKetThucTruoc15p(){
         try {
-            const ketqua = await execute(`
-                SELECT DISTINCT IDND 
+            const [rows] = await execute(`
+                SELECT DISTINCT IDND, ID_LICH_DAT 
                 FROM lichdat
                 WHERE KHUNG_KETTHUC BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 15 MINUTE)
               AND TRANG_THAI = 0
-              AND THOIGIAN_RA IS NULL;
+              AND THOIGIAN_RA IS NULL
+              AND THONGBAO_SAU = 0;
                 `,[])
+            if (!rows || rows.length === 0) {
+                return [];
+            }
+            const mangID_LichDat = rows.map(item => item.ID_LICH_DAT);
+            await execute(`
+                UPDATE lichdat 
+                SET THONGBAO_SAU = 1 
+                WHERE ID IN (?);
+            `, [mangID_LichDat]);
              const mangIDND = ketqua.map(item => item.IDND);
              return mangIDND;
         } catch (error) {
@@ -738,6 +758,34 @@ LIMIT 1;
              throw new Error("Database query failed: " + error.message);
         }
     }
+    static async LichDat_ChuaThanhToan_sau15p(){
+        try {
+          const [kq] = await execute(`
+            SELECT ld.IDND, ld.ID_LICH_DAT
+            FROM lichdat ld
+            LEFT JOIN hoadon hd ON ld.ID_LICH_DAT = hd.ID_LICH_DAT
+            WHERE ld.NGAY_TAO < DATE_SUB(NOW(), INTERVAL 15 MINUTE)
+            AND ld.TRANG_THAI = 0
+            AND hd.ID_LICHDAT IS NULL; 
+        `, []);
+            return kq;
+        } catch (error) {
+             throw new Error("Database query failed: " + error.message);
+        }
+    }
+    static async HuyLichTheoId(id){
+        try {
+            const [update] = await execute(`
+                UPDATE lichdat
+                SET TRANG_THAI = 2
+                WHERE ID_LICH_DAT = ?
+                `,[id]);
+            return update.affectedRows>0 
+        } catch (error) {
+            throw new Error("Database query failed: " + error.message);
+        }
+    }
+    
 
 
 

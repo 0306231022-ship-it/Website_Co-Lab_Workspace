@@ -94,8 +94,7 @@ function ThongTin({DuLieu} : { DuLieu : LichDat}) {
             return;
         }
         if(DatLich.success){
-            const XacNhan = await ThongBao.ThongBao_XacNhanTT('Đặt hàng thành công!, bạn có muốn thanh toán luôn không?');
-            if(!XacNhan) return;
+            ThongBao.ThongBao_ThongTin(DatLich.message)
             const chuyenhuong_thanhtoan = await api.CallAPI(undefined,{url:`/NguoiDung/ThanhToan?id=${DatLich.ID_LICHDAT}`, PhuongThuc:2});
             if (chuyenhuong_thanhtoan && chuyenhuong_thanhtoan.success && chuyenhuong_thanhtoan.paymentUrl) {
                window.open(chuyenhuong_thanhtoan.paymentUrl, '_blank')

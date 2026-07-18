@@ -192,14 +192,12 @@ function ChiTietKhongGian() {
                 return;
             }
             if(DatLich.success){
-                  const XacNhan = await ThongBao.ThongBao_XacNhanTT('ĐẶT hàng thành công!, bạn có muốn thanh toán luôn không?');
-                            if(!XacNhan) return;
-                            const chuyenhuong_thanhtoan = await api.CallAPI(undefined,{url:`/NguoiDung/ThanhToan?id=${DatLich.ID_LICHDAT}`, PhuongThuc:2});
-                            if (chuyenhuong_thanhtoan && chuyenhuong_thanhtoan.success && chuyenhuong_thanhtoan.paymentUrl) {
-                               window.open(chuyenhuong_thanhtoan.paymentUrl, '_blank')
-                            } else {
-                              ThongBao.ThongBao_CanhBao(chuyenhuong_thanhtoan?.message || "Không thể khởi tạo link thanh toán từ hệ thống.");
-                            }
+                 const chuyenhuong_thanhtoan = await api.CallAPI(undefined,{url:`/NguoiDung/ThanhToan?id=${DatLich.ID_LICHDAT}`, PhuongThuc:2});
+                 if (chuyenhuong_thanhtoan && chuyenhuong_thanhtoan.success && chuyenhuong_thanhtoan.paymentUrl) {
+                  window.open(chuyenhuong_thanhtoan.paymentUrl, '_blank')
+                  } else {
+                  ThongBao.ThongBao_CanhBao(chuyenhuong_thanhtoan?.message || "Không thể khởi tạo link thanh toán từ hệ thống.");
+                }        
             }
             if(DatLich.success===false){
                 ThongBao.ThongBao_Loi(DatLich.message)
@@ -618,6 +616,10 @@ function ChiTietKhongGian() {
               <p className="font-bold text-emerald-800 flex items-center gap-1.5">💡 Lưu ý sử dụng không gian</p>
               <p className="pl-2">• Vui lòng ngồi đúng vị trí ghế hoặc không gian đã chọn để tránh ảnh hưởng tới thành viên khác.</p>
               <p className="pl-2">• Giữ gìn vệ sinh chung tại khu vực OpenSpace, không đem đồ ăn nặng mùi vào phòng.</p>
+              <p className="pl-2">• Khi đặt chổ thành công, vui lòng thanh toán trước khi sử dụng.</p>
+               <p className="pl-2">• Sau 15 phút sau khi đặt đơn, nếu bạn chưa thanh toán. Hệ thống sẽ hủy đơn đặt chỗ của bạn!</p>
+               <p className="pl-2">• Không chấp nhận mọi sự chậm chễ đến từ khách hàng!</p>
+
             </div>
             <div className="bg-white border border-gray-100 p-4 rounded-xl flex items-center gap-4">
               <div className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-lg border">🎧</div>

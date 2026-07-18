@@ -335,12 +335,7 @@ function ChiTietDon(){
                     </div>
                 </div>
 
-                <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-200/60">
-                    <button type="button" className="flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl text-xs font-bold shadow-md shadow-indigo-600/10 transition-all cursor-pointer">
-                        <i className="fa-solid fa-circle-check"></i>
-                        <span>Hoàn thành đơn đặt</span>
-                    </button>
-                </div>
+             
         </>
     )
 };

@@ -11,7 +11,7 @@ import DatLichModel from './models/LichDatModel.js';
  
 cron.schedule('*/15 * * * *', async () => {
     console.log(`--- [${new Date().toLocaleTimeString()}] Đang kiểm tra ---`);
-    // Chuyển trangthai khi NGAY_CAP_NHAT = NOW()
+    // Tác vụ 1: Thay đổi trạng thái chi nhánh(nếu có)
     try {
         const CapNhat = await ChiNhanhModel.ChuyenTrangThai();
         if(CapNhat){
@@ -21,49 +21,37 @@ cron.schedule('*/15 * * * *', async () => {
     } catch (error) {
         console.error('Lỗi thực thi tác vụ 15 phút:', error.message);
     }
-    // xóa mã OTP đã hết hạn
+    // Tác vụ 2: xóa mã OTP đã hết hạn
     try {
         await XacThucOTPModel.XoaOTP_HetHan();
     } catch (error) {
          console.error('Lỗi thực thi tác vụ 15 phút:', error.message);
     }
-    // Đổi trạng thái không gian
+    // Tác vụ 3: Thay đổi trạng thái không gian
   try {
     const [chi1, chitiet2] = await Promise.all([
         KhongGianModel.Mokhonggian(),
         KhongGianModel.khoa_khonggian()
     ]);
-
-    // Kiểm tra xem thực sự có sự thay đổi nào không
     const coThayDoiMo = chi1 && chi1.length > 0;
     const coThayDoiKhoa = chitiet2 && chitiet2.length > 0;
-
-    // NẾU CÓ THAY ĐỔI THÌ MỚI XỬ LÝ VÀ GỬI THÔNG BÁO
     if (coThayDoiMo || coThayDoiKhoa) {
         let chiTietMo = "";
         if (coThayDoiMo) {
             chiTietMo = `🔓 Đã mở lại (${chi1.length}): ` + chi1.map(kg => kg.TEN_KHONGGIAN || kg.TEN_KHONG_GIAN).join(', ');
         }
-
         let chiTietKhoa = "";
         if (coThayDoiKhoa) {
             chiTietKhoa = `🔒 Đã khóa bảo trì (${chitiet2.length}): ` + chitiet2.map(kg => kg.TEN_KHONGGIAN || kg.TEN_KHONG_GIAN).join(', ');
         }
-
         let noiDungChiTiet = "Hệ thống đã quét và cập nhật trạng thái vận hành các không gian tự động.\n";
         if (chiTietMo) noiDungChiTiet += chiTietMo + "\n";
         if (chiTietKhoa) noiDungChiTiet += chiTietKhoa + "\n";
-
-        // Thực hiện lưu thông báo vào database
         const thongbao = await thongBaoModel.create('Cập nhật trạng thái chi nhánh tự động', noiDungChiTiet, 4, 1);
-        
         if (!thongbao) {
             console.log('Vui lòng kiểm tra lại hệ thống lưu thông báo!');
-        } else {
-            console.log('Đã gửi thông báo cập nhật trạng thái không gian thành công.');
-        }
+        } 
     } else {
-        // Nếu không có thay đổi thì chỉ in log ra màn hình console để biết hệ thống vẫn đang chạy ngầm tốt
         console.log('--- [Cron Job] Quét không gian hoàn tất: Không có thay đổi nào về trạng thái. ---');
     }
 
@@ -75,69 +63,58 @@ cron.schedule('*/15 * * * *', async () => {
     scheduled: true,
     timezone: "Asia/Ho_Chi_Minh" 
 });
-//Quets 1 phút 1 lần
+//Quét 1 phút 1 lần
 cron.schedule('* * * * *', async () => {
      const ID_ADMIN = 1;
-try {
-    const kiemtra = await DatLichModel.lichDatTruoc15p();
-    
-    // Chỉ xử lý nếu mảng hợp lệ và có phần tử
-    if (kiemtra && kiemtra.length > 0) {
-        const noiDungChiTiet = "Bạn có lịch đặt chỗ sắp diễn ra trong 15 phút tới. Vui lòng chuẩn bị thời gian!";
-        const danhSachIdLoi = [];
-        
-        await Promise.all(kiemtra.map(async (id_nd) => {
-            // SỬA LỖI TẠI ĐÂY: Nếu id_nd bị null hoặc undefined, bỏ qua ngay lập tức không ném vào DB
-            if (id_nd === null || id_nd === undefined) return;
-
-            const kq = await thongBaoModel.create('Nhắc nhở lịch đặt sắp diễn ra', noiDungChiTiet, 4, id_nd);
-            if (!kq) {
-                danhSachIdLoi.push(id_nd);
-            }
-        }));
-
-        if (danhSachIdLoi.length > 0) {
-            const noiDungBaoAdmin = `Hệ thống gặp lỗi khi gửi thông báo nhắc lịch 15 phút cho các khách hàng có ID: ${danhSachIdLoi.join(', ')}. Vui lòng kiểm tra lại hệ thống!`;
-            // Thay đổi loại sang 5 cho Admin (để phân biệt với loại của khách) và ép kiểu an toàn cho ID_ADMIN
-            const kq = await thongBaoModel.create('HỆ THỐNG LỖI: Không thể gửi thông báo khách hàng', noiDungBaoAdmin, 5, ID_ADMIN || null);
-            if (!kq) {
-                console.log('Vui lòng kiểm tra hệ thống gửi thông báo!');
-            }
-        } 
+      // Tác vụ 1: Thông báo lịch đặt trước 15p
+    try {
+        const kiemtra = await DatLichModel.lichDatTruoc15p();
+        if (kiemtra && kiemtra.length > 0) {
+            const noiDungChiTiet = "Bạn có lịch đặt chỗ sắp diễn ra trong 15 phút tới. Vui lòng chuẩn bị thời gian!";
+            const danhSachIdLoi = [];
+            await Promise.all(kiemtra.map(async (id_nd) => {
+                if (id_nd === null || id_nd === undefined) return;
+                 const kq = await thongBaoModel.create('Nhắc nhở lịch đặt sắp diễn ra', noiDungChiTiet, 4, id_nd);
+                if (!kq) {
+                    danhSachIdLoi.push(id_nd);
+                }
+            }));
+            if (danhSachIdLoi.length > 0) {
+                const noiDungBaoAdmin = `Hệ thống gặp lỗi khi gửi thông báo nhắc lịch 15 phút cho các khách hàng có ID: ${danhSachIdLoi.join(', ')}. Vui lòng kiểm tra lại hệ thống!`;
+                const kq = await thongBaoModel.create('HỆ THỐNG LỖI: Không thể gửi thông báo khách hàng', noiDungBaoAdmin, 5, ID_ADMIN || null);
+                if (!kq) {
+                    console.log('Vui lòng kiểm tra hệ thống gửi thông báo!');
+                }
+            } 
+        }
+    } catch (error) {
+        console.error("Lỗi trong quá trình quét và tạo thông báo tự động (Tác vụ 1):", error);
     }
-} catch (error) {
-     console.error("Lỗi trong quá trình quét và tạo thông báo tự động (Tác vụ 1):", error);
-}
-
-try {
-    const kiemtra = await DatLichModel.lichDatKetThucTruoc15p();
-    
-    if (kiemtra && kiemtra.length > 0) {
-        const noiDungChiTiet = "Bạn có lịch đặt chỗ sắp kết thúc trong 15 phút tới. Vui lòng chuẩn bị thời gian!";
-        const danhSachIdLoi = [];
-        
-        await Promise.all(kiemtra.map(async (id_nd) => {
-    
-            if (id_nd === null || id_nd === undefined) return;
-
-            const kq = await thongBaoModel.create('Nhắc nhở lịch đặt sắp kết thúc!', noiDungChiTiet, 4, id_nd);
-            if (!kq) {
-                danhSachIdLoi.push(id_nd);
-            }
-        }));
-
-        if (danhSachIdLoi.length > 0) {
-            const noiDungBaoAdmin = `Hệ thống gặp lỗi khi gửi thông báo nhắc lịch kết thúc 15 phút cho các khách hàng có ID: ${danhSachIdLoi.join(', ')}. Vui lòng kiểm tra lại hệ thống!`;
-            const kq = await thongBaoModel.create('HỆ THỐNG LỖI: Không thể gửi thông báo khách hàng', noiDungBaoAdmin, 5, ID_ADMIN || null);
-            if (!kq) {
-                console.log('Vui lòng kiểm tra hệ thống gửi thông báo!');
-            }
-        } 
+    // Tác vụ 2: Thông báo lịch đặt kết thúc trước 15p
+    try {
+        const kiemtra = await DatLichModel.lichDatKetThucTruoc15p();
+        if (kiemtra && kiemtra.length > 0) {
+            const noiDungChiTiet = "Bạn có lịch đặt chỗ sắp kết thúc trong 15 phút tới. Vui lòng chuẩn bị thời gian!";
+            const danhSachIdLoi = [];
+            await Promise.all(kiemtra.map(async (id_nd) => {
+                if (id_nd === null || id_nd === undefined) return;
+                const kq = await thongBaoModel.create('Nhắc nhở lịch đặt sắp kết thúc!', noiDungChiTiet, 4, id_nd);
+                if (!kq) {
+                    danhSachIdLoi.push(id_nd);
+                }
+            }));
+            if (danhSachIdLoi.length > 0) {
+                const noiDungBaoAdmin = `Hệ thống gặp lỗi khi gửi thông báo nhắc lịch kết thúc 15 phút cho các khách hàng có ID: ${danhSachIdLoi.join(', ')}. Vui lòng kiểm tra lại hệ thống!`;
+                const kq = await thongBaoModel.create('HỆ THỐNG LỖI: Không thể gửi thông báo khách hàng', noiDungBaoAdmin, 5, ID_ADMIN || null);
+                if (!kq) {
+                    console.log('Vui lòng kiểm tra hệ thống gửi thông báo!');
+                }
+            } 
+        }
+    } catch (error) {
+        console.error("Lỗi trong quá trình quét và tạo thông báo tự động (Tác vụ 2):", error);
     }
-} catch (error) {
-    console.error("Lỗi trong quá trình quét và tạo thông báo tự động (Tác vụ 2):", error);
-}
-    // tác vụ 3: Hủy đơn nếu không check-in
+    // tác vụ 3: Hủy đơn nếu không check-in trước 5p
     try {
         const danhSachLichQuaHan = await DatLichModel.LayDanhSachLichChuaCheckinQuaHan();
         if (danhSachLichQuaHan && danhSachLichQuaHan.length > 0) {
@@ -152,7 +129,32 @@ try {
     } catch (error) {
         console.error("Lỗi trong quá trình tìm lịch chưa check-in và tạo thông báo tự động:", error);
     }
-
+    // Tác vụ 4: Hủy đơn nếu quá 15 không thanh toán 
+    try {
+        const danhsach = await DatLichModel.LichDat_ChuaThanhToan_sau15p();
+        const mangID_LichDat = rows.map(item => item.ID_LICH_DAT);
+        const danhSachIdLoi = [];
+        await Promise.all(mangID_LichDat.map(async (id_nd) => {
+            if (id_nd === null || id_nd === undefined) return;
+            const HuyDon = await DatLichModel.HuyDon(id_nd);
+            if(!HuyDon){
+                danhSachIdLoi.push(id_nd);
+            }
+        }))
+        if (danhSachIdLoi.length > 0) {
+            const noiDungBaoAdmin = `Hệ thống gặp lỗi khi hủy đơn ID: ${danhSachIdLoi.join(', ')}. Vui lòng kiểm tra lại hệ thống!`;
+            const kq = await thongBaoModel.create('HỆ THỐNG LỖI: Không thể hủy đơn do chưa thanh toán', noiDungBaoAdmin, 5, ID_ADMIN || null);
+            if (!kq) console.log('Vui lòng kiểm tra hệ thống gửi thông báo!');
+        }
+        const mangID_nd = rows.map(item => item.IDND);
+        await Promise.all(mangID_nd.map(async (id_nd) => {
+            const noiDungBaoAdmin = `Hệ thống đã hủy đơn của bạn do bạn chưa thanh toán!`;
+            const kq = await thongBaoModel.create('Thống báo về đơn hàng cúa bạn', noiDungBaoAdmin, 5, id_nd || null);
+             if (!kq) console.log('Vui lòng kiểm tra hệ thống gửi thông báo!');
+        }))
+    } catch (error) {
+        console.error("Lỗi trong quá trình hủy đơn do chưa thanh toán quá thời gian quy định:", error);
+    }
 },{
     scheduled: true,
     timezone: "Asia/Ho_Chi_Minh" 

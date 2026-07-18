@@ -71,7 +71,7 @@ export default class LichDatController{
             return res.status(200).json({
                 success:true,
                 ID_LICHDAT: DatLich,
-                message:                                                                                   'Đặt lịch thành công!'
+                message:  'Vui lòng thanh toán trước khi sử dụng dịch vụ!'
             })
 
         } catch (error) {
