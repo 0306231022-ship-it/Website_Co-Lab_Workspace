@@ -11,7 +11,7 @@ import qs from 'qs';
 
 export default class ThanhToanController {
  static async ThanhToan(req, res) {
-    const id = req.query.id; 
+    const id = req.query.id;
     
     try {
         if (!id) {

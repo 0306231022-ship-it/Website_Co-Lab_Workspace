@@ -166,37 +166,57 @@ export default class DatLichModel{
             throw new Error('Database query failed: ' + error.message);
         }
     }
-    static async DanhSach_theoIDND(limit, offset, userId){
-        try {
-            const [DanhSach] = await execute(`
-           SELECT 
-    ld.ID_LICH_DAT,
-    ld.KHUNG_BATDAU,
-    ld.KHUNG_KETTHUC,
-    COALESCE(g.ID_KHONG_GIAN, ld.ID_KHONG_GIAN) AS ID_KHONG_GIAN,
-    kg.TEN_KHONG_GIAN,
-    cn.TEN_CHI_NHANH,
-    ld.ID_GHE
-FROM lichdat ld
-LEFT JOIN ghe g ON ld.ID_GHE = g.ID_GHE
-LEFT JOIN khonggian kg ON kg.ID_KHONG_GIAN = COALESCE(g.ID_KHONG_GIAN, ld.ID_KHONG_GIAN)
-LEFT JOIN chinhanh cn ON kg.ID_CHI_NHANH = cn.ID_CHI_NHANH
-WHERE ld.IDND = ?
-ORDER BY ld.KHUNG_BATDAU DESC
-LIMIT ? OFFSET ?;
-                `,[userId,limit,offset]);
-            const [TongSo] = await execute(`
-                 SELECT COUNT(*) AS total FROM lichdat
-                 WHERE IDND=?
-                `,[userId]);
-            return {
-                DanhSach:DanhSach,
-                TongSo:TongSo[0].total
-            }
-        } catch (error) {
-            throw new Error('Database query failed: ' + error.message);
+    static async DanhSach_theoIDND(limit, offset, userId, tab) {
+    try {
+        let dieuKienTab = "";
+        switch (tab) {
+            case "saptoi":
+                dieuKienTab = " AND ld.TRANG_THAI = 0 AND ld.KHUNG_BATDAU > NOW() ";
+                break;
+            case "hoanthanh":
+                dieuKienTab = " AND ld.TRANG_THAI = 1 AND ld.KHUNG_KETTHUC <= NOW() ";
+                break;
+            case "dahuy":
+                dieuKienTab = " AND ld.TRANG_THAI = 2 "; 
+                break;
+            case "all":
+            default:
+                dieuKienTab = "";
+                break;
         }
+        const sqlDanhSach = `
+            SELECT 
+                ld.ID_LICH_DAT,
+                ld.KHUNG_BATDAU,
+                ld.KHUNG_KETTHUC,
+                COALESCE(g.ID_KHONG_GIAN, ld.ID_KHONG_GIAN) AS ID_KHONG_GIAN,
+                kg.TEN_KHONG_GIAN,
+                cn.TEN_CHI_NHANH,
+                ld.ID_GHE
+            FROM lichdat ld
+            LEFT JOIN ghe g ON ld.ID_GHE = g.ID_GHE
+            LEFT JOIN khonggian kg ON kg.ID_KHONG_GIAN = COALESCE(g.ID_KHONG_GIAN, ld.ID_KHONG_GIAN)
+            LEFT JOIN chinhanh cn ON kg.ID_CHI_NHANH = cn.ID_CHI_NHANH
+            WHERE ld.IDND = ? ${dieuKienTab}
+            ORDER BY ld.KHUNG_BATDAU DESC
+            LIMIT ? OFFSET ?;
+        `;
+        const sqlTongSo = `
+            SELECT COUNT(*) AS total 
+            FROM lichdat ld
+            WHERE ld.IDND = ? ${dieuKienTab};
+        `;
+        const [DanhSach] = await execute(sqlDanhSach, [userId, limit, offset]);
+        const [TongSo] = await execute(sqlTongSo, [userId]);
+        return {
+            DanhSach: DanhSach,
+            TongSo: TongSo[0].total
+        };
+        
+    } catch (error) {
+        throw new Error('Database query failed: ' + error.message);
     }
+}
     static async ChiTiet_LichDat_theoIDDL(id){
     
         let connection = await beginTransaction();
@@ -562,43 +582,53 @@ WHERE DATE(KHUNG_BATDAU) = CURDATE()
             if (!rows || rows.length === 0) {
                 return [];
             }
-           const mangID_LichDat = rows.map(item => item.ID_LICH_DAT);
-           await execute(`
-                UPDATE lichdat 
-                SET THONGBAO_TRUOC = 1 
-                WHERE ID_LICH_DAT IN (?);
-        `, [[mangID_LichDat]]);
+            const mangID_LichDat = rows.map(item => item.ID_LICH_DAT);
             const mangIDND = rows.map(item => item.IDND);
+            const placeholders = mangID_LichDat.map(() => '?').join(', ');
+          await execute(`
+            UPDATE lichdat 
+            SET THONGBAO_TRUOC = 1 
+            WHERE ID_LICH_DAT IN (${placeholders});
+        `, mangID_LichDat);
             return mangIDND;
         } catch (error) {
               console.error("Lỗi khi kiểm tra thông báo trước 15p:", error);
         }
     }
-    static async lichDatKetThucTruoc15p(){
-        try {
-            const [rows] = await execute(`
-                SELECT DISTINCT IDND, ID_LICH_DAT 
-                FROM lichdat
-                WHERE KHUNG_KETTHUC BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 15 MINUTE)
-              AND TRANG_THAI = 0
+   static async lichDatKetThucTruoc15p() {
+    try {
+      
+        const bayGio = new Date(); 
+        
+        const muoiLamPhutSau = new Date(bayGio.getTime() + 15 * 60 * 1000);
+        const [rows] = await execute(`
+            SELECT DISTINCT IDND, ID_LICH_DAT 
+            FROM lichdat
+            WHERE KHUNG_KETTHUC BETWEEN ? AND ?
+              AND TRANG_THAI <> 2
               AND THOIGIAN_RA IS NULL
               AND THONGBAO_SAU = 0;
-                `,[])
-            if (!rows || rows.length === 0) {
-                return [];
-            }
-            const mangID_LichDat = rows.map(item => item.ID_LICH_DAT);
-            await execute(`
-                UPDATE lichdat 
-                SET THONGBAO_SAU = 1 
-                WHERE ID_LICH_DAT IN (?);
-            `, [mangID_LichDat]);
-             const mangIDND = ketqua.map(item => item.IDND);
-             return mangIDND;
-        } catch (error) {
-             console.error("Lỗi khi kiểm tra thông báo trước 15p:", error);
+        `, [bayGio, muoiLamPhutSau]); 
+
+        if (!rows || rows.length === 0) {
+            return [];
         }
+
+        const mangID_LichDat = rows.map(item => item.ID_LICH_DAT);
+        const mangIDND = rows.map(item => item.IDND);
+        const placeholders = mangID_LichDat.map(() => '?').join(', ');
+        
+        await execute(`
+            UPDATE lichdat 
+            SET THONGBAO_SAU = 1 
+            WHERE ID_LICH_DAT IN (${placeholders});
+        `, mangID_LichDat);
+
+        return mangIDND;
+    } catch (error) {
+         console.error("Lỗi khi kiểm tra thông báo trước 15p kết thúc:", error);
     }
+}
     static async HuyLichChua_checkin(){
         try {
             const [ketqua] = await execute(`
@@ -725,6 +755,7 @@ return tongTien;
             FROM lichdat
             WHERE NOW() >= KHUNG_BATDAU
               AND THOIGIAN_VAO IS NULL
+              AND TRANG_THAI <> 2
         `, []);
         return rows;
     } catch (error) {
@@ -811,6 +842,7 @@ LIMIT 1;
             throw new Error("Database query failed: " + error.message);
         }
     }
+
   
     
 

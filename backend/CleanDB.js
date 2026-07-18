@@ -122,7 +122,7 @@ cron.schedule('* * * * *', async () => {
                 const thanhCong = await DatLichModel.CapNhat_TrangThai(lich.ID_LICH_DAT,2);
                 if (thanhCong) {
                     await thongBaoModel.create(`HỆ THỐNG: Lịch đặt #${lich.ID_LICH_DAT} đã bị hủy`, `Lịch đặt của khách hàng đã bị hủy tự động vì quá giờ mà không check-in!`,5, ID_ADMIN || null);
-                    await thongBaoModel.create('Lịch đặt của bạn đã bị hủy','Lịch đặt đã bị hệ thống hủy tự động do bạn không check-in đúng giờ.', 5,lich.IDND);
+                    await thongBaoModel.create(`Lịch đặt ${lich.ID_LICH_DAT} của bạn đã bị hủy`,'Lịch đặt đã bị hệ thống hủy tự động do bạn không check-in đúng giờ.', 5,lich.IDND);
                 }
             }
         }

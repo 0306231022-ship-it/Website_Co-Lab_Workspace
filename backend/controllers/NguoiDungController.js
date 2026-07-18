@@ -290,7 +290,7 @@ export default class NguoiDungController{
             };
              const dd_db = await NguoiDungModel.findByid(userId);
              const dd = dd_db.HINH_ANH;
-             if(dd!==''){
+             if(dd!== null){
                const xoa = xoaFileCu(dd);
                         if(!xoa){
                             return res.status(500).json({

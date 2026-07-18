@@ -345,7 +345,7 @@ export default class KhongGianModel {
                 `,[id]);
             return ketqua.length>0 ? ketqua[0].LOAI_KHONG_GIAN : null
         } catch (error) {
-              console.error("Lỗi chỉnh sửa giá:", error);
+              console.error("Lỗi khi lấy loại không gian:", error);
         throw new Error('Database query failed: ' + error.message);
         }
     }

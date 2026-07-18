@@ -29,7 +29,7 @@ function ThongTin({DuLieu} : { DuLieu : LichDat}) {
   const [ThongTinGhe,setThongTin] = useState<Ghe | null>(null)
    const batDau = new Date(gioBatDau);
   const ketThuc = new Date(gioKetThuc);
- const tongGio = (ketThuc.getTime() - batDau.getTime()) / (1000 * 60 * 60);
+const tongGio = +((ketThuc.getTime() - batDau.getTime()) / (1000 * 60 * 60)).toFixed(2);
   useEffect(()=>{
     const layGT = async()=>{
         setloading(true)
@@ -96,6 +96,7 @@ function ThongTin({DuLieu} : { DuLieu : LichDat}) {
         if(DatLich.success){
             ThongBao.ThongBao_ThongTin(DatLich.message)
             const chuyenhuong_thanhtoan = await api.CallAPI(undefined,{url:`/NguoiDung/ThanhToan?id=${DatLich.ID_LICHDAT}`, PhuongThuc:2});
+            alert(JSON.stringify(chuyenhuong_thanhtoan))
             if (chuyenhuong_thanhtoan && chuyenhuong_thanhtoan.success && chuyenhuong_thanhtoan.paymentUrl) {
                window.open(chuyenhuong_thanhtoan.paymentUrl, '_blank')
             } else {
@@ -274,7 +275,7 @@ function ThongTin({DuLieu} : { DuLieu : LichDat}) {
                 <span className="text-xs font-bold text-slate-400 block mb-0.5">Vui lòng kiểm tra lại giờ đặt</span>
                 <span className="text-sm font-bold text-slate-800">Tạm tính: {tongGio || 0} giờ</span>
               </div>
-              <span className="text-3xl font-black text-blue-600 tracking-tight">{fun.formatCurrency(((tongGio * Number(ThongTinGhe?.DON_GIA)) || 0))}</span>
+              <span className="text-3xl font-black text-blue-600 tracking-tight">{fun.formatCurrency((Number(tongGio) * Number(ThongTinGhe?.DON_GIA)) || 0)}</span>
             </div>
 
             <button 

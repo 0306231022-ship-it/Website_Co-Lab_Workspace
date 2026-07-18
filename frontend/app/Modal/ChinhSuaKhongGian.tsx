@@ -22,50 +22,31 @@ function ChinhSuaKhongGian() {
     const [loading, setloading] = useState<boolean>(false);
     const [khonggian, setkhonggian] = useState<KhongGian | null>(null);
     const [LichDatCuoi, setLichDatCuoi] = useState<LichDatItems | null>(null);
-    
-    // --- Các State phục vụ dữ liệu form chỉnh sửa ---
     const [TenKhongGian, setTenKhongGian] = useState<string>("");
     const [TrangThai, setTrangThai] = useState<string>("active");
     const [anhChiNhanh, setAnhChiNhanh] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string>("");
     const [errors, setErrors] = useState<string[]>([]);
-    
-    // State cho khung giờ bảo trì
     const [ThoiGianBatDauDong, setThoiGianBatDauDong] = useState<string>("");
     const [ThoiGianDuKienMo, setThoiGianDuKienMo] = useState<string>("");
-
-
     const [danhSachGia, setDanhSachGia] = useState<BangGia[]>([]);
     const [idBangGia, setIdBangGia] = useState<string>("");
-
-    // --- Lấy dữ liệu ban đầu từ Server ---
   useEffect(() => {
     const laythongtin = async () => {
         setloading(true);
         try {
-            // 1. Lấy thông tin chi tiết không gian hiện tại
             const laydl = await api.CallAPI(undefined, { url: `/admin/ThongTin?id=${idkhonggian}`, PhuongThuc: 2 });
-            
             if (laydl.success) {
-                const dataKg = laydl.dulieu?.KhongGian?.[0];
-                
-     
-
+                const dataKg = laydl.dulieu?.KhongGian?.KhongGian;
                 setkhonggian(dataKg || null);
-                
-
                 setLichDatCuoi(laydl.dulieu?.LichDatCuoi?.[0] || null);
-                
                 setTenKhongGian(dataKg?.TEN_KHONG_GIAN || "");
                 setTrangThai((dataKg?.TRANG_THAI ?? 1) === 1 ? 'active' : 'maintenance');
                 if (dataKg?.HINHANH) {
                     setPreviewUrl(`http://localhost:3001/${dataKg.HINHANH}`);
                 }
             }
-
-            // 2. Lấy danh sách bảng giá để đổ vào select option
             const resGia = await api.CallAPI(undefined, { url: "/admin/DanhSachBangGia", PhuongThuc: 2 });
-          
             if (resGia.success) {
                 setDanhSachGia(resGia.dulieu || []);
             }

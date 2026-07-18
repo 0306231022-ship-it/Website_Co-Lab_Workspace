@@ -66,8 +66,8 @@ export default class LichDatController{
                 })
             }
             //phát sự kiện
-              const loai = await KhongGianModel.LayLoai_KG(dulieu.ID_KHONG_GIAN)
-              io.to(`space_type_${loai}_id_${dulieu.ID_KHONG_GIAN}`).emit('update_schedule', {success:true});
+              /*const loai = await KhongGianModel.LayLoai_KG(dulieu.ID_KHONG_GIAN)
+              io.to(`space_type_${loai}_id_${dulieu.ID_KHONG_GIAN}`).emit('update_schedule', {success:true});*/
             return res.status(200).json({
                 success:true,
                 ID_LICHDAT: DatLich,
@@ -183,6 +183,7 @@ export default class LichDatController{
             const page = parseInt(req.query.page) || 1;
             const limit = parseInt(req.query.limit) || 3;
             const offset = (page - 1) * limit;
+            const tab = req.query.tab;
             await Promise.all([
                 query('page')
                     .notEmpty()
@@ -199,7 +200,7 @@ export default class LichDatController{
                     errors: errors.array().map(err => err.msg)
                 });
             }
-            const lichsu = await DatLichModel.DanhSach_theoIDND(limit, offset, userId);
+            const lichsu = await DatLichModel.DanhSach_theoIDND(limit, offset, userId, tab);
             return res.status(200).json({
                 success: true,
                 DanhSach: lichsu.DanhSach,
