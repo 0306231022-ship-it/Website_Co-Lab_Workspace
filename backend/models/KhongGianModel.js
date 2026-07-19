@@ -241,72 +241,115 @@ export default class KhongGianModel {
             throw new Error('Database query failed: ' + error.message);
         }
     }
-   static async ThongKe(id) {
+static async ThongKe(id) {
     try {
-        // 1. Gộp tất cả các chỉ số thống kê vào 1 câu query duy nhất nhằm tăng tốc độ xử lý và tối ưu database
-        const [rows] = await execute(`
-            SELECT 
-                kg.ID_KHONG_GIAN,
-                kg.LOAI_KHONG_GIAN,
-                COALESCE(bg.DON_GIA, 0) AS DONGIA,
-                CASE 
-                    WHEN kg.LOAI_KHONG_GIAN = 2 THEN
-                        CASE 
-                            WHEN EXISTS (
-                                SELECT 1 FROM lichdat ld 
-                                WHERE ld.ID_KHONG_GIAN = kg.ID_KHONG_GIAN 
-                                  AND NOW() BETWEEN ld.KHUNG_BATDAU AND ld.KHUNG_KETTHUC
-                            ) THEN 100 ELSE 0
-                        END
-                    WHEN kg.LOAI_KHONG_GIAN = 1 THEN
-                        COALESCE(
-                            (SELECT COUNT(DISTINCT ld.ID_GHE) FROM lichdat ld 
-                             WHERE ld.ID_KHONG_GIAN = kg.ID_KHONG_GIAN 
-                               AND NOW() BETWEEN ld.KHUNG_BATDAU AND ld.KHUNG_KETTHUC 
-                               AND ld.ID_GHE IS NOT NULL
-                            ) * 100.0 / NULLIF((SELECT COUNT(*) FROM ghe g WHERE g.ID_KHONG_GIAN = kg.ID_KHONG_GIAN), 0), 
-                            0
-                        )
-                    ELSE 0
-                END AS TI_LE_LAP_DAY,
-                COALESCE((
-                    SELECT SUM(TIMESTAMPDIFF(HOUR, ld_gio.KHUNG_BATDAU, ld_gio.KHUNG_KETTHUC))
-                    FROM lichdat ld_gio
-                    WHERE ld_gio.ID_KHONG_GIAN = kg.ID_KHONG_GIAN AND ld_gio.TRANG_THAI = 1
-                ), 0) AS TONG_SO_GIO_THUE,
-                CASE 
-                    WHEN kg.LOAI_KHONG_GIAN = 1 THEN
-                        (SELECT COUNT(*) FROM ghe g WHERE g.ID_KHONG_GIAN = kg.ID_KHONG_GIAN)
-                    ELSE 0
-                END AS TONG_SO_GHE
-
+        // 1. Lấy thông tin cơ bản và đơn giá của không gian
+        const [rowsKg] = await execute(`
+            SELECT kg.ID_KHONG_GIAN, kg.LOAI_KHONG_GIAN, COALESCE(bg.DON_GIA, 0) AS DONGIA
             FROM khonggian kg
             LEFT JOIN banggia bg ON kg.ID_GIA = bg.ID_GIA
             WHERE kg.ID_KHONG_GIAN = ?;
         `, [id]);
-        const data = Array.isArray(rows) ? rows[0] : rows;
-
-        if (!data) {
-            // Trả về dữ liệu mặc định an toàn nếu ID không gian không tồn tại trên hệ thống
-            return {
-                Tile_LapDay: 0,
-                DonGia: 0,
-                TongGioThue: 0,
-                TongSoGhe: 0
-            };
+       
+        const dataKg = Array.isArray(rowsKg) ? rowsKg[0] : rowsKg;
+        if (!dataKg) {
+            return { Tile_LapDay: 0, DonGia: 0, TongGioThue: 0, TongSoGhe: 0 };
         }
 
-        // 3. Trả kết quả chuẩn chỉnh ra ngoài controller phục vụ API
+        const loaiKhongGian = dataKg.LOAI_KHONG_GIAN;
+        const donGia = Number(dataKg.DONGIA || 0);
+
+        let tiLeLapDay = 0;
+        let tongGioThue = 0;
+
+        // 2. Xử lý theo từng loại Không Gian
+        if (loaiKhongGian === 0) { 
+            // KHÔNG GIAN ĐÓNG (Phòng riêng)
+            const [rowsLd] = await execute(`
+                SELECT COUNT(*) AS DangDung 
+                FROM lichdat 
+                WHERE ID_KHONG_GIAN = ? 
+                  AND TRANG_THAI <> 2 
+                  AND THOIGIAN_RA IS NULL
+                  AND (THOIGIAN_VAO IS NOT NULL OR NOW() BETWEEN KHUNG_BATDAU AND KHUNG_KETTHUC);
+            `, [id]);
+            const resLd = Array.isArray(rowsLd) ? rowsLd[0] : rowsLd;
+            tiLeLapDay = (resLd?.DangDung || 0) > 0 ? 100 : 0;
+
+            // Tính tổng số giờ thuê trực tiếp từ bảng lichdat bằng ID_KHONG_GIAN (Không cần JOIN bảng ghe)
+            const [rowsGioKg] = await execute(`
+                SELECT SUM(
+                    CASE 
+                        WHEN THOIGIAN_VAO IS NOT NULL AND THOIGIAN_RA IS NOT NULL THEN TIMESTAMPDIFF(HOUR, THOIGIAN_VAO, THOIGIAN_RA)
+                        WHEN THOIGIAN_VAO IS NOT NULL AND THOIGIAN_RA IS NULL THEN TIMESTAMPDIFF(HOUR, THOIGIAN_VAO, NOW())
+                        ELSE TIMESTAMPDIFF(HOUR, KHUNG_BATDAU, KHUNG_KETTHUC)
+                    END
+                ) AS TongGio
+                FROM lichdat
+                WHERE ID_KHONG_GIAN = ? AND TRANG_THAI <> 2;
+            `, [id]);
+            const resGioKg = Array.isArray(rowsGioKg) ? rowsGioKg[0] : rowsGioKg;
+            tongGioThue = Number(resGioKg?.TongGio || 0);
+
+        } else if (loaiKhongGian === 1) { 
+            // CHỖ NGỒI CHUNG (Ghế lẻ)
+            const [rowsGheDangDung] = await execute(`
+                SELECT COUNT(DISTINCT ld.ID_GHE) AS GheBan
+                FROM lichdat ld
+                INNER JOIN ghe g ON ld.ID_GHE = g.ID_GHE
+                WHERE g.ID_KHONG_GIAN = ?
+                  AND ld.TRANG_THAI <> 2 
+                  AND ld.THOIGIAN_RA IS NULL
+                  AND ld.ID_GHE IS NOT NULL
+                  AND (ld.THOIGIAN_VAO IS NOT NULL OR NOW() BETWEEN ld.KHUNG_BATDAU AND ld.KHUNG_KETTHUC);
+            `, [id]);
+          
+            const [rowsTongGhe] = await execute(`
+                SELECT COUNT(*) AS TongGhe FROM ghe WHERE ID_KHONG_GIAN = ?;
+            `, [id]);
+
+            const resGheBan = Array.isArray(rowsGheDangDung) ? rowsGheDangDung[0] : rowsGheDangDung;
+            const resTongGhe = Array.isArray(rowsTongGhe) ? rowsTongGhe[0] : rowsTongGhe;
+
+            const gheBan = resGheBan?.GheBan || 0;
+            const tongGhe = resTongGhe?.TongGhe || 0;
+            tiLeLapDay = tongGhe > 0 ? Math.round((gheBan / tongGhe) * 100) : 0;
+
+            // Tính tổng số giờ thuê của toàn bộ ghế thuộc không gian này
+            const [rowsGioGhe] = await execute(`
+                SELECT SUM(
+                    CASE 
+                        WHEN ld.THOIGIAN_VAO IS NOT NULL AND ld.THOIGIAN_RA IS NOT NULL THEN TIMESTAMPDIFF(HOUR, ld.THOIGIAN_VAO, ld.THOIGIAN_RA)
+                        WHEN ld.THOIGIAN_VAO IS NOT NULL AND ld.THOIGIAN_RA IS NULL THEN TIMESTAMPDIFF(HOUR, ld.THOIGIAN_VAO, NOW())
+                        ELSE TIMESTAMPDIFF(HOUR, ld.KHUNG_BATDAU, ld.KHUNG_KETTHUC)
+                    END
+                ) AS TongGio
+                FROM lichdat ld
+                INNER JOIN ghe g ON ld.ID_GHE = g.ID_GHE
+                WHERE g.ID_KHONG_GIAN = ? AND ld.TRANG_THAI <> 2;
+            `, [id]);
+            const resGioGhe = Array.isArray(rowsGioGhe) ? rowsGioGhe[0] : rowsGioGhe;
+            tongGioThue = Number(resGioGhe?.TongGio || 0);
+        }
+
+        // 4. Lấy tổng số ghế của không gian để hiển thị
+        const [rowsCountGhe] = await execute(`
+            SELECT COUNT(*) AS TongGhe FROM ghe WHERE ID_KHONG_GIAN = ?;
+        `, [id]);
+        const resCountGhe = Array.isArray(rowsCountGhe) ? rowsCountGhe[0] : rowsCountGhe;
+        const tongSoGhe = loaiKhongGian === 1 ? Number(resCountGhe?.TongGhe || 0) : 0;
+
+        // 5. Trả kết quả an toàn (Không sợ crash vì biến đã được khởi tạo sẵn)
         return {
-            Tile_LapDay: Number(data.TI_LE_LAP_DAY || 0),
-            DonGia: Number(data.DONGIA || 0),
-            TongGioThue: Number(data.TONG_SO_GIO_THUE || 0),
-            TongSoGhe: Number(data.TONG_SO_GHE || 0)
+            Tile_LapDay: tiLeLapDay,
+            DonGia: donGia,
+            TongGioThue: tongGioThue,
+            TongSoGhe: tongSoGhe
         };
 
     } catch (error) {
-        console.error("Lỗi ThongKe model:", error);
-        throw new Error('Database query failed: ' + error.message);
+        console.error("Lỗi ThongKe tại Model:", error);
+        throw error;
     }
 }
     static async ChinhSua_Gia(IDKG,IDBangGia){

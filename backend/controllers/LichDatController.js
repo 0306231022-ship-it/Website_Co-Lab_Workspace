@@ -483,10 +483,18 @@ export default class LichDatController{
                         message: "Check-in thất bại! Vui lòng thực hiện trong giây lát"
                     });
                }
+                //Phát tín hiệu vào các phòng đã đăng ký
+               /* io.to(`space_type_${loaiKhongGian}_id_${idKhongGian}`).emit('ThayDoi_TrangThai', {
+                    success: true,
+                    message: "Không tồn tại lịch đặt này!"
+                });*/
+
                io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-checkin', {
                     success: true,
                     message: "Check-in thành công!"
                 });
+               
+
                 res.end();
                 return;
             } else if (timeHienTai < mocCheckInSom) {

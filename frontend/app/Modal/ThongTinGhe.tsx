@@ -17,23 +17,24 @@ interface ThongTin_DatLich {
     TENND: string;
     HINH_ANH: string;
     EMAIL: string;
+    THOIGIAN_VAO?: string;
 }
 
 function ThongTinGhe({ DuLieu }: { DuLieu: dulieu }) {
     const [ThongTin, setThongTin] = useState<Ghe | null>(null);
     const [thongTin_DatL, setTT] = useState<ThongTin_DatLich | null>(null);
-    const { OpenMoDal,   CloseMoDal } = useModalContext();
+    const { OpenMoDal, CloseMoDal } = useModalContext();
+
     useEffect(() => {
         const laydl = async () => {
             try {
-                // Sửa logic truyền param nếu DuLieu là Object {ID_GHE: ...} hoặc số đơn thuần
                 const idGhe = typeof DuLieu === 'object' ? (DuLieu).ID_GHE : DuLieu;
                 const lay = await api.CallAPI(undefined, { url: `/admin/ChiTiet_ghe?ID_GHE=${idGhe}`, PhuongThuc: 2 });
                 
                 if (lay.success) {
                     setThongTin(lay.dulieu.ThongTinGhe);
-                    if (lay.dulieu.NguoiDatHienTai !== null && lay.dulieu.NguoiDatHienTai.length > 0) {
-                        setTT(lay.dulieu.NguoiDatHienTai[0]);
+                    if (lay.dulieu.NguoiDatHienTai && Object.keys(lay.dulieu.NguoiDatHienTai).length > 0) {
+                        setTT(lay.dulieu.NguoiDatHienTai);
                     } else {
                         setTT(null);
                     }
@@ -48,11 +49,9 @@ function ThongTinGhe({ DuLieu }: { DuLieu: dulieu }) {
 
     return (
         <div className=" flex flex-col md:flex-row overflow-hidden transition-all duration-300">
-            
             {/* CỘT TRÁI: THÔNG TIN CƠ BẢN CỦA GHẾ */}
             <div className="w-full md:w-5/12 bg-slate-50/70 p-6 flex flex-col justify-between border-b md:border-b-0 md:border-r border-slate-100">
                 <div className="space-y-6">
-                    {/* Header ID Ghế */}
                     <div className="flex items-center justify-between bg-white p-4 rounded-xl border border-slate-100 shadow-xs">
                         <div>
                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mã vị trí</span>
@@ -63,7 +62,6 @@ function ThongTinGhe({ DuLieu }: { DuLieu: dulieu }) {
                         </div>
                     </div>
 
-                    {/* Danh sách thuộc tính */}
                     <div className="space-y-4 px-1">
                         <div>
                             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Tên ghế (Tài sản)</span>
@@ -110,7 +108,6 @@ function ThongTinGhe({ DuLieu }: { DuLieu: dulieu }) {
                     </div>
                 </div>
 
-                {/* Nút chỉnh sửa */}
                 <div className="mt-8 pt-4 border-t border-slate-200/60">
                     <button 
                         type="button" 
@@ -149,7 +146,6 @@ function ThongTinGhe({ DuLieu }: { DuLieu: dulieu }) {
                     {thongTin_DatL !== null ? (
                         <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 space-y-4 shadow-3xs">
                             <div className="flex items-center space-x-3">
-                                {/* Khung bọc Image bộc bắt buộc có relative và kích thước cố định */}
                                 <div className="relative w-10 h-10 rounded-full overflow-hidden bg-slate-200 border border-white shadow-xs flex-shrink-0">
                                     <Image 
                                         src={`http://localhost:3001/${thongTin_DatL.HINH_ANH}`} 
@@ -190,14 +186,12 @@ function ThongTinGhe({ DuLieu }: { DuLieu: dulieu }) {
                     )}
                 </div>
 
-                {/* Khối Actions bên dưới */}
                 <div className="mt-8 pt-4 border-t border-slate-100 flex items-center justify-end gap-2">
                     <button type="button" onClick={()=>{CloseMoDal()}} className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer">
                         Hoàn tất xem
                     </button>
                 </div>
             </div>
-            
         </div>
     );
 }

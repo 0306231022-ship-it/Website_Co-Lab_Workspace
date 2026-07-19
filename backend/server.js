@@ -77,6 +77,13 @@ io.on('connection', (socket) => {
       const ten = `QuanLi_khunggio-${idlichdat}`;
       socket.join(ten);
     })
+     socket.on("join_space_room", (data) => {
+        const { idKhongGian, loaiKhongGian } = data;
+        const roomName = `space_type_${loaiKhongGian}_id_${idKhongGian}`;
+        socket.join(roomName);
+    });
+
+
     //ĐÃ CHWCK SOCKET phía trên
     socket.on('lich-dat', (idNguoiDung) => {
         socket.join(idNguoiDung); 
@@ -93,11 +100,7 @@ io.on('connection', (socket) => {
     socket.on("join-room", (userId) => {
         socket.join(userId.toString());
     });
-    socket.on("join_space_room", (data) => {
-        const { idKhongGian, loaiKhongGian } = data;
-        const roomName = `space_type_${loaiKhongGian}_id_${idKhongGian}`;
-        socket.join(roomName);
-    });
+   
     socket.on("leave_space", (data) => {
         const { idKhongGian, loaiKhongGian } = data;
         const roomName = `space_type_${loaiKhongGian}_id_${idKhongGian}`;

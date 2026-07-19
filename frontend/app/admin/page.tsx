@@ -4,6 +4,7 @@ import * as ThongBao from '@/FUNCTION/ThongBao';
 import { useEffect, useState } from 'react';
 import ThongKe from "../Modal/Thongke";
 import * as fun from '@/FUNCTION/function';
+import Link from 'next/link';
 
 interface LichDatItem {
     ID_LICH_DAT: number;
@@ -163,7 +164,7 @@ function Admin() {
                             <h2 className="text-sm font-bold text-slate-800">Danh sách đặt đơn gần đây</h2>
                             <p className="text-[11px] text-slate-400">Cập nhật phiên đặt chỗ và trạng thái hóa đơn của khách hàng</p>
                         </div>
-                        <button className="text-xs text-indigo-600 hover:text-indigo-800 font-bold px-3 py-1.5 hover:bg-indigo-50 rounded-lg transition-all">Xem tất cả đơn</button>
+                        <Link href={`/admin/QuanLiDatDon`} className="text-xs text-indigo-600 hover:text-indigo-800 font-bold px-3 py-1.5 hover:bg-indigo-50 rounded-lg transition-all">Xem tất cả đơn</Link>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-xs whitespace-nowrap">

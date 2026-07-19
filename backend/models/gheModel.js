@@ -2,32 +2,45 @@ import { execute } from "../config/db.js";
 
 export default class GheModel {
     
-    static async getIDkhongian(idkhongigan) {
-        try {
-            
-             const [rows] = await execute(`
-           SELECT 
-    g.*,
-    
-    CASE 
-        WHEN ld.ID_LICH_DAT IS NOT NULL THEN 1  
-        ELSE 0                                  
-    END AS DangCoNguoiDat
-FROM ghe g
-LEFT JOIN 
-    lichdat ld ON g.ID_GHE = ld.ID_GHE AND ld.TRANG_THAI <> 2
-    AND NOW() BETWEEN ld.KHUNG_BATDAU AND ld.KHUNG_KETTHUC 
-WHERE 
-    g.ID_KHONG_GIAN = ? 
-ORDER BY 
-    g.TEN_GHE ASC;   
-            `,[idkhongigan]);
-            return rows; 
-        } catch (error) {
-            console.error(" Lỗi Database trong GheModel.getAll:", error.message);
-            throw new Error("Không thể kết nối đến cơ sở dữ liệu để lấy danh sách ghế!");
-        }
+static async getIDkhongian(idkhongigan) {
+    try {
+        const [rows] = await execute(`
+            SELECT 
+                g.*,
+                CASE 
+                    -- 1. ƯU TIÊN 1: Đã check-in nhưng CHƯA check-out -> Chắc chắn đang bận sử dụng (Trả về 1)
+                    WHEN ld.ID_LICH_DAT IS NOT NULL AND ld.THOIGIAN_VAO IS NOT NULL AND ld.THOIGIAN_RA IS NULL THEN 1
+                    
+                    -- 2. ƯU TIÊN 2: Nằm trong khung giờ hiện tại và CHƯA từng check-in -> Đã được đặt trước (Trả về 1)
+                    WHEN ld.ID_LICH_DAT IS NOT NULL AND ld.THOIGIAN_VAO IS NULL AND (NOW() BETWEEN ld.KHUNG_BATDAU AND ld.KHUNG_KETTHUC) THEN 1
+                    
+                    -- 3. CÒN LẠI: Ghế trống (Trả về 0)
+                    ELSE 0                                                  
+                END AS DangCoNguoiDat
+            FROM ghe g
+            LEFT JOIN lichdat ld ON g.ID_GHE = ld.ID_GHE 
+                AND ld.TRANG_THAI <> 2
+                -- 🔥 CHÌA KHÓA: Đã check-out (THOIGIAN_RA không NULL) thì loại thẳng cánh, không JOIN!
+                AND ld.THOIGIAN_RA IS NULL 
+                AND (
+                    -- Hoặc là đang ngồi thực tế
+                    (ld.THOIGIAN_VAO IS NOT NULL) 
+                    OR 
+                    -- Hoặc là đang tới khung giờ đặt
+                    (NOW() BETWEEN ld.KHUNG_BATDAU AND ld.KHUNG_KETTHUC)
+                )
+            WHERE 
+                g.ID_KHONG_GIAN = ? 
+            ORDER BY 
+                g.TEN_GHE ASC;   
+        `, [idkhongigan]);
+
+        return rows; 
+    } catch (error) {
+        console.error("Lỗi Database trong GheModel.getIDkhongian:", error.message);
+        throw new Error("Không thể kết nối đến cơ sở dữ liệu để lấy danh sách ghế!");
     }
+}
     static async getById(id) {
         try {
            const[rows]=await execute(`
@@ -201,7 +214,8 @@ static async danhsachghe_thoigian(id, BatDau, KetThuc) {
         const [kq] = await execute(`
             SELECT g.*,
                 CASE 
-                    WHEN ld.ID_LICH_DAT IS NOT NULL THEN 1  
+                    WHEN ld.ID_LICH_DAT IS NOT NULL THEN 1
+                    WHEN ld.ID_LICH_DAT IS NOT NULL AND ld.THOIGIAN_VAO IS NOT NULL AND ld.THOIGIAN_RA IS NULL THEN 1 
                     ELSE 0                                  
                 END AS DangCoNguoiDat
             FROM ghe g

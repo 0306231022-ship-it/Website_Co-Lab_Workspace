@@ -88,29 +88,46 @@ export default class DatLichModel{
         throw new Error('Database query failed: ' + error.message);
     }
 }
-    static async NguoiDat_ghe_HienTai(IDGHE){
-        try {
-            const [layttt] = await execute(`
-                SELECT 
-        ld.KHUNG_BATDAU,
-        ld.KHUNG_KETTHUC,
-        nd.TENND,
-        nd.HINH_ANH,
-        nd.EMAIL
-    FROM 
-        lichdat AS ld
-    INNER JOIN 
-        nguoidung AS nd ON ld.IDND = nd.IDND
-    WHERE 
-        ld.ID_GHE = ? 
-        AND NOW() BETWEEN ld.KHUNG_BATDAU AND ld.KHUNG_KETTHUC
-    LIMIT 1
-                `,[IDGHE]);
-            return layttt.length> 0 ? layttt :null
-        } catch (error) {
-             throw new Error('Database query failed: ' + error.message);
-        }
+   static async NguoiDat_ghe_HienTai(IDGHE) {
+    try {
+        const [layttt] = await execute(`
+            SELECT 
+                ld.ID_LICH_DAT,
+                ld.KHUNG_BATDAU,
+                ld.KHUNG_KETTHUC,
+                ld.THOIGIAN_VAO,
+                ld.THOIGIAN_RA,
+                nd.TENND,
+                nd.HINH_ANH,
+                nd.EMAIL
+            FROM 
+                lichdat AS ld
+            INNER JOIN 
+                nguoidung AS nd ON ld.IDND = nd.IDND
+            WHERE 
+                ld.ID_GHE = ? 
+                AND ld.TRANG_THAI <> 2      -- Không tính lịch đã hủy
+                AND ld.THOIGIAN_RA IS NULL  -- 🔥 ĐIỀU KIỆN TIÊN QUYẾT: Người này CHƯA check-out rời đi
+                AND (
+                    (ld.THOIGIAN_VAO IS NOT NULL)
+                    OR 
+            
+                    (NOW() BETWEEN ld.KHUNG_BATDAU AND ld.KHUNG_KETTHUC)
+                )
+            ORDER BY 
+                -- Ưu tiên lấy người đang ngồi thực tế lên trước
+                CASE WHEN ld.THOIGIAN_VAO IS NOT NULL THEN 0 ELSE 1 END ASC,
+                ld.ID_LICH_DAT DESC
+            LIMIT 1
+        `, [IDGHE]);
+       
+    
+        return layttt && layttt.length > 0 ? layttt[0] : null;
+
+    } catch (error) {
+        throw new Error('Database query failed: ' + error.message);
     }
+}
     static async DanhSach_theoIDGHE(limit, offset, IDGHE){
         try {
             const [DanhSach] = await execute(`
@@ -449,10 +466,17 @@ export default class DatLichModel{
                 `,[]);
             const thoigian = new Date();
             const [DangHoatDong] = await execute(`
-                SELECT COUNT(ID_LICH_DAT) as HOATDONG
-                FROM lichdat
-                WHERE ? BETWEEN KHUNG_BATDAU AND KHUNG_KETTHUC AND TRANG_THAI = 1
-                `,[thoigian]);
+    SELECT COUNT(ID_LICH_DAT) as HOATDONG
+    FROM lichdat
+    WHERE TRANG_THAI <> 2         
+      AND THOIGIAN_RA IS NULL     
+      AND (
+          
+          (THOIGIAN_VAO IS NOT NULL)
+        
+        
+      );
+`, [thoigian]);
             const [DoanhThuThang] = await execute(`
                 SELECT SUM(GIA_TIEN) AS DOANHTHU
                 FROM hoadon
@@ -506,57 +530,74 @@ WHERE DATE(KHUNG_BATDAU) = CURDATE()
              throw new Error('Database query failed: ' + error.message);
         }
     }
-  static async PhanTram_ghe() {
+ static async PhanTram_ghe() {
     try {
-        // 1. Lấy số lượng ghế đang được sử dụng tại thời điểm hiện tại
+        // 1. Lấy số lượng ghế đang được sử dụng thực tế tại thời điểm hiện tại
         const [tong_hoatdong] = await execute(`
-            SELECT COUNT(DISTINCT ID_GHE) AS TongGheDangSuDung
-            FROM lichdat
-            WHERE NOW() BETWEEN KHUNG_BATDAU AND KHUNG_KETTHUC
-              AND ID_GHE IS NOT NULL
-              AND TRANG_THAI = 1;
+            SELECT COUNT(DISTINCT ld.ID_GHE) AS TongGheDangSuDung
+            FROM lichdat ld
+            WHERE ld.TRANG_THAI <> 2      -- Không tính lịch đã hủy
+              AND ld.THOIGIAN_RA IS NULL  
+              AND ld.ID_GHE IS NOT NULL
+              AND (
+        
+                  (ld.THOIGIAN_VAO IS NOT NULL)
+    
+              );
         `, []);
 
-        // 2. Lấy tổng số lượng ghế có trong hệ thống (Đã xóa dấu ; thừa)
+        // 2. Lấy tổng số lượng ghế có trong hệ thống
         const [tong] = await execute(`
             SELECT COUNT(ID_GHE) as TONG
             FROM ghe;
         `, []);
 
-        const gheDangDung = tong_hoatdong[0]?.TongGheDangSuDung || 0;
-        const tongSoGhe = tong[0]?.TONG || 0;
+        // 🔥 SỬA CÚ PHÁP ĐỌC DỮ LIỆU: Đảm bảo an toàn không bị undefined crash
+        const rowsHoatDong = Array.isArray(tong_hoatdong) ? tong_hoatdong[0] : tong_hoatdong;
+        const rowsTong = Array.isArray(tong) ? tong[0] : tong;
 
-        // Xử lý bảo vệ: Nếu hệ thống chưa có ghế nào thì trả về 0% để tránh lỗi chia cho 0 (NaN/Infinity)
+        const gheDangDung = rowsHoatDong?.TongGheDangSuDung || 0;
+        const tongSoGhe = rowsTong?.TONG || 0;
+
+        // Xử lý bảo vệ tránh lỗi chia cho 0
         if (tongSoGhe === 0) return 0;
 
-        // Tính phần trăm và làm tròn (ví dụ: 78% thay vì 78.333333%)
+        // Tính phần trăm và làm tròn số
         const phanTram = (gheDangDung / tongSoGhe) * 100;
         return Math.round(phanTram); 
 
     } catch (error) {
         console.error("Lỗi khi tính phần trăm ghế:", error);
-        return 0; // Trả về 0 nếu có lỗi xảy ra để giao diện không bị crash
+        return 0; 
     }
 }
-    static async PhanTram_phong(){
+  static async PhanTram_phong() {
     try {
-        // 1. Lấy số lượng không gian (phòng) đang được sử dụng tại thời điểm hiện tại
+        // 1. Lấy số lượng phòng đang được sử dụng tại thời điểm hiện tại
         const [tong_hoatdong] = await execute(`
-            SELECT COUNT(DISTINCT ID_KHONG_GIAN) AS TongKhongGianDangSuDung
-            FROM lichdat
-            WHERE NOW() BETWEEN KHUNG_BATDAU AND KHUNG_KETTHUC
-              AND ID_KHONG_GIAN IS NOT NULL
-              AND TRANG_THAI = 1;
+            SELECT COUNT(DISTINCT ld.ID_KHONG_GIAN) AS TongKhongGianDangSuDung
+            FROM lichdat ld
+            WHERE ld.TRANG_THAI <> 2          -- Không tính lịch đã hủy
+              AND ld.THOIGIAN_RA IS NULL      -- 🔥 Tiên quyết: Chưa check-out
+              AND ld.ID_KHONG_GIAN IS NOT NULL
+              AND (
+                  -- Trường hợp 1: Phòng đã được check-in thực tế
+                  (ld.THOIGIAN_VAO IS NOT NULL)
+              );
         `, []);
 
-        // 2. Lấy tổng số lượng không gian (phòng) đang quản lý trong hệ thống
+        // 2. Lấy tổng số lượng phòng đang quản lý trong hệ thống
         const [tong] = await execute(`
             SELECT COUNT(ID_KHONG_GIAN) as TONG
             FROM khonggian;
         `, []);
 
-        const kgDangDung = tong_hoatdong[0]?.TongKhongGianDangSuDung || 0;
-        const tongSoKg = tong[0]?.TONG || 0;
+        // 🔥 SỬA CÚ PHÁP ĐỌC DỮ LIỆU: Đảm bảo an toàn, tự động kiểm tra mảng tránh lỗi undefined
+        const rowsHoatDong = Array.isArray(tong_hoatdong) ? tong_hoatdong[0] : tong_hoatdong;
+        const rowsTong = Array.isArray(tong) ? tong[0] : tong;
+
+        const kgDangDung = rowsHoatDong?.TongKhongGianDangSuDung || 0;
+        const tongSoKg = rowsTong?.TONG || 0;
 
         // Xử lý bảo vệ: Tránh lỗi chia cho 0 nếu hệ thống chưa cấu hình phòng nào
         if (tongSoKg === 0) return 0;
@@ -841,12 +882,5 @@ LIMIT 1;
         } catch (error) {
             throw new Error("Database query failed: " + error.message);
         }
-    }
-
-  
-    
-
-
-
-                   
+    }            
 }
