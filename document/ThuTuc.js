@@ -235,3 +235,5 @@ WHERE
     -- Chỉ tính lịch đặt có trạng thái hợp lệ (Ví dụ TRANG_THAI = 1 là đã xác nhận/thành công)
     AND ld.TRANG_THAI = 1;
  */
+
+    /**/

@@ -6,6 +6,7 @@ import { body, param, query, validationResult } from "express-validator";
 import ChiTietThietBiModel from "../models/ChiTiet_ThietBiModel.js";
 import DatLichModel from "../models/LichDatModel.js";
 import { io } from '../server.js';
+import moment from 'moment'
 export default class gheController {
     
 
@@ -354,4 +355,70 @@ export default class gheController {
             });
         }
     }
+  static async danhsachghe_thoigian(req, res) {
+    const id = req.query.id;
+    const BatDau = req.query.BatDau;
+    const KetThuc = req.query.KetThuc;
+
+    try {
+        await Promise.all([
+            query('BatDau')
+                .notEmpty().withMessage('Thời gian bắt đầu không được để trống.')
+                .isISO8601().withMessage('Thời gian bắt đầu không đúng định dạng ngày tháng.')
+                .custom((value) => {
+                    if (new Date(value) < new Date()) throw new Error('Không thể đặt lịch cho thời gian trong quá khứ.');
+                    const formats = ['YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DDTHH:mm:ss', 'YYYY-MM-DD'];
+                    const dateCheck = moment(value, formats, true);
+                    if (!dateCheck.isValid()) throw new Error('Thời gian bắt đầu không hợp lệ!');
+                    return true;
+                })
+                .run(req),
+
+            query('KetThuc')
+                .notEmpty().withMessage('Thời gian kết thúc không được để trống.')
+                .isISO8601().withMessage('Thời gian kết thúc không đúng định dạng ngày tháng.')
+                .custom((value, { req }) => {
+                    // 🔥 SỬA TẠI ĐÂY: Lấy từ req.query.BatDau thay vì req.body.BatDau
+                    if (new Date(value) <= new Date(req.query.BatDau)) {
+                        throw new Error('Thời gian kết thúc phải lớn hơn thời gian bắt đầu.');
+                    }
+                    const formats = ['YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DDTHH:mm:ss', 'YYYY-MM-DD'];
+                    const dateCheck = moment(value, formats, true);
+                    if (!dateCheck.isValid()) throw new Error('Thời gian kết thúc không hợp lệ!');
+                    return true;
+                })
+                .run(req),
+
+            query('id')
+                .notEmpty().withMessage('Lỗi không gian!.')
+                .custom(async (idValue) => { // Đổi tên từ body -> idValue cho rõ nghĩa
+                    const kiemtra = await KhongGianModel.kiemtraid(idValue);
+                    if (!kiemtra) throw new Error('Không gian không tồn tại!!');
+                    return true;
+                })
+                .run(req)
+        ]);
+
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                validate: true,
+                message: 'Dữ liệu không hợp lệ!',
+                errors: errors.array().map(err => err.msg)
+            });
+        }
+        const danhsach = await GheModel.danhsachghe_thoigian(id, BatDau, KetThuc);
+        return res.status(200).json({
+            success: true,
+            Ghe: danhsach
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi thông tin ghế.",
+            error: error.message
+        });
+    }
+}
 }

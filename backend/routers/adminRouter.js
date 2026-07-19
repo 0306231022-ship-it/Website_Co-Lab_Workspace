@@ -58,7 +58,7 @@ adminRouter.post("/themthietbi", upload.none(), thietbiController.createThietBi)
 adminRouter.post("/themdanhmucghe",upload.none(),danhmucgheController.createDanhMucGhe,);
 adminRouter.get("/danhsachdanhmucghe", danhmucgheController.getAllDanhMucGhe);
 adminRouter.post("/capnhatdanhmucghe",upload.none(),danhmucgheController.updateDanhMucGhe,);
-
+adminRouter.get('/danhsachghe_thoigian', gheController.danhsachghe_thoigian);
 //============================================
 //QUẢN LÝ LỊCH ĐẶT
 adminRouter.get("/danhsach_lichdat", LichDatController.DanhSachDatLich);

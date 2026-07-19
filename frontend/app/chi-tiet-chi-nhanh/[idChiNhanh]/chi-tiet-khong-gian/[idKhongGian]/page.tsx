@@ -8,9 +8,8 @@ import { KhongGian } from '@/interface/KhongGian';
 import { ThietBi } from '@/interface/ThietBi';
 import Image from "next/image";
 import * as fun from '@/FUNCTION/function';
-import { Ghe } from '@/interface/ghe';
-import SoDoGheCanvas from '@/component/Ghe';
-import { useModalContext } from "@/context/QuanLiMoal";
+ import { Ghe } from '@/interface/ghe';
+import GheNgoi from '@/component/ThongTinGhe';
 import { useRouter } from 'next/navigation';
 import {socket} from '@/FUNCTION/socket';
 interface LichDaDat{
@@ -18,7 +17,7 @@ interface LichDaDat{
     KHUNG_KETTHUC: string
 }
 function ChiTietKhongGian() {
-  const { OpenMoDal } = useModalContext();
+
   const { idChiNhanh , idKhongGian } = useParams();
   const [loading,setloading] = useState<boolean>(false);
   const [err, setErr] = useState<string[]>([]);
@@ -27,7 +26,7 @@ function ChiTietKhongGian() {
   const [ThietBi,setThietBi] =  useState<ThietBi[]>([]); 
   const [page,setpage] = useState<number>(1);
   const [TongDanhSach,setTongDanhSach] = useState<number>(1);
-  const [ghe,setghe] = useState<Ghe[]>([]);
+    const [ghe,setghe] = useState<Ghe[]>([]);
   const [lichDaDat, setLichDaDat] = useState<LichDaDat[]>([]);
   const router = useRouter();
      const getTodayString = () => {
@@ -149,9 +148,7 @@ function ChiTietKhongGian() {
          ThongBao.ThongBao_CanhBao('Lỗi khi tải thông tin thiết bị');
     }
   }
- const handleGheSelect = (thongTinGhe: Ghe) => {
-    OpenMoDal({thongTinGhe},{TenTrang:'ThongTin_ghe'});
-  };
+ 
    const fetchLichDaDat = async(selectedDate : string) => {
       setloading(true)
       try {
@@ -472,25 +469,8 @@ function ChiTietKhongGian() {
           {/* SƠ ĐỒ GHẾ TRỰC QUAN */}
             {
               khonggian?.LOAI_KHONG_GIAN === 1 ? (
-                <div className="md:col-span-7 bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
-  <div>
+                <GheNgoi DuLieu={ghe} />
 
-
-    <div className="flex flex-wrap justify-between items-center gap-2 mb-4">
-      <div>
-        <h3 className="text-sm font-bold text-gray-800">Sơ đồ vị trí chỗ ngồi</h3>
-        <p className="text-[11px] text-gray-400">Nhấp vào vị trí ghế trống trên sơ đồ để tiến hành lựa chọn</p>
-      </div>
-      <div className="flex gap-3 text-[10px] text-gray-500 font-medium">
-        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-emerald-500"></span> Trống</span>
-        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-red-500"></span> Đang có người</span>
-      </div>
-    </div>
-    <SoDoGheCanvas danhSachGhe={ghe} onGheClick={handleGheSelect}  isReadOnly={true} />
-     <div className="mt-4 p-3 bg-gray-50 border border-gray-200 text-gray-400 rounded-xl text-center text-xs font-medium max-w-md mx-auto">Vui lòng chọn một ghế trống bất kỳ trên sơ đồ</div>
-     
-  </div>
-</div>
               ) : (
                 <div className="md:col-span-7 bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
       <div>

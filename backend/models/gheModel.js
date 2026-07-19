@@ -63,11 +63,6 @@ ORDER BY
             throw new Error("Không thể thêm ghế mới vào cơ sở dữ liệu!");
         }
     }
-
-    
-    
-
-    
  static async update(idGia, tenGia, moTa, soTienMoi, idDanhMucGhe, phuongThuc) {
     // TH1: Admin chọn ghi đè bất chấp hoặc phương thức yêu cầu trực tiếp
     if (phuongThuc === 'overwrite') {
@@ -201,4 +196,27 @@ ORDER BY
             throw new Error("Không thể truy vấn cập nhật tên ghế!");
         }
     }
+static async danhsachghe_thoigian(id, BatDau, KetThuc) {
+    try {
+        const [kq] = await execute(`
+            SELECT g.*,
+                CASE 
+                    WHEN ld.ID_LICH_DAT IS NOT NULL THEN 1  
+                    ELSE 0                                  
+                END AS DangCoNguoiDat
+            FROM ghe g
+            LEFT JOIN lichdat ld ON g.ID_GHE = ld.ID_GHE 
+                AND ld.TRANG_THAI <> 2
+                AND (? < ld.KHUNG_KETTHUC AND ? > ld.KHUNG_BATDAU) 
+            WHERE g.ID_KHONG_GIAN = ? 
+            ORDER BY g.TEN_GHE ASC;
+        `, [BatDau, KetThuc, id]); 
+
+        return kq; 
+        
+    } catch (error) {
+        console.error("Lỗi khi lấy danh sách ghế theo thời gian:", error);
+        throw error; 
+    }
+}
 }
