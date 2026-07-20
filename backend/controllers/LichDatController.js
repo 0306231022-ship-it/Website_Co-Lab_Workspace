@@ -10,7 +10,9 @@ import ThanhToanModal from '../models/ThanhToanModal.js';
 export default class LichDatController{
     static async DatLich(req,res){
         const dulieu = req.body;
-        const userId = req.user.id
+        const userId = req.user.id;
+        const id = req.body.id;
+
         try {
             await Promise.all([
                 body('KHUNG_BATDAU')
@@ -32,6 +34,14 @@ export default class LichDatController{
                          const formats = ['YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DDTHH:mm:ss', 'YYYY-MM-DD'];
                         const dateCheck = moment(value, formats, true);
                         if (!dateCheck.isValid()) throw new Error('thời gian kết thúc không hợp lệ!');
+                        return true;
+                    })
+                    .run(req),
+                  body('id')
+                    .notEmpty().withMessage('Dữ liệu không được bỏ trống!')
+                    .custom(async (body) => {
+                        const kiemtra = await KhongGianModel.kiemtraid(body);
+                        if(!kiemtra) throw new Error('Không ttoonf tại không gian!');
                         return true;
                     })
                     .run(req),
@@ -66,8 +76,8 @@ export default class LichDatController{
                 })
             }
             //phát sự kiện
-              /*const loai = await KhongGianModel.LayLoai_KG(dulieu.ID_KHONG_GIAN)
-              io.to(`space_type_${loai}_id_${dulieu.ID_KHONG_GIAN}`).emit('update_schedule', {success:true});*/
+              const loai = await KhongGianModel.LayLoai_KG(id)
+              io.to(`space_type_${loai}_id_${id}`).emit('update_schedule', {success:true});
             return res.status(200).json({
                 success:true,
                 ID_LICHDAT: DatLich,
@@ -483,12 +493,9 @@ export default class LichDatController{
                         message: "Check-in thất bại! Vui lòng thực hiện trong giây lát"
                     });
                }
-                //Phát tín hiệu vào các phòng đã đăng ký
-               /* io.to(`space_type_${loaiKhongGian}_id_${idKhongGian}`).emit('ThayDoi_TrangThai', {
-                    success: true,
-                    message: "Không tồn tại lịch đặt này!"
-                });*/
-
+               const idkg= await DatLichModel.layidkg_idlich(id);
+               const loai = await KhongGianModel.LayLoai_KG(idkg)
+               io.to(`space_type_${loai}_id_${idkg}`).emit('update_schedule', {success:true});
                io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-checkin', {
                     success: true,
                     message: "Check-in thành công!"
@@ -551,6 +558,9 @@ export default class LichDatController{
                     res.end();
                     return;
                }
+             const idkg= await DatLichModel.layidkg_idlich(id);
+               const loai = await KhongGianModel.LayLoai_KG(idkg)
+               io.to(`space_type_${loai}_id_${idkg}`).emit('update_schedule', {success:true});
               io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-checkout', {
                 success: true,
                 message: "Check-out thành công!"

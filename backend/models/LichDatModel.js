@@ -882,5 +882,20 @@ LIMIT 1;
         } catch (error) {
             throw new Error("Database query failed: " + error.message);
         }
-    }            
+    }
+    static async layidkg_idlich(id){
+        try {
+            const [thongtin] = await execute(`
+                SELECT 
+    ld.ID_LICH_DAT,
+    COALESCE(ld.ID_KHONG_GIAN, g.ID_KHONG_GIAN) AS ID_KHONG_GIAN
+FROM lichdat ld
+LEFT JOIN ghe g ON ld.ID_GHE = g.ID_GHE
+WHERE ld.ID_LICH_DAT = ?;
+                `,[id]);
+                return thongtin[0].ID_KHONG_GIAN;
+        } catch (error) {
+             throw new Error("Database query failed: " + error.message);
+        }
+    }    
 }

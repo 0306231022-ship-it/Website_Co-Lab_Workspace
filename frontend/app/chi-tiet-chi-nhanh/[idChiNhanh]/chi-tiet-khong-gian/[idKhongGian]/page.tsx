@@ -12,10 +12,7 @@ import * as fun from '@/FUNCTION/function';
 import GheNgoi from '@/component/ThongTinGhe';
 import { useRouter } from 'next/navigation';
 import {socket} from '@/FUNCTION/socket';
-interface LichDaDat{
-    KHUNG_BATDAU:string,
-    KHUNG_KETTHUC: string
-}
+import DatPhong from '@/component/DatPhong';
 function ChiTietKhongGian() {
 
   const { idChiNhanh , idKhongGian } = useParams();
@@ -27,30 +24,14 @@ function ChiTietKhongGian() {
   const [page,setpage] = useState<number>(1);
   const [TongDanhSach,setTongDanhSach] = useState<number>(1);
     const [ghe,setghe] = useState<Ghe[]>([]);
-  const [lichDaDat, setLichDaDat] = useState<LichDaDat[]>([]);
+
   const router = useRouter();
-     const getTodayString = () => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-  const todayDate = getTodayString();
-  const [ngayDat, setNgayDat] = useState(todayDate);
-  const [gioBatDau, setGioBatDau] = useState<string>('');
- const [gioKetThuc, setGioKetThuc] = useState<string>('');
- const batDau = new Date(gioBatDau);
-  const ketThuc = new Date(gioKetThuc);
-   const tongGio = (ketThuc.getTime() - batDau.getTime()) / (1000 * 60 * 60);
-  useEffect(()=>{
-    const laydl = async()=>{
+    
+   const laydl = async()=>{
        setloading(true)
       try {
-        const [dulieu1,dulieu2] = await Promise.all([
-          api.CallAPI(undefined,{url:`/admin/ChiTiet_KhongGian?IDKG=${idKhongGian}&IDCN=${idChiNhanh}`,PhuongThuc:2}),
-          api.CallAPI(undefined,{url:`/admin/DanhSach_theo_khonggian?IDKG=${idKhongGian}`, PhuongThuc:2})
-        ])
+        const dulieu1 = await api.CallAPI(undefined,{url:`/admin/ChiTiet_KhongGian?IDKG=${idKhongGian}&IDCN=${idChiNhanh}`,PhuongThuc:2});
+       
         if(dulieu1.validate){
           setErr(dulieu1.errors);
           return;
@@ -66,11 +47,6 @@ function ChiTietKhongGian() {
           setTongDanhSach(dulieu1.DanhSach.ThietBi.TongDanhSach);
           const danhSachGheChuan = dulieu1.DanhSach.Ghe || dulieu1.DanhSach.ghe || dulieu1.DanhSach.DanhSachGhe || [];
           setghe(danhSachGheChuan);
-        }
-        if (dulieu2 && dulieu2.success) {
-          setLichDaDat(dulieu2.dulieu || []);
-        } else {
-          setLichDaDat([]);
         }
       } catch (error) {
          console.error("Lỗi khi tải thông tin không gian:", error);
@@ -79,44 +55,25 @@ function ChiTietKhongGian() {
         setloading(false)
       }
     }
-    laydl();
-  },[idChiNhanh,idKhongGian])
+    useEffect(()=>{
+      const haha = async()=>{
+        await laydl()
+      }
+      haha();
+       // eslint-disable-next-line react-hooks/exhaustive-deps
+    },[])
   useEffect(() => {
           socket.on("update_schedule", async(data) => {
             if (data.success) {
-                   const [dulieu1,dulieu2] = await Promise.all([
-          api.CallAPI(undefined,{url:`/admin/ChiTiet_KhongGian?IDKG=${idKhongGian}&IDCN=${idChiNhanh}`,PhuongThuc:2}),
-          api.CallAPI(undefined,{url:`/admin/DanhSach_theo_khonggian?IDKG=${idKhongGian}`, PhuongThuc:2})
-        ])
-        if(dulieu1.validate){
-          setErr(dulieu1.errors);
-          return;
-        }
-        if (dulieu1.success) {
-          setchinhanh(dulieu1.DanhSach.ChiNhanh);
-          setkhonggian(dulieu1.DanhSach.KhongGian.KhongGian);
-          socket.emit("join_space_room", {
-            idKhongGian: idKhongGian,
-            loaiKhongGian: dulieu1.DanhSach.KhongGian.KhongGian.LOAI_KHONG_GIAN
-          });
-          setThietBi(dulieu1.DanhSach.ThietBi.DanhSach);
-          setTongDanhSach(dulieu1.DanhSach.ThietBi.TongDanhSach);
-          const danhSachGheChuan = dulieu1.DanhSach.Ghe || dulieu1.DanhSach.ghe || dulieu1.DanhSach.DanhSachGhe || [];
-          setghe(danhSachGheChuan);
-        }
-        if (dulieu2 && dulieu2.success) {
-          setLichDaDat(dulieu2.dulieu || []);
-        } else {
-          setLichDaDat([]);
-        }
-            } else {
-              ThongBao.ThongBao_CanhBao(data.message || data.mesage);
+              await laydl();
             }
+               
           });
           return () => {
             socket.off("update_schedule");
           };
-        }, [idKhongGian, idChiNhanh]);
+           // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, []);
 
 
   const getTrangThaiConfig = (trangThai: number) => {
@@ -149,61 +106,7 @@ function ChiTietKhongGian() {
     }
   }
  
-   const fetchLichDaDat = async(selectedDate : string) => {
-      setloading(true)
-      try {
-          const data = await api.CallAPI(undefined,{url:`/admin/lichdatkhonggian_theothoigian?THOIGIAN=${fun.formatToBackendDateTime(selectedDate)}&IDKG=${idKhongGian}` , PhuongThuc:2});
-      
-          if(data.validate){
-              setErr(data.errors);
-              ThongBao.ThongBao_CanhBao(data.message)
-              return;
-          }
-           if (data && data.success) {
-              setLichDaDat(data.dulieu || []);
-          } else {
-              setLichDaDat([]);
-          }
-      } catch (error) {
-           console.error("Lỗi lấy danh sách lịch đặt hiện tại theo ghế:", error);
-      } finally {
-          setloading(false)
-      }
-    };
-      const handleDatCho = async() => {
-        if (gioKetThuc <= gioBatDau) {
-          ThongBao.ThongBao_CanhBao("Giờ kết thúc phải lớn hơn giờ bắt đầu!");
-          return;
-        }
-        try {
-             const dataToSend = new FormData();
-            dataToSend.append('ID_KHONG_GIAN' , String(idKhongGian));
-            dataToSend.append('KHUNG_BATDAU', String(fun.formatToBackendDateTime(gioBatDau)));
-            dataToSend.append('KHUNG_KETTHUC' , String(fun.formatToBackendDateTime(gioKetThuc)));
-            dataToSend.append("LoaiND", String(0));
-            const DatLich = await api.CallAPI(dataToSend,{url:'/nguoiDung/LichDat', PhuongThuc:1});
-           
-             if(DatLich.validate){
-                setErr(DatLich.errors);
-                ThongBao.ThongBao_CanhBao(DatLich.message)
-                return;
-            }
-            if(DatLich.success){
-                 const chuyenhuong_thanhtoan = await api.CallAPI(undefined,{url:`/NguoiDung/ThanhToan?id=${DatLich.ID_LICHDAT}`, PhuongThuc:2});
-                 if (chuyenhuong_thanhtoan && chuyenhuong_thanhtoan.success && chuyenhuong_thanhtoan.paymentUrl) {
-                  window.open(chuyenhuong_thanhtoan.paymentUrl, '_blank')
-                  } else {
-                  ThongBao.ThongBao_CanhBao(chuyenhuong_thanhtoan?.message || "Không thể khởi tạo link thanh toán từ hệ thống.");
-                }        
-            }
-            if(DatLich.success===false){
-                ThongBao.ThongBao_Loi(DatLich.message)
-            }
-        } catch (error) {
-            console.error("Lỗi đặt lịch:", error);
-            ThongBao.ThongBao_CanhBao('Có lỗi sảy ra!')
-        }
-      };
+   
 
 
 
@@ -472,119 +375,7 @@ function ChiTietKhongGian() {
                 <GheNgoi DuLieu={ghe} />
 
               ) : (
-                <div className="md:col-span-7 bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
-      <div>
-        {/* Tiêu đề góc */}
-        <div className="mb-4">
-          <h3 className="text-sm font-bold text-gray-800">Thông tin đặt phòng họp</h3>
-          <p className="text-[11px] text-gray-400">Vui lòng điền đầy đủ thông tin để tiến hành đặt không gian họp</p>
-        </div>
-                    <div className="text-right">
-                              <span className="text-2xl font-black text-blue-600">{fun.formatCurrency(String(khonggian?.DON_GIA))}</span>
-                              <span className="text-xs font-bold text-slate-400"> / giờ</span>
-                            </div>
-        {/* Các trường nhập liệu */}
-        <div className="space-y-4">
-    
-          <div className="grid grid-cols-2 gap-3">
-           
-            <div>
-              <label className="block text-xs font-semibold text-gray-600 mb-1">Giờ bắt đầu</label>
-              <input 
-                type="datetime-local"
-                  value={gioBatDau}
-                    min={todayDate}
-                    onChange={(e) =>{
-                        setGioBatDau(e.target.value);
-                        fetchLichDaDat(e.target.value);
-                        setNgayDat(e.target.value);
-                    }}
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-gray-700"
-              />
-            </div>
-            {/* Giờ kết thúc */}
-            <div>
-              <label className="block text-xs font-semibold text-gray-600 mb-1">Giờ kết thúc</label>
-              <input 
-                type="datetime-local"
-                value={gioKetThuc}
-                min={gioBatDau}
-                onChange={(e) => setGioKetThuc(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-gray-700"
-              />
-            </div>
-          </div>
-
-    
-      
-
-       <div>
-              <div className="flex items-center justify-between mb-3">
-              <h4 className="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <i className="fa-solid fa-calendar-xmark text-slate-400"></i> Lịch kín ngày : { fun.formatDate(ngayDat) }
-              </h4>
-            </div>
-       <div className="w-full max-w-md mx-auto p-4 bg-white rounded-2xl shadow-sm border border-slate-100">
-
-
-  {/* Khung chứa danh sách - Hỗ trợ cuộn chuẩn UX */}
-  {lichDaDat && lichDaDat.length > 0 ? (
-    <div className="space-y-2 max-h-48 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-rose-200">
-      {lichDaDat.map((item, index) => (
-        <div
-          key={ index} // Sử dụng ID nếu có, nếu không dùng index trực tiếp tại thẻ ngoài cùng
-          className="flex items-center justify-between border border-rose-100 bg-gradient-to-r from-rose-50/50 to-transparent px-4 py-3 rounded-xl hover:border-rose-200 transition-all duration-200"
-        >
-          {/* Thời gian */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-rose-100/60 flex items-center justify-center text-rose-500">
-              <i className="fa-regular fa-clock text-xs"></i>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xs font-bold text-slate-800">
-                {fun.formatTime(item.KHUNG_BATDAU)} - {fun.formatTime(item.KHUNG_KETTHUC)}
-              </span>
-              <span className="text-[10px] text-slate-400">Thời gian cố định</span>
-            </div>
-          </div>
-
-          {/* Trạng thái */}
-          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100">
-            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
-            Đã đặt
-          </span>
-        </div>
-      ))}
-    </div>
-  ) : (
-    /* Giao diện trống (Empty State) tinh tế hơn */
-    <div className="flex flex-col items-center justify-center py-8 px-4 text-center border border-dashed border-slate-200 rounded-xl bg-slate-50/50">
-      <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
-        <i className="fa-regular fa-calendar-xmark text-sm"></i>
-      </div>
-      <p className="text-xs font-medium text-slate-500">
-        Không có lịch đặt nào trong ngày hôm nay
-      </p>
-    </div>
-  )}
-</div>
-          </div>
-        </div>
-      </div>
-       <div className="flex justify-between items-end mb-4 px-1">
-                    <div>
-                      <span className="text-xs font-bold text-slate-400 block mb-0.5">Vui lòng kiểm tra lại giờ đặt</span>
-                      <span className="text-sm font-bold text-slate-800">Tạm tính: {tongGio || 0} giờ</span>
-                    </div>
-                    <span className="text-3xl font-black text-blue-600 tracking-tight">{fun.formatCurrency(((tongGio * Number(khonggian?.DON_GIA)) || 0))}</span>
-                  </div>
-      {/* Nút hành động */}
-      <div className="mt-5 border-t border-gray-100 pt-4">
-        <button onClick={()=>{handleDatCho()}} className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm rounded-xl transition-all shadow-sm shadow-indigo-100">
-          Xác nhận thông tin phòng họp
-        </button>
-      </div>
-    </div>
+                <DatPhong DuLieu={String(khonggian?.DON_GIA)} />
               )
             }
          

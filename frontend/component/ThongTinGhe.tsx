@@ -7,24 +7,92 @@ import * as api from '@/API/API';
 import { useState, useEffect } from "react";
 import { useParams } from 'next/navigation'; 
 import * as fun from '@/FUNCTION/function';
+
 function GheNgoi({ DuLieu }: { DuLieu: Ghe[] }) {
     const { OpenMoDal } = useModalContext();
     const params = useParams(); 
     const [startTime, setStartTime] = useState<string>("");
     const [endTime, setEndTime] = useState<string>("");
     const [danhSachGheHienTai, setDanhSachGheHienTai] = useState<Ghe[]>(DuLieu);
+
+    // Khởi tạo mốc thời gian tối thiểu (hiện tại) dùng cho thuộc tính min
+    const [minDateTime] = useState<string>(() => {
+        const bayGio = new Date();
+        return bayGio.toLocaleString('sv-SE').replace(' ', 'T').substring(0, 16);
+    });
+
+    // 🔥 HÀM TIỆN ÍCH CHẶN GIỜ QUÁ KHỨ (Xử lý khi gõ/nhập tay)
+    const handleStartTimeChange = (value: string) => {
+        if (!value) {
+            setStartTime("");
+            return;
+        }
+
+        const selectedDate = new Date(value);
+        const now = new Date();
+
+        // Nếu thời gian gõ vào nhỏ hơn thời gian hiện tại
+        if (selectedDate < now) {
+            ThongBao.ThongBao_CanhBao("Thời gian bắt đầu không được ở trong quá khứ!");
+            setStartTime(""); // Reset ô input để ép chọn lại
+            return;
+        }
+
+        setStartTime(value);
+    };
+
+    const handleEndTimeChange = (value: string) => {
+        if (!value) {
+            setEndTime("");
+            return;
+        }
+
+        const selectedEndDate = new Date(value);
+        const now = new Date();
+
+        // Kiểm tra thời gian kết thúc với thời gian hiện tại
+        if (selectedEndDate < now) {
+            ThongBao.ThongBao_CanhBao("Thời gian kết thúc không được ở trong quá khứ!");
+            setEndTime("");
+            return;
+        }
+
+        // Kiểm tra nếu có startTime thì endTime bắt buộc phải lớn hơn
+        if (startTime && selectedEndDate <= new Date(startTime)) {
+            ThongBao.ThongBao_CanhBao("Thời gian kết thúc phải lớn hơn thời gian bắt đầu!");
+            setEndTime("");
+            return;
+        }
+
+        setEndTime(value);
+    };
+
     useEffect(() => {
         const fetchGheTheoKhungGio = async () => {
             if (startTime && endTime) {
-                if (new Date(startTime) >= new Date(endTime)) {
+                const now = new Date();
+                const start = new Date(startTime);
+                const end = new Date(endTime);
+
+                if (start < now) {
+                    ThongBao.ThongBao_CanhBao("Thời gian bắt đầu không được ở trong quá khứ!");
+                    return;
+                }
+
+                if (start >= end) {
                     ThongBao.ThongBao_CanhBao("Thời gian kết thúc phải lớn hơn thời gian bắt đầu!");
                     return;
                 }
+
                 try {
-                    const idKhongGian = params?.idKhongGian || DuLieu[0]?.ID_KHONG_GIAN;
+                    const idKhongGian = params?.idkhonggian || params?.idKhongGian || DuLieu[0]?.ID_KHONG_GIAN;
                     if (!idKhongGian) return;
-                    const thoigian = await api.CallAPI(undefined,{url:`/admin/danhsachghe_thoigian?id=${idKhongGian}&BatDau=${fun.formatToBackendDateTime(startTime)}&KetThuc=${fun.formatToBackendDateTime(endTime)}`,PhuongThuc:2});
-                    alert(JSON.stringify(thoigian))
+                    
+                    const thoigian = await api.CallAPI(undefined, {
+                        url: `/admin/danhsachghe_thoigian?id=${idKhongGian}&BatDau=${fun.formatToBackendDateTime(startTime)}&KetThuc=${fun.formatToBackendDateTime(endTime)}`,
+                        PhuongThuc: 2
+                    });
+                    
                     if (thoigian && thoigian.success) {
                         setDanhSachGheHienTai(thoigian.Ghe);
                     }
@@ -37,16 +105,32 @@ function GheNgoi({ DuLieu }: { DuLieu: Ghe[] }) {
         fetchGheTheoKhungGio();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [startTime, endTime]);
+
     const handleGheSelect = (thongTinGhe: Ghe) => {
+        const idKhongGian = params?.idkhonggian || params?.idKhongGian || DuLieu[0]?.ID_KHONG_GIAN;
+        
         if (!startTime || !endTime) {
             ThongBao.ThongBao_CanhBao("Vui lòng chọn thời gian bắt đầu và kết thúc trước khi chọn ghế!");
             return;
         }
+
+        const now = new Date();
+        if (new Date(startTime) < now) {
+            ThongBao.ThongBao_CanhBao("Thời gian bắt đầu không hợp lệ (nằm trong quá khứ)!");
+            return;
+        }
+
+        if (new Date(startTime) >= new Date(endTime)) {
+            ThongBao.ThongBao_CanhBao("Thời gian kết thúc phải lớn hơn thời gian bắt đầu!");
+            return;
+        }
+
         OpenMoDal(
             { 
                 thongTinGhe, 
                 thoiGianBatDau: startTime, 
-                thoiGianKetThuc: endTime 
+                thoiGianKetThuc: endTime,
+                idKhongGian: idKhongGian
             }, 
             { TenTrang: 'ThongTin_ghe' }
         );
@@ -65,7 +149,8 @@ function GheNgoi({ DuLieu }: { DuLieu: Ghe[] }) {
                                     type="datetime-local"  
                                     className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-700 font-medium focus:outline-none focus:border-emerald-500 focus:bg-white transition-all cursor-pointer"
                                     value={startTime} 
-                                    onChange={(e) => setStartTime(e.target.value)}
+                                    min={minDateTime} // Chặn click quá khứ trên UI lịch
+                                    onChange={(e) => handleStartTimeChange(e.target.value)} // Chặn gõ tay quá khứ
                                 />
                             </div>
                             <div className="flex flex-col gap-1.5">
@@ -74,7 +159,8 @@ function GheNgoi({ DuLieu }: { DuLieu: Ghe[] }) {
                                     type="datetime-local" 
                                     className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-700 font-medium focus:outline-none focus:border-emerald-500 focus:bg-white transition-all cursor-pointer"
                                     value={endTime} 
-                                    onChange={(e) => setEndTime(e.target.value)}
+                                    min={startTime || minDateTime} // Chặn click giờ kết thúc nhỏ hơn bắt đầu trên UI
+                                    onChange={(e) => handleEndTimeChange(e.target.value)} // Chặn gõ tay giờ kết thúc nhỏ hơn bắt đầu
                                 />
                             </div>
                         </div>

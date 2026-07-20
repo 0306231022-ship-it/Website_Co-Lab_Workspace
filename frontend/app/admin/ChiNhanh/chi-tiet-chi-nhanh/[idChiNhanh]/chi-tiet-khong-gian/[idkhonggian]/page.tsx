@@ -15,6 +15,15 @@ import Link from 'next/link';
 import {  LichDatItems } from "@/interface/LichDat";
 import {socket} from '@/FUNCTION/socket';
 
+interface ThongTin_DatLich {
+    KHUNG_BATDAU: string;
+    KHUNG_KETTHUC: string;
+    TENND: string;
+    HINH_ANH: string;
+    EMAIL: string;
+    THOIGIAN_VAO?: string;
+}
+
 function ChiTietKhongGian() {
     const { OpenMoDal } = useModalContext();
     const [page1, setpage1] = useState<number>(1);
@@ -33,9 +42,61 @@ function ChiTietKhongGian() {
     const [DonGia, setDonGia] = useState<number>(0);
     const [tongghe, settongghe] = useState<number>(0);
     const [gioketiep,setgioketiep] = useState< LichDatItems | null>(null);
-    const [id_hientai,setid_hientai] = useState<string>('');
+    const [NguoiDung,setNguoiDung] = useState<ThongTin_DatLich | null>(null);
 
-    // Effect 1: Tải danh sách thiết bị khi chuyển trang (Phân trang)
+    const loadDL = async()=>{
+        try {
+            const [dulieu1, dulieu2] = await Promise.all([
+                api.CallAPI(undefined, { url: `/admin/ChiTiet_KhongGian?IDKG=${idkhonggian}&IDCN=${idChiNhanh}`, PhuongThuc: 2 }),
+                api.CallAPI(undefined, { url: `/admin/thongke?id=${idkhonggian}`, PhuongThuc: 2 }),
+            ]);
+            if (dulieu1.validate) {
+                setErr(dulieu1.errors);
+                return;
+            }
+            if (dulieu1.success) {
+                setchinhanh(dulieu1.DanhSach.ChiNhanh);
+                setkhonggian(dulieu1.DanhSach.KhongGian.KhongGian);
+                socket.emit("join_space_room", {
+                    idKhongGian: idkhonggian,
+                    loaiKhongGian: dulieu1.DanhSach.KhongGian.KhongGian.LOAI_KHONG_GIAN
+                });
+                setThietBi(dulieu1.DanhSach.ThietBi.DanhSach);
+                setTongDanhSach1(dulieu1.DanhSach.ThietBi.TongDanhSach);
+                const danhSachGheChuan = dulieu1.DanhSach.Ghe || dulieu1.DanhSach.ghe || dulieu1.DanhSach.DanhSachGhe || [];
+                setghe(danhSachGheChuan);
+                const danhsach_lich_ketiep = dulieu1.DanhSach.KhongGian.lichKeTiep || null;
+                setgioketiep(danhsach_lich_ketiep);
+            }
+            if (dulieu2 && dulieu2.success) {
+                setTongGioThue(dulieu2.dulieu.TongGioThue || 0);
+                setTiLeLapDay(dulieu2.dulieu.Tile_LapDay || 0);
+                setDonGia(dulieu2.dulieu.DonGia || 0);
+                settongghe(dulieu2.dulieu.TongSoGhe || 0);
+
+                // Đảm bảo cập nhật chính xác trạng thái người đặt từ server, nếu không có thì set về null
+                if (dulieu2.dulieu.NguoiDungHienTai!==null) {
+                    setNguoiDung(dulieu2.dulieu.NguoiDungHienTai);
+                } else {
+                    setNguoiDung(null);
+                }
+            } else {
+                console.error("Không thể tải dữ liệu thống kê từ API 2");
+            }
+        } catch (error) {
+            console.error("Lỗi khi tải thông tin chi tiết không gian:", error);
+            ThongBao.ThongBao_CanhBao('Lỗi khi tải thông tin không gian');
+        }
+    };
+
+    useEffect(()=>{
+        const data = async()=>{
+            await loadDL();
+        };
+        data();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    },[]);
+
     useEffect(() => {
         if (page1 === 1) return;
         const loaddl = async () => {
@@ -61,91 +122,18 @@ function ChiTietKhongGian() {
         };
         loaddl();
     }, [page1, idkhonggian]);
+    
     useEffect(() => {
-        const loadl = async () => {
-            try {
-                const [dulieu1, dulieu2] = await Promise.all([
-                    api.CallAPI(undefined, { url: `/admin/ChiTiet_KhongGian?IDKG=${idkhonggian}&IDCN=${idChiNhanh}`, PhuongThuc: 2 }),
-                    api.CallAPI(undefined, { url: `/admin/thongke?id=${idkhonggian}`, PhuongThuc: 2 }),
-                ]);
-                if (dulieu1.validate) {
-                    setErr(dulieu1.errors);
-                    return;
-                }
-                if (dulieu1.success) {
-                    setchinhanh(dulieu1.DanhSach.ChiNhanh);
-                    setkhonggian(dulieu1.DanhSach.KhongGian.KhongGian);
-                    socket.emit("join_space_room", {
-                        idKhongGian: idkhonggian,
-                        loaiKhongGian: dulieu1.DanhSach.KhongGian.KhongGian.LOAI_KHONG_GIAN
-                    });
-                    setThietBi(dulieu1.DanhSach.ThietBi.DanhSach);
-                    setTongDanhSach1(dulieu1.DanhSach.ThietBi.TongDanhSach);
-                    const danhSachGheChuan = dulieu1.DanhSach.Ghe || dulieu1.DanhSach.ghe || dulieu1.DanhSach.DanhSachGhe || [];
-                    setghe(danhSachGheChuan);
-                    const danhsach_lich_ketiep = dulieu1.DanhSach.KhongGian.lichKeTiep || null;
-                    setgioketiep(danhsach_lich_ketiep);
-                    const lich_hientai = dulieu1.DanhSach.KhongGian.lichHienTai || '';
-                    setid_hientai(lich_hientai)
-                }
-                if (dulieu2 && dulieu2.success) {
-                    setTongGioThue(dulieu2.dulieu.TongGioThue || 0);
-                    setTiLeLapDay(dulieu2.dulieu.Tile_LapDay || 0);
-                    setDonGia(dulieu2.dulieu.DonGia || 0);
-                    settongghe(dulieu2.dulieu.TongSoGhe || 0);
-                } else {
-                    console.error("Không thể tải dữ liệu thống kê từ API 2");
-                }
-            } catch (error) {
-                console.error("Lỗi khi tải thông tin chi tiết không gian:", error);
-                ThongBao.ThongBao_CanhBao('Lỗi khi tải thông tin không gian');
+        socket.on('update_schedule', async(item) => {
+            if(item){
+                await loadDL();
             }
-        };
-        loadl();
-    }, [idChiNhanh, idkhonggian]);
-      useEffect(() => {
-        socket.on("update_schedule", async(data) => {
-          if (data.success) {
-              const [dulieu1, dulieu2] = await Promise.all([
-                    api.CallAPI(undefined, { url: `/admin/ChiTiet_KhongGian?IDKG=${idkhonggian}&IDCN=${idChiNhanh}`, PhuongThuc: 2 }),
-                    api.CallAPI(undefined, { url: `/admin/thongke?id=${idkhonggian}`, PhuongThuc: 2 }),
-                ]);
-                if (dulieu1.validate) {
-                    setErr(dulieu1.errors);
-                    return;
-                }
-                if (dulieu1.success) {
-                    setchinhanh(dulieu1.DanhSach.ChiNhanh);
-                    setkhonggian(dulieu1.DanhSach.KhongGian.KhongGian);
-                    socket.emit("join_space_room", {
-                        idKhongGian: idkhonggian,
-                        loaiKhongGian: dulieu1.DanhSach.KhongGian.KhongGian.LOAI_KHONG_GIAN
-                    });
-                    setThietBi(dulieu1.DanhSach.ThietBi.DanhSach);
-                    setTongDanhSach1(dulieu1.DanhSach.ThietBi.TongDanhSach);
-                    const danhSachGheChuan = dulieu1.DanhSach.Ghe || dulieu1.DanhSach.ghe || dulieu1.DanhSach.DanhSachGhe || [];
-                    setghe(danhSachGheChuan);
-                    const danhsach_lich_ketiep = dulieu1.DanhSach.KhongGian.lichKeTiep || null;
-                    setgioketiep(danhsach_lich_ketiep);
-                    const lich_hientai = dulieu1.DanhSach.KhongGian.lichHienTai || '';
-                    setid_hientai(lich_hientai)
-                }
-                if (dulieu2 && dulieu2.success) {
-                    setTongGioThue(dulieu2.dulieu.TongGioThue || 0);
-                    setTiLeLapDay(dulieu2.dulieu.Tile_LapDay || 0);
-                    setDonGia(dulieu2.dulieu.DonGia || 0);
-                    settongghe(dulieu2.dulieu.TongSoGhe || 0);
-                } else {
-                    console.error("Không thể tải dữ liệu thống kê từ API 2");
-                }
-          } else {
-            ThongBao.ThongBao_CanhBao(data.message || data.mesage);
-          }
         });
         return () => {
-          socket.off("update_schedule");
+          socket.off('update_schedule');
         };
-      }, [idkhonggian, idChiNhanh]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const handleDeleteAllocation = async (idThietBi: number) => {
         const XacNhan = await ThongBao.ThongBao_XacNhanTT('Bạn có chắn chắn muốn xóa thiết bị này?');
@@ -256,7 +244,7 @@ function ChiTietKhongGian() {
                             </div>
                         </div>
 
-                        {/* SƠ ĐỒ GHẾ NGỒI CANVAS TRỰC QUAN */}
+                        {/* SƠ ĐỒ GHẾ NGỒI CANVAS */}
                         <div id="floorPlanSection" className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
                             {khonggian?.LOAI_KHONG_GIAN === 1 && (
                                 ghe.length > 0 ? (
@@ -291,25 +279,20 @@ function ChiTietKhongGian() {
                                                     </div>
                                                 </div>
 
-       {/* 🎯 KHU VỰC HIỂN THỊ CHÍNH - ĐÃ FIX LỖI CO COONG/LỆCH TRÁI */}
-<div className="w-full bg-slate-100/60 p-4 md:p-8 flex flex-col items-center justify-center overflow-hidden relative select-none rounded-xl">
-    
-    {/* Box đệm căn giữa cố định */}
-    <div className="w-full flex justify-center items-center">
-        <SoDoGheCanvas 
-            danhSachGhe={ghe} 
-            onGheClick={handleGheSelect} 
-            setGhe={setghe} 
-            isReadOnly={true}
-        />
-    </div>
-    
-    {/* Nhãn hệ thống nhỏ góc dưới */}
-    <div className="mt-4 bg-slate-900/90 text-white text-[10px] font-bold px-3 py-1.5 rounded-full backdrop-blur-xs flex items-center space-x-2 shadow-sm">
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-        <span>Chế độ xem trực quan sơ đồ không gian</span>
-    </div>
-</div>                                  
+                                                <div className="w-full bg-slate-100/60 p-4 md:p-8 flex flex-col items-center justify-center overflow-hidden relative select-none rounded-xl">
+                                                    <div className="w-full flex justify-center items-center">
+                                                        <SoDoGheCanvas 
+                                                            danhSachGhe={ghe} 
+                                                            onGheClick={handleGheSelect} 
+                                                            setGhe={setghe} 
+                                                            isReadOnly={true}
+                                                        />
+                                                    </div>
+                                                    <div className="mt-4 bg-slate-900/90 text-white text-[10px] font-bold px-3 py-1.5 rounded-full backdrop-blur-xs flex items-center space-x-2 shadow-sm">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                                                        <span>Chế độ xem trực quan sơ đồ không gian</span>
+                                                    </div>
+                                                </div>                                  
                                                 <div className="mt-8 pt-4 border-t border-dashed border-slate-200 text-center text-xs text-slate-400 font-medium flex items-center justify-center gap-1.5">
                                                     <i className="fa-solid fa-angles-down text-[10px] text-sky-400 animate-bounce"></i> 
                                                     <span>Hướng ban công ngoài trời</span>
@@ -402,10 +385,8 @@ function ChiTietKhongGian() {
 
                     {/* CỘT PHẢI: BÁO CÁO THỜI GIAN THỰC VÀ HIỆU SUẤT */}
                     <div className="space-y-6">
-                     
-                    
-                    {/* LIVE DENSITY STATUS */}
-                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-4">
+                        {/* LIVE DENSITY STATUS */}
+                        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-4">
     {/* Live Status Header */}
     <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
         <span className="relative flex h-2 w-2">
@@ -418,7 +399,7 @@ function ChiTietKhongGian() {
     {/* Main Content Box */}
     <div className="p-4 bg-slate-50/60 border border-slate-100/80 rounded-xl space-y-4">
         {khonggian?.LOAI_KHONG_GIAN === 1 ? (
-            /* ================= GIAO DIỆN KHÔNG GIAN GHẾ NGỒI ================= */
+            /* ================= GIAO DIỆN KHÔNG GIAN GHẾ NGỒI (LOẠI 1) ================= */
             <>
                 {/* Mật độ ghế */}
                 <div className="flex items-center justify-between">
@@ -440,41 +421,97 @@ function ChiTietKhongGian() {
                         {phanTramMatDo.toFixed(1)}% Đang sử dụng
                     </div>
                 </div>
+                {/* KHÔNG CÒN CÓ LỊCH KẾ TIẾP Ở ĐÂY NỮA */}
             </>
         ) : (
-            /* ================= GIAO DIỆN KHÔNG GIAN PHÒNG HỌP ================= */
+            /* ================= GIAO DIỆN KHÔNG GIAN PHÒNG HỌP (LOẠI 0) ================= */
             <>
                 {/* Trạng thái phòng */}
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between border-b border-slate-200/60 pb-3">
                     <span className="text-xs font-bold text-slate-600">Trạng thái sử dụng:</span>
-                    <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200/60 px-2.5 py-1 rounded-full flex items-center gap-1.5 animate-pulse shadow-3xs">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                        {
-                            id_hientai ==="" ? 'Phòng đang trống' : ' Đang có lịch họp'
-                        }
+                    <span className={`text-[11px] font-bold border px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-3xs ${
+                        NguoiDung ? 'text-amber-700 bg-amber-50 border-amber-200/60 animate-pulse' : 'text-emerald-700 bg-emerald-50 border-emerald-200/60'
+                    }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${NguoiDung ? 'bg-amber-500' : 'bg-emerald-500'}`}></span>
+                        {NguoiDung ? 'Đang bận' : 'Đang trống'}
                     </span>
                 </div>
 
-                {/* Khung giờ bận kế tiếp */}
-                <div className="flex items-center justify-between p-2.5 bg-white border border-slate-200/60 rounded-xl text-[11px] font-bold shadow-3xs">
-             {gioketiep && typeof gioketiep === 'object' && 'KHUNG_BATDAU' in gioketiep && (
-    <>
-        <span className="text-slate-500 flex items-center">
-            <i className="fa-regular fa-clock mr-2 text-amber-500 text-sm"></i>
-            Lịch bận kế tiếp:
-        </span>
-        <span className="font-mono text-slate-700 bg-slate-50 border border-slate-200/50 px-2 py-0.5 rounded-md">
-            {fun.formatTime(gioketiep.KHUNG_BATDAU)} {" - "}{fun.formatTime(gioketiep.KHUNG_KETTHUC)}
-        </span>
-    </>
-)}
+                {/* Thông tin người dùng đặt phòng */}
+                {NguoiDung ? (
+                    <div className="bg-white border border-slate-100 rounded-xl p-4 space-y-4 shadow-3xs">
+                        <div className="flex items-center space-x-3">
+                            <div className="relative w-10 h-10 rounded-full overflow-hidden bg-slate-200 border border-white shadow-xs flex-shrink-0">
+                                <Image 
+                                    src={NguoiDung?.HINH_ANH ? `http://localhost:3001/${NguoiDung.HINH_ANH}` : "/default-avatar.png"} 
+                                    alt={NguoiDung?.TENND || "User"} 
+                                    fill 
+                                    unoptimized 
+                                    className="object-cover" 
+                                />
+                            </div>
+                            <div>
+                                <p className="text-sm font-bold text-slate-800">{NguoiDung?.TENND || "Ẩn danh"}</p>
+                                <p className="text-xs text-slate-400 font-medium">{NguoiDung?.EMAIL || "Không có email"}</p>
+                            </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4 pt-3.5 border-t border-slate-200/60 text-xs">
+                            <div>
+                                <span className="text-slate-400 block font-semibold mb-0.5">Thời gian bắt đầu</span>
+                                <span className="font-bold text-slate-700 flex items-center gap-1.5">
+                                    <i className="fa-regular fa-clock text-indigo-500"></i>
+                                    {NguoiDung?.KHUNG_BATDAU ? `${fun.formatTime(NguoiDung.KHUNG_BATDAU)} | ${fun.formatDate(NguoiDung.KHUNG_BATDAU)}` : "N/A"}
+                                </span>
+                            </div>
+                            <div>
+                                <span className="text-slate-400 block font-semibold mb-0.5">Thời gian kết thúc</span>
+                                <span className="font-bold text-slate-700 flex items-center gap-1.5">
+                                    <i className="fa-regular fa-calendar-xmark text-rose-500"></i>
+                                    {NguoiDung?.KHUNG_KETTHUC ? `${fun.formatTime(NguoiDung.KHUNG_KETTHUC)} | ${fun.formatDate(NguoiDung.KHUNG_KETTHUC)}` : "N/A"}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="h-28 border-2 border-dashed border-slate-200/60 rounded-xl flex flex-col items-center justify-center text-slate-400 p-4 bg-white">
+                        <i className="fa-solid fa-calendar-check text-xl mb-1.5 text-slate-300"></i>
+                        <p className="text-xs font-medium text-center">Hiện tại phòng họp đang trống.</p>
+                    </div>
+                )}
                 
+                {/* Lịch bận kế tiếp được chuyển vào ĐÂY - Chỉ render khi là phòng họp */}
+                <div className="flex items-center justify-between p-2.5 bg-white border border-slate-200/60 rounded-xl text-[11px] font-bold shadow-3xs">
+                    {gioketiep && typeof gioketiep === 'object' && 'KHUNG_BATDAU' in gioketiep ? (
+                        <>
+                            <span className="text-slate-500 flex items-center">
+                                <i className="fa-regular fa-clock mr-2 text-amber-500 text-sm"></i>
+                                Lịch bận kế tiếp:
+                            </span>
+                            <span className="font-mono text-slate-700 bg-slate-50 border border-slate-200/50 px-2 py-0.5 rounded-md">
+                                {fun.formatTime(gioketiep.KHUNG_BATDAU)} {" - "}{fun.formatTime(gioketiep.KHUNG_KETTHUC)}
+                            </span>
+                        </>
+                    ) : (
+                        <>
+                            <span className="text-slate-500 flex items-center">
+                                <i className="fa-regular fa-circle-check mr-2 text-emerald-500 text-sm"></i>
+                                Lịch tiếp theo:
+                            </span>
+                            <span className="text-emerald-600 bg-emerald-50/50 border border-emerald-100 px-2 py-0.5 rounded-md">
+                                Còn trống suốt ngày
+                            </span>
+                        </>
+                    )}
                 </div>
             </>
         )}
     </div>
 </div>
-                        {/* HIỆU SUẤT HOẠT ĐỘNG (DỮ LIỆU ĐỘNG) */}
+                            </div>
+                        </div>
+
+                        {/* HIỆU SUẤT HOẠT ĐỘNG */}
                         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
                             <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest"><i className="fa-solid fa-chart-pie mr-1 text-indigo-500"></i> Hiệu suất hoạt động</h3>
                             <div className="grid grid-cols-2 gap-3">
@@ -489,8 +526,8 @@ function ChiTietKhongGian() {
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
+            
+            
         </>
     );
 }

@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import {socket} from '@/FUNCTION/socket';
 import { useModalContext } from "@/context/QuanLiMoal";
 import type { NguoiDung } from '@/interface/NguoiDung';
+import Image from "next/image";
 export default function NguoiDung() {
   const params = useParams();
   const id = params?.id;
@@ -176,7 +177,7 @@ export default function NguoiDung() {
         <div className="w-full bg-white border border-slate-200/60 rounded-2xl p-6 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
                 <div className="relative group">
-                    <img src={`http://localhost:3001/${ThongTin?.HINH_ANH}`} alt="Avatar" className="w-20 h-20 rounded-full object-cover border-2 border-indigo-100"/>
+                   <Image  src={`http://localhost:3001/${ThongTin?.HINH_ANH}`} width={500}  height={192} unoptimized alt="Avatar" className="w-20 h-20 rounded-full object-cover border-2 border-indigo-100" />
                     <label className="absolute inset-0 bg-black/40 text-white text-[10px] font-bold rounded-full flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                         <i className="fa-solid fa-camera text-xs mb-1"></i>Thay ảnh
                         <input type="file" accept="image/*" onChange={handleThayAnh} className="hidden"/>

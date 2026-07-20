@@ -45,16 +45,6 @@ export default class KhongGianModel {
             WHERE kg.ID_KHONG_GIAN = ?
             LIMIT 1;
                 `,[id]);
-            const [rowsHienTai] = await execute(`
-                SELECT ld.ID_LICH_DAT
-                FROM lichdat ld
-                WHERE ld.ID_KHONG_GIAN = ?
-                AND ld.TRANG_THAI <> 2
-                AND NOW() >= KHUNG_BATDAU
-                AND NOW() < ld.KHUNG_KETTHUC
-                 LIMIT 1;
-            `, [id]);
-            const lichHienTai = (rowsHienTai && rowsHienTai.length > 0) ? rowsHienTai[0].ID_LICH_DAT : null;
             const [rowsKeTiep] = await execute(`
                 SELECT ld.ID_LICH_DAT, ld.KHUNG_BATDAU, ld.KHUNG_KETTHUC
                 FROM lichdat ld
@@ -68,7 +58,6 @@ export default class KhongGianModel {
             const lichKeTiep = (rowsKeTiep && rowsKeTiep.length > 0) ? rowsKeTiep[0] : null;
             return {
                 KhongGian: kiemtra[0],
-                lichHienTai: lichHienTai,
                 lichKeTiep: lichKeTiep
             };
         } catch (error) {
@@ -255,15 +244,35 @@ static async ThongKe(id) {
         if (!dataKg) {
             return { Tile_LapDay: 0, DonGia: 0, TongGioThue: 0, TongSoGhe: 0 };
         }
-
         const loaiKhongGian = dataKg.LOAI_KHONG_GIAN;
         const donGia = Number(dataKg.DONGIA || 0);
-
         let tiLeLapDay = 0;
         let tongGioThue = 0;
+        let nguoiDungHienTai = null;
 
         // 2. Xử lý theo từng loại Không Gian
-        if (loaiKhongGian === 0) { 
+        if (loaiKhongGian === 0) {
+            const [danghoatdong] = await execute(`
+               SELECT ld.ID_LICH_DAT, nd.TENND, nd.EMAIL, nd.HINH_ANH, ld.KHUNG_BATDAU, ld.KHUNG_KETTHUC
+                FROM lichdat ld
+                LEFT JOIN nguoidung nd ON ld.IDND = nd.IDND
+                WHERE ld.ID_KHONG_GIAN = ?
+                  AND ld.TRANG_THAI <> 2 
+                  AND ld.THOIGIAN_RA IS NULL
+                  AND (ld.THOIGIAN_VAO IS NOT NULL OR NOW() BETWEEN ld.KHUNG_BATDAU AND ld.KHUNG_KETTHUC)
+                LIMIT 1;
+                `,[id])
+            const resDataHienTai = Array.isArray(danghoatdong) ? danghoatdong[0] : danghoatdong;
+            if (resDataHienTai) {
+                nguoiDungHienTai = {
+                    ID_LICH_DAT: resDataHienTai.ID_LICH_DAT,
+                    TENND: resDataHienTai.TENND || "Ẩn danh",
+                    EMAIL: resDataHienTai.EMAIL || "Không có email",
+                    HINH_ANH: resDataHienTai.HINH_ANH || null,
+                    KHUNG_BATDAU: resDataHienTai.KHUNG_BATDAU,
+                    KHUNG_KETTHUC: resDataHienTai.KHUNG_KETTHUC
+                };
+            }
             // KHÔNG GIAN ĐÓNG (Phòng riêng)
             const [rowsLd] = await execute(`
                 SELECT COUNT(*) AS DangDung 
@@ -276,7 +285,6 @@ static async ThongKe(id) {
             const resLd = Array.isArray(rowsLd) ? rowsLd[0] : rowsLd;
             tiLeLapDay = (resLd?.DangDung || 0) > 0 ? 100 : 0;
 
-            // Tính tổng số giờ thuê trực tiếp từ bảng lichdat bằng ID_KHONG_GIAN (Không cần JOIN bảng ghe)
             const [rowsGioKg] = await execute(`
                 SELECT SUM(
                     CASE 
@@ -339,12 +347,13 @@ static async ThongKe(id) {
         const resCountGhe = Array.isArray(rowsCountGhe) ? rowsCountGhe[0] : rowsCountGhe;
         const tongSoGhe = loaiKhongGian === 1 ? Number(resCountGhe?.TongGhe || 0) : 0;
 
-        // 5. Trả kết quả an toàn (Không sợ crash vì biến đã được khởi tạo sẵn)
+        
         return {
             Tile_LapDay: tiLeLapDay,
             DonGia: donGia,
             TongGioThue: tongGioThue,
-            TongSoGhe: tongSoGhe
+            TongSoGhe: tongSoGhe,
+            NguoiDungHienTai: nguoiDungHienTai
         };
 
     } catch (error) {
@@ -403,6 +412,7 @@ static async ThongKe(id) {
              throw new Error('Database query failed: ' + error.message);
         }
     }
+    
     
 
 

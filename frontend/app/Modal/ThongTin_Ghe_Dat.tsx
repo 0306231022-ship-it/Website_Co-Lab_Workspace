@@ -8,6 +8,7 @@ interface DuLieuModal {
   thongTinGhe: Ghe;
   thoiGianBatDau: string;
   thoiGianKetThuc: string;
+  idKhongGian:number;
 }
 
 interface LichDaDat {
@@ -106,7 +107,7 @@ function ThongTin({ DuLieu }: { DuLieu: DuLieuModal }) {
       dataToSend.append('KHUNG_BATDAU', String(fun.formatToBackendDateTime(gioBatDau)));
       dataToSend.append('KHUNG_KETTHUC', String(fun.formatToBackendDateTime(gioKetThuc)));
       dataToSend.append("LoaiND", String(0));
-
+      dataToSend.append('id', String(DuLieu.idKhongGian));
       const DatLich = await api.CallAPI(dataToSend, { url: '/nguoiDung/LichDat', PhuongThuc: 1 });
       
       if (DatLich.validate) {
