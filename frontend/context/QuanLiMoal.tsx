@@ -1,15 +1,47 @@
 "use client";
-
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import SignUpForm from "@/app/Modal/page";
 import DangKy from "@/app/Modal/DangKy";
 import DangNhap from "@/app/Modal/DangNhap";
 import QuenMatKhau from "@/app/Modal/QuenMatKhau";
+import ThemGiaMoi from "@/app/Modal/ThemGia";
+import ThemChiNhanh from "@/app/Modal/ThemChiNhanh";
+import ThemKhongGian from "@/app/Modal/ThemKhongGian";
+import ChinhSuaChiNhanh from "@/app/Modal/ChinhSuaChiNhanh";
+
+import SuaGia from "@/app/Modal/SuaGia";
+import ThemDanhMucGhe from "@/app/Modal/ThemDanhMucGhe";
+import Chinhsuadmghe from "@/app/Modal/ChinhSuaDMGhe";
+import ChinhSuaKhongGian from "@/app/Modal/ChinhSuaKhongGian";
+import CapTrangThietBi from "@/app/Modal/CapTrangThietBi";
+import ThemGhe from "@/app/Modal/ThemGhe";
+import ThongTinGhe from "@/app/Modal/ThongTinGhe";
+import ChinhSuaGhe from "@/app/Modal/ChinhSuaGhe";
+import ThongTin from "@/app/Modal/ThongTin_Ghe_Dat";
+import Themthietbi from "@/app/Modal/ThemThietBi";
+import ChinhSuaThietBi from "@/app/Modal/ChinhSuaThietBi";
+
 const MODAL_REGISTRY = {
     'DangKy' : SignUpForm,
     'formDangKy' : DangKy,
     'DangNhap' : DangNhap,
-    'QuenMatKhau' : QuenMatKhau
+    'QuenMatKhau' : QuenMatKhau,
+    'ThenGia' : ThemGiaMoi,
+    'SuaGia':SuaGia,
+    'ThemDanhMucGhe':ThemDanhMucGhe,
+    'ChinhSuaDMGhe':Chinhsuadmghe,
+    'ThemChiNhanh' : ThemChiNhanh,
+    'ThemKhongGian' : ThemKhongGian,
+    'ChinhSuaChiNhanh' : ChinhSuaChiNhanh,
+    'ChinhSuaKhongGian' : ChinhSuaKhongGian,
+    'CapThietBi' : CapTrangThietBi,
+    'ThemGhe' : ThemGhe,
+    'ThongTinGhe' : ThongTinGhe,
+    'ChinhSuaGhe' : ChinhSuaGhe,
+    'ThongTin_ghe' : ThongTin,
+    'ThemThietBi' : Themthietbi,
+    'ChinhSuaThietBi' : ChinhSuaThietBi
+
 };
 
 // Khai báo kiểu dữ liệu cho các key (Tên trang) hợp lệ trong hệ thống
@@ -97,7 +129,6 @@ export function AppMDProvider({ children }: { children: ReactNode }) {
                                w-auto md:min-w-[400px] max-w-[95vw] max-h-[90vh]"
                     style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}
                 >
-                    {/* --- HEADER --- */}
                     <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white shrink-0 sticky top-0 z-10 gap-8">
                         <div className="flex items-center gap-4">
                             {modalStack.length > 1 && (

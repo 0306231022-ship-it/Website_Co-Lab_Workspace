@@ -19,6 +19,7 @@ export function DangKy({ DuLieu, onClose }: DangKyProps) {
   const [XacNhan,setXacNhan] = useState<string>('');
   const [OTP,setOTP] = useState<string>();
   const { OpenMoDal , CloseMoDal } = useModalContext();
+  const [showPassword, setShowPassword] = useState(false);
   const [err, setErr] = useState<string[]>([]);
 
   const handleSubmit = async () => {
@@ -113,12 +114,20 @@ export function DangKy({ DuLieu, onClose }: DangKyProps) {
           <i className="fa-solid fa-lock text-slate-400 mr-3.5 text-base"></i>
           <input 
             name="regPassword" 
-            type="password" 
+              type={showPassword ? "text" : "password"} 
             placeholder="Mật khẩu bảo mật" 
             className="bg-transparent border-none outline-none w-full text-sm text-slate-800 placeholder-slate-400 font-medium" 
              onChange={(e)=>{setMatKhau(e.target.value)}}
            value={MatKhau}
           />
+           {/* Nút toggle con mắt */}
+    <button 
+      type="button" 
+      onClick={() => setShowPassword(!showPassword)}
+      className="ml-2 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors duration-200"
+    >
+      <i className={`fa-solid ${showPassword ? 'fa-eye' : 'fa-eye-slash'}`}></i>
+    </button>
         </div>
       </div>
 
@@ -128,12 +137,20 @@ export function DangKy({ DuLieu, onClose }: DangKyProps) {
           <i className="fa-solid fa-shield text-slate-400 mr-3.5 text-base"></i>
           <input 
             name="regConfirmPassword" 
-            type="password" 
+              type={showPassword ? "text" : "password"} 
             placeholder="Xác nhận mật khẩu" 
             className="bg-transparent border-none outline-none w-full text-sm text-slate-800 placeholder-slate-400 font-medium" 
              onChange={(e)=>{setXacNhan(e.target.value)}}
            value={XacNhan}
           />
+          
+    <button 
+      type="button" 
+      onClick={() => setShowPassword(!showPassword)}
+      className="ml-2 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors duration-200"
+    >
+      <i className={`fa-solid ${showPassword ? 'fa-eye' : 'fa-eye-slash'}`}></i>
+    </button>
         </div>
       </div>
 

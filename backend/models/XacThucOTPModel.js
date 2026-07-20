@@ -61,5 +61,15 @@ export default class XacThucOTPModel {
              throw new Error('Database query failed: ' + error.message);
         }
     }
+    static async XoaOTP_HetHan(){
+        try {
+            const [otp] = await execute(`
+                DELETE FROM xacthucotp 
+                WHERE NGAY_HET_HAN < NOW();
+                `,[]);
+        } catch (error) {
+             throw new Error('Database query failed: ' + error.message);
+        }
+    }
 
 }

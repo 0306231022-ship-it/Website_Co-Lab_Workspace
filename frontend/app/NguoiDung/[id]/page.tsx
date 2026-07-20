@@ -5,14 +5,8 @@ import * as ThongBao from '@/FUNCTION/ThongBao';
 import { useEffect, useState } from 'react';
 import {socket} from '@/FUNCTION/socket';
 import { useModalContext } from "@/context/QuanLiMoal";
-type NguoiDung = {
-    TENND: string,
-    EMAIL: string,
-    HINH_ANH: string,
-    IDND: string,
-    LOAIND: number
-}
-
+import type { NguoiDung } from '@/interface/NguoiDung';
+import Image from "next/image";
 export default function NguoiDung() {
   const params = useParams();
   const id = params?.id;
@@ -30,16 +24,13 @@ export default function NguoiDung() {
           return;
       }
       try {
-          const laytt = await api.CallAPI(undefined, { PhuongThuc: 2, url: `/NguoiDung/kiemtra_dangnhap` });
-         console.log(laytt)
+
+           const formdata = new FormData();
+          formdata.append('LoaiND', String(0));
+          const laytt = await api.CallAPI(formdata, { PhuongThuc: 1, url: `/NguoiDung/kiemtra_dangnhap` });
           if (laytt.success) {
               setThongTin(laytt.dulieu);
               setTenND(laytt.dulieu.TENND);
-              
-              if (String(id) !== String(laytt.dulieu.IDND)) {
-                  ThongBao.ThongBao_Loi('Thông tin đăng nhập không trùng khớp!');
-                  return;
-              }
           }
       } catch (error) {
           console.error("Lỗi xảy ra:", error);
@@ -61,6 +52,7 @@ export default function NguoiDung() {
     const fileAnh = files[0];
     const formData = new FormData();
     formData.append("files", fileAnh);
+    formData.append('LoaiND', String(0));
     try {
       const response = await api.CallAPI(formData, { 
         url: `/NguoiDung/ChinhSua_Anh`, 
@@ -98,6 +90,7 @@ export default function NguoiDung() {
        formData.append("MatKhauCu", matKhauCu);
        formData.append('MatKhauMoi',matKhauMoi);
        formData.append('XacNhanMatKhau' , xacNhanMatKhau);
+       formData.append('LoaiND', String(0));
       const response = await api.CallAPI(formData, { 
         url: `/NguoiDung/DoiMatKhau`, 
         PhuongThuc: 1 
@@ -128,6 +121,7 @@ export default function NguoiDung() {
     try {
          const formData = new FormData();
          formData.append("TENND", tenND);
+         formData.append('LoaiND', String(0));
         const response = await api.CallAPI(formData, { 
           url: `/NguoiDung/ChinhSua_thongTin`, 
           PhuongThuc: 1 
@@ -159,6 +153,7 @@ export default function NguoiDung() {
          const formData = new FormData();
          formData.append("Email", ThongTin.EMAIL);
          formData.append('TrangThai',String(2));
+         formData.append('LoaiND', String(0));
          const response = await api.CallAPI(formData, { 
             url: '/NguoiDung/XacThucOTP', 
             PhuongThuc: 1 
@@ -183,7 +178,7 @@ export default function NguoiDung() {
         <div className="w-full bg-white border border-slate-200/60 rounded-2xl p-6 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
                 <div className="relative group">
-                    <img src={`http://localhost:3001/${ThongTin?.HINH_ANH}`} alt="Avatar" className="w-20 h-20 rounded-full object-cover border-2 border-indigo-100"/>
+                   <Image  src={`http://localhost:3001/${ThongTin?.HINH_ANH}`} width={500}  height={192} unoptimized alt="Avatar" className="w-20 h-20 rounded-full object-cover border-2 border-indigo-100" />
                     <label className="absolute inset-0 bg-black/40 text-white text-[10px] font-bold rounded-full flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                         <i className="fa-solid fa-camera text-xs mb-1"></i>Thay ảnh
                         <input type="file" accept="image/*" onChange={handleThayAnh} className="hidden"/>
@@ -192,7 +187,7 @@ export default function NguoiDung() {
                 <div>
                     <div className="flex items-center justify-center sm:justify-start gap-2">
                         <h1 className="text-lg font-bold text-slate-900">{ThongTin?.TENND}</h1>
-                        <span className="bg-indigo-50 text-indigo-600 text-[10px] font-bold px-2 py-0.5 rounded-md border border-indigo-100">{ThongTin?.LOAIND === 1 ? 'Quản trị viên' : 'Thành viên'}</span>
+                        <span className="bg-indigo-50 text-indigo-600 text-[10px] font-bold px-2 py-0.5 rounded-md border border-indigo-100">{'Thành viên'}</span>
                     </div>
                     <p className="text-xs text-slate-400 mt-0.5">Mã số: <span className="font-mono text-slate-600">{ThongTin?.IDND}</span></p>
                 </div>

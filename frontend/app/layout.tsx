@@ -8,31 +8,29 @@ import * as api from '@/API/API';
 import * as ThongBao from '@/FUNCTION/ThongBao';
 import { socket } from '@/FUNCTION/socket';
 import { usePathname } from 'next/navigation';
-
-interface NguoiDung {
-    TENND: string;
-    EMAIL: string;
-    HINH_ANH: string;
-    IDND:number;
-}
-
-
+import { NguoiDung } from "@/interface/NguoiDung";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const { OpenMoDal } = useModalContext();
+   const router = useRouter();
   const [DangNhap, setDangNhap] = useState<boolean>(false);
   const [ThongTin, setThongTin] = useState<NguoiDung | null>(null);
-
+    const [TongThongBao,setTongThongBao] = useState<number>(0);
+    const [TongDonHang,setTongDonHang] = useState<number>(0)
   // 1. Kiểm tra xem người dùng có đang truy cập vào trang Admin hay không
   const pathname = usePathname();
   const isAdminPage = pathname.startsWith('/admin');
-
+  const formdata = new FormData();
+  formdata.append('LoaiND', String(0));
   const KiemTra = async () => {
     try {
-       const formdata = new FormData();
-      formdata.append('LoaiND', String(0));
-      const kiemtra = await api.CallAPI(formdata, { url: '/NguoiDung/kiemtra_dangnhap', PhuongThuc: 1 });
-    
+       
+      const [kiemtra, thongke] = await Promise.all([
+        api.CallAPI(formdata, { url: '/NguoiDung/kiemtra_dangnhap', PhuongThuc: 1 }),
+        api.CallAPI(formdata,{url:`/NguoiDung/thongke`, PhuongThuc:2})
+      ]) 
       if (kiemtra.success) {
         setDangNhap(true);
         setThongTin(kiemtra.dulieu);
@@ -40,19 +38,23 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
         setDangNhap(false);
         setThongTin(null);
       }
+      if(thongke.success){
+        setTongThongBao(thongke.dulieu.ThongBao);
+        setTongDonHang(thongke.dulieu.DonHang)
+      }
     } catch (error) {
       console.error("Lỗi xảy ra:", error);
     }
   };
 
   useEffect(() => {
-    // Chỉ chạy kiểm tra đăng nhập nếu KHÔNG PHẢI trang admin
     if (!isAdminPage) {
       const load = async () => {
           await KiemTra();
       };
       load();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdminPage]);
 
   useEffect(() => {
@@ -73,9 +75,16 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
       const XacNhan = await ThongBao.ThongBao_XacNhanTT('Bạn có chắc chắn muốn đăng xuất không?');
       if(!XacNhan) return ;
       try {
-        const response = await api.CallAPI(undefined, { url: '/NguoiDung/dangxuat', PhuongThuc: 1 });
+        const response = await api.CallAPI(formdata, { url: '/NguoiDung/dangxuat', PhuongThuc: 1 });
+        await fetch("/api/auth/logout", {
+           method: "POST" ,    
+           body: JSON.stringify({
+            LoaiND: 0, 
+          }), 
+       });
         if(response.success){
            ThongBao.ThongBao_ThanhCong(response.message)
+           router.push('/');
            setDangNhap(false);
            setThongTin(null);
         }
@@ -84,7 +93,6 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
       }
   };
 
-  // 2. NẾU LÀ TRANG ADMIN: Trả về trang trống hoàn toàn, không dính dáng layout cũ
   if (isAdminPage) {
     return <>{children}</>;
   }
@@ -134,34 +142,37 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                 <nav className="space-y-1.5">
                   <NavLink 
                      href={`/NguoiDung/${ThongTin?.IDND}`}
-                   activeClassName="bg-blue-50 text-blue-600 font-bold"
-            className="flex items-center justify-between px-4 py-3 text-slate-700 hover:bg-slate-50 rounded-xl relative group transition-all duration-300">
+                     activeClassName="bg-blue-50 text-blue-600 font-bold"
+                     className="flex items-center justify-between px-4 py-3 text-slate-700 hover:bg-slate-50 rounded-xl relative group transition-all duration-300">
                     <div className="flex items-center gap-3 font-semibold">
                       <i className="fa-solid fa-id-card w-5 text-center text-lg"></i>
                       <span>Thông tin cá nhân</span>
                     </div>
                   </NavLink>
 
-                  <a href="#" className="flex items-center justify-between px-4 py-3 hover:bg-slate-50 text-slate-700 rounded-xl relative group transition-all duration-300">
+                  <NavLink 
+                     href={`/NguoiDung/lich-su-dat-lich`}
+                     activeClassName="bg-blue-50 text-blue-600 font-bold"
+                     className="flex items-center justify-between px-4 py-3 text-slate-700 hover:bg-slate-50 rounded-xl relative group transition-all duration-300">
                     <div className="flex items-center gap-3 font-semibold">
                       <i className="fa-solid fa-clock-rotate-left w-5 text-center text-lg"></i>
                       <span>Lịch sử đặt lịch</span>
                     </div>
                     <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-                      12
+                      {TongDonHang}
                     </span>
-                  </a>
+                  </NavLink>
 
-                <NavLink 
+                  <NavLink 
                      href={`/NguoiDung/ThongBao`}
-                   activeClassName="bg-blue-50 text-blue-600 font-bold"
-            className="flex items-center justify-between px-4 py-3 text-slate-700 hover:bg-slate-50 rounded-xl relative group transition-all duration-300">
+                     activeClassName="bg-blue-50 text-blue-600 font-bold"
+                     className="flex items-center justify-between px-4 py-3 text-slate-700 hover:bg-slate-50 rounded-xl relative group transition-all duration-300">
                     <div className="flex items-center gap-3 font-semibold">
                       <i className="fas fa-envelope w-5 text-center text-lg"></i>
                       <span>Thông báo</span>
                     </div>
                     <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-                      12
+                      {TongThongBao}
                     </span>
                   </NavLink>
                 </nav>
@@ -175,12 +186,14 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
           {DangNhap ? (
             <div className="flex flex-col items-center bg-slate-50 p-3 rounded-xl border border-slate-200 shadow-inner">
               <div className="flex items-center gap-3 w-full mb-3">
-               <img
-                  src={`http://localhost:3001/${ThongTin?.HINH_ANH}`}
-                  alt="User avatar"
+                 <Image 
+                                src={`http://localhost:3001/${ThongTin?.HINH_ANH}`} 
+                                width={500}
+                                height={192}
+                                 unoptimized
                   className="w-10 h-10 rounded-full object-cover border border-slate-200"
-                  loading="lazy"
-                />
+                                alt="User avatar"  />
+      
                 <div className="flex-1 min-w-0 text-left">
                   <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">{ThongTin?.EMAIL}</p>
                   <p className="text-xs font-bold text-slate-800 truncate">{ThongTin?.TENND || "Thành viên"}</p>
@@ -212,7 +225,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                 </button>
                 <button 
                   type="button"
-                  onClick={() => OpenMoDal(null, { TenTrang: 'DangKy', TieuDe: 'Đăng ký thành viên', icon: 'fa-solid fa-user-plus' })} 
+                  onClick={() => OpenMoDal({TrangThai:1}, { TenTrang: 'DangKy', TieuDe: 'Đăng ký thành viên', icon: 'fa-solid fa-user-plus' })} 
                   className="flex-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-semibold py-1.5 rounded-lg text-xs transition cursor-pointer"
                 >
                   Đăng ký

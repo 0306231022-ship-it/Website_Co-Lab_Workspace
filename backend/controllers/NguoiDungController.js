@@ -2,10 +2,15 @@ import { hash, compare } from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import NguoiDungModel from '../models/NguoiDungModel.js';
 import XacThucOTPModel from '../models/XacThucOTPModel.js';
+import DatLichModel from '../models/LichDatModel.js';
+import hoadonModel from '../models/hoadonModel.js';
 import { body, query, validationResult } from 'express-validator';
 import { taoMaOTP , guiEmailOTP , generateToken } from '../function.js';
 import { io } from '../server.js';
-
+import { xoaFileCu } from "../function.js";
+import ChiNhanhController from './ChiNhanhController.js';
+import ChiNhanhModel from '../models/ChiNhanhModel.js';
+import KhongGianModel from '../models/KhongGianModel.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
@@ -101,6 +106,7 @@ export default class NguoiDungController{
          if( user.LOAIND===1){
             res.cookie("token_admin", token, {
                httpOnly: true,
+               path: "/",
                secure: process.env.NODE_ENV === "production",
                sameSite: "lax",
                maxAge: 7 * 24 * 60 * 60 * 1000
@@ -108,6 +114,7 @@ export default class NguoiDungController{
          }else{
             res.cookie("token", token, {
                httpOnly: true,
+               path: "/",
                secure: process.env.NODE_ENV === "production",
                sameSite: "lax",
                maxAge: 7 * 24 * 60 * 60 * 1000
@@ -118,6 +125,7 @@ export default class NguoiDungController{
             success: true,
             message: 'Đăng nhập thành công!',
             ThongTin_NguoiDung: user.LOAIND,
+            IDND:user.IDND
          });
         } catch (error) {
             return res.status(500).json({
@@ -202,7 +210,7 @@ export default class NguoiDungController{
         }
       }
       static async ThongTin_NguoiDung(req, res) {
-          const userId = req.user.id;
+          const userId = req.user.id
           const LOAIND = req.body?.LoaiND || null;
           try {
             const ketqua= await NguoiDungModel.findByid(userId);
@@ -213,14 +221,12 @@ export default class NguoiDungController{
                })
             }
             const loaiND = ketqua.LOAIND;
-            if(LOAIND !== null){
-               if(loaiND !== LOAIND){
+               if(loaiND !== parseInt(LOAIND)){
                   return res.status(403).json({
                      success: false,
                      message: 'Bạn không có quyền truy cập thông tin người dùng này!'
                   });
                }
-            }
             return res.status(200).json({
                success:true,
                dulieu: ketqua
@@ -282,6 +288,17 @@ export default class NguoiDungController{
                   message:'Lỗi tải ảnh!'
                })
             };
+             const dd_db = await NguoiDungModel.findByid(userId);
+             const dd = dd_db.HINH_ANH;
+             if(dd!== null){
+               const xoa = xoaFileCu(dd);
+                        if(!xoa){
+                            return res.status(500).json({
+                                success:false,
+                                message:'lỗi khi thao tác hệ thống!'
+                            })
+                        }
+             }
             const ketqua = await NguoiDungModel.CapNhat_Anh(userId,DuongDan);
             if(!ketqua){
                return res.status(500).json({
@@ -304,10 +321,6 @@ export default class NguoiDungController{
         }
       }
       static async ChinhSua_TrangThai_NguoiDung(req, res) {
-         /*{
-            IDND,
-            TrangThai
-         }*/
         const DuLieu = req.body;
         try {
             await Promise.all([
@@ -331,7 +344,7 @@ export default class NguoiDungController{
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                return res.status(400).json({
-                  success: false,
+                  validate:true,
                   message: 'Dữ liệu không hợp lệ!',
                   errors: errors.array().map(err => err.msg)
                });
@@ -355,12 +368,7 @@ export default class NguoiDungController{
         }
       }
       static async QuenMatKhau(req, res) {
-         /*{
-            Email:'',
-            MatKhauMoi:'',
-            XacNhanMatKhau: '',
-            OTP:
-         }*/
+        
          const dulieu = req.body;
          try {
             await Promise.all([
@@ -396,7 +404,7 @@ export default class NguoiDungController{
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                return res.status(400).json({
-                  success: false,
+                  validate:true,
                   message: 'Dữ liệu không hợp lệ!',
                   errors: errors.array().map(err => err.msg)
                });
@@ -486,11 +494,15 @@ export default class NguoiDungController{
           const limit = parseInt(req.query.limit) || 10;
          const offset = (page - 1) * limit;
          try {
-            const ketqua = await NguoiDungModel.DSND(limit,offset);
+            const [ketqua1,ketqua]  = await Promise.all([
+               NguoiDungModel.DSND(limit,offset),
+               NguoiDungModel.ThongKeNguoiDung()
+            ]);
             return res.status(200).json({
                success:true,
-               DanhSach:ketqua.DanhSach,
-               TongDanhSach:ketqua.TongDanhSach[0].total
+               DanhSach:ketqua1.DanhSach,
+               TongDanhSach:ketqua1.TongDanhSach[0].total,
+               ThongKe:ketqua
             })
          } catch (error) {
              return res.status(500).json({
@@ -513,12 +525,6 @@ export default class NguoiDungController{
                });
             };
             const TimKiemdl = await NguoiDungModel.TimKiem(DuLieu);
-            if(!TimKiemdl){
-               return res.status(500).json({
-                  success:false,
-                  message:'Không tìm thấy người dùng!'
-               })
-            }
             return res.status(200).json({
                success:true,
                dulieu:TimKiemdl
@@ -531,18 +537,30 @@ export default class NguoiDungController{
          }
       }
       static async DangXuat(req,res){
-         const loaind = req.body.LOAIND || null;
+         const userId = parseInt(req.user.id);
+         const kiemtra = await NguoiDungModel.findByid(userId);
+         if(!kiemtra){
+            return res.status(401).json({
+               success:false,
+               message:'Không tìm thấy người dùng!'
+            })
+         }
+         const loaind = kiemtra.LOAIND;
          if(loaind === 1){
             res.clearCookie("token_admin", {
                httpOnly: true,
                secure: process.env.NODE_ENV === "production",
-               sameSite: "lax"
+               sameSite: "lax",
+               path: "/",
+               domain: "localhost"
             });  
          }else{
-            res.clearCookie("token", {
+             res.clearCookie("token", {
                httpOnly: true,
                secure: process.env.NODE_ENV === "production",
-               sameSite: "lax"
+               sameSite: "lax",
+               path: "/",
+               domain: "localhost"
             });
          }
          return res.status(200).json({
@@ -550,4 +568,74 @@ export default class NguoiDungController{
             message: 'Bạn đã đăng xuất thành công!'
          });
       }
+      static async ThongTin(req,res){
+         const id = req.query.id;
+         try {
+            const kiemtra = await NguoiDungModel.findByid(id);
+            if(!kiemtra){
+               return res.status(401).json({
+                  success:false,
+                  message:"Không tìm thấy id người dùng!"
+               })
+            }
+            return res.status(200).json({
+               success:true,
+               dulieu:kiemtra
+            })
+         } catch (error) {
+             return res.status(500).json({
+                success: false,
+                message: 'Thông tin người dùng thất bại: ' + error.message
+            });
+         }
+      }
+      static async ThongKe(req,res){
+         try {
+              const id = parseInt(req.user.id);
+             const thongke = await NguoiDungModel.thongke(id);
+             return res.status(200).json({
+               success: true,
+               dulieu : {
+                  ThongBao : thongke.ThongBao,
+                  DonHang:thongke.DonHang
+               }
+             })
+         } catch (error) {
+             return res.status(500).json({
+                success: false,
+                message: 'Thông tin thống kê thất bại: ' + error.message
+            });
+         }
+      }
+      static async TongQuanAD(req,res){
+         try {
+            const [ketqua1, tonglich, DoanhThu, KhachMoi, PhanTram_ghe , PhanTram_phong, TongChiNhanh, TongKhongGian] = await Promise.all([
+               DatLichModel.DanhSachHomnay(),
+               DatLichModel.TongLich(),
+               hoadonModel.DoanhThu(),
+               NguoiDungModel.TongKhach(),
+               DatLichModel.PhanTram_ghe(),
+               DatLichModel.PhanTram_phong(),
+               ChiNhanhModel.TongChiNhanh(),
+               KhongGianModel.TongKhongGian()
+            ])
+            return res.status(200).json({
+               success: true,
+               DanhSach: ketqua1,
+               TongLich: tonglich,
+               DoanhThu:DoanhThu,
+               KhachMoi:KhachMoi,
+               ghe:PhanTram_ghe,
+               phong:PhanTram_phong,
+               TongChiNhanh:TongChiNhanh,
+               TongKhongGian:TongKhongGian
+            })
+         } catch (error) {
+            return res.status(500).json({
+                success: false,
+                message: 'Thông tin thống kê thất bại: ' + error.message
+            });
+         }
+      }
+
 }

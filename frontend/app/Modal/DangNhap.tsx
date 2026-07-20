@@ -4,14 +4,17 @@ import { useModalContext } from "@/context/QuanLiMoal";
 import * as ThongBao from '@/FUNCTION/ThongBao';
 import * as api from '@/API/API';
 import { useRouter } from 'next/navigation';
+import {socket} from '@/FUNCTION/socket';
 export function DangNhap() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string[]>([]);
   const [email,setemail] = useState<string>();
   const [MatKhau,setMatKhau] = useState<string>();
-  const { OpenMoDal , CloseMoDal } = useModalContext();
+  const { OpenMoDal , CloseMoDal , CloseAllModals } = useModalContext();
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const handleSubmit = async () => {
+    
     setLoading(true)
     if(email==="" ||MatKhau===""){
         ThongBao.ThongBao_CanhBao('Vui lòng nhập đầy đủ thông tin!');
@@ -22,7 +25,6 @@ export function DangNhap() {
     formdata.append('MatKhau' ,String(MatKhau));
     try {
         const DangNhap = await api.CallAPI(formdata,{url:`/NguoiDung/DangNhap` , PhuongThuc:1});
-        alert(JSON.stringify(DangNhap));
         if(DangNhap.validate){
             setErr(DangNhap.errors);
             return;
@@ -34,8 +36,9 @@ export function DangNhap() {
             if(DangNhap.ThongTin_NguoiDung===1){
                 router.push('/admin'); 
             }
-            CloseMoDal();
+            CloseAllModals();
             ThongBao.ThongBao_ThanhCong(DangNhap.message);
+            socket.emit('dang-nhap-phong', DangNhap.IDND);
             return;
         }
     } catch (error) {
@@ -47,7 +50,7 @@ export function DangNhap() {
   };
   const DangKy=()=>{
      CloseMoDal();
-     OpenMoDal(null, { TenTrang: 'DangKy', TieuDe: 'Đăng ký thành viên', icon: 'fa-solid fa-user-plus' })
+     OpenMoDal({TrangThai:1}, { TenTrang: 'DangKy', TieuDe: 'Đăng ký thành viên', icon: 'fa-solid fa-user-plus' })
   }
 
 
@@ -88,38 +91,41 @@ export function DangNhap() {
 
       {/* Input Mật khẩu */}
       <div className="w-full mb-4">
-        <div className="flex items-center bg-slate-50 border border-slate-200/80 rounded-2xl px-4 py-3 focus-within:border-blue-500 focus-within:bg-white focus-within:shadow-[0_0_20px_rgba(37,99,235,0.06)] transition-all duration-300">
-          <i className="fa-solid fa-lock text-slate-400 mr-3.5 text-base"></i>
-          <input 
-            name="loginPassword" 
-            type="password" 
-            placeholder="Mật khẩu tài khoản" 
-            className="bg-transparent border-none outline-none w-full text-sm text-slate-800 placeholder-slate-400 font-medium" 
-            onChange={(e)=>{setMatKhau(e.target.value)}}
-            value={MatKhau}
-          />
-        </div>
-      </div>
+  <div className="flex items-center bg-slate-50 border border-slate-200/80 rounded-2xl px-4 py-3 focus-within:border-blue-500 focus-within:bg-white focus-within:shadow-[0_0_20px_rgba(37,99,235,0.06)] transition-all duration-300">
+    <i className="fa-solid fa-lock text-slate-400 mr-3.5 text-base"></i>
+    <input 
+      name="loginPassword" 
+      // Đổi type linh hoạt dựa vào state
+      type={showPassword ? "text" : "password"} 
+      placeholder="Mật khẩu tài khoản" 
+      className="bg-transparent border-none outline-none w-full text-sm text-slate-800 placeholder-slate-400 font-medium" 
+      onChange={(e) => {setMatKhau(e.target.value)}}
+      value={MatKhau}
+      onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+    />
+    
+    {/* Nút toggle con mắt */}
+    <button 
+      type="button" 
+      onClick={() => setShowPassword(!showPassword)}
+      className="ml-2 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors duration-200"
+    >
+      <i className={`fa-solid ${showPassword ? 'fa-eye' : 'fa-eye-slash'}`}></i>
+    </button>
+  </div>
+</div>
 
       {/* Ghi nhớ đăng nhập & Quên mật khẩu */}
       <div className="flex items-center justify-between w-full mb-6 text-xs font-medium">
-        <label className="flex items-center gap-2 text-slate-500 hover:text-slate-700 cursor-pointer select-none">
-          <input 
-            type="checkbox" 
-            name="rememberMe"
-            className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-transparent cursor-pointer"
-          />
-          Ghi nhớ tôi
-        </label>
+  
         <button 
           type="button"
+          onClick={()=>{ OpenMoDal({TrangThai:2}, { TenTrang: 'DangKy', TieuDe: 'Quên mật khẩu', icon: 'fa-solid fa-user-plus'})}}
           className="text-blue-600 hover:text-blue-700 font-semibold bg-transparent border-none cursor-pointer outline-none"
         >
           Quên mật khẩu?
         </button>
       </div>
-
-      {/* Nút Đăng Nhập */}
       <button 
         type="button" 
         disabled={loading}

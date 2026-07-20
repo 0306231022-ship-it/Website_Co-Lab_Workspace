@@ -5,7 +5,8 @@ import dmGhe from "../models/danhmucgheModel.js";
 import { body, param, query, validationResult } from "express-validator";
 import ChiTietThietBiModel from "../models/ChiTiet_ThietBiModel.js";
 import DatLichModel from "../models/LichDatModel.js";
-
+import { io } from '../server.js';
+import moment from 'moment'
 export default class gheController {
     
 
@@ -50,12 +51,11 @@ export default class gheController {
         }
     }
 
-    // [POST] /api/admin/ghe
+  
     static async createGhe(req, res) {
         try {
             const { TEN_GHE, TOA_X, TOA_Y, ID_KHONG_GIAN, ID_DANH_MUC } = req.body;
-            
-            // Validate toàn bộ các trường của bảng ghế bằng Promise.all giống hệt mẫu
+        
             await Promise.all([
                 body('TEN_GHE')
                     .notEmpty()
@@ -99,7 +99,7 @@ export default class gheController {
                 });
             }
 
-            // Thực hiện thêm mới dựa theo mẫu (Loại bỏ khoảng trắng thừa bằng .trim())
+          
             const insertId = await GheModel.create({
                 TEN_GHE: TEN_GHE.trim(),
                 TOA_X,
@@ -114,14 +114,15 @@ export default class gheController {
                     message: 'Thêm ghế thất bại!'
                 });
             }
-            res.status(200).json({ success: true, message: "Thêm ghế thành công!", id: insertId });
+            const Ghe = await GheModel.getIDkhongian(ID_KHONG_GIAN);
+            io.to(`khonggian-${ID_KHONG_GIAN}_ghe`).emit(`themghe`, {ThongTinGhe: Ghe});
+            res.status(200).json({ success: true, message: "Thêm ghế thành công!" });
         } catch (error) {
             res.status(500).json({ success: false, message: error.message });
         }
     }
 
-    // [PUT] /api/admin/ghe/:id
-   static async updateGhe(req, res) {
+   static async updatetenGhe(req, res) {
         try {
             await Promise.all([
                 body('ID_GHE')
@@ -138,36 +139,6 @@ export default class gheController {
                     .isString().withMessage('Tên ghế phải là chuỗi ký tự')
                     .isLength({ max: 255 }).withMessage('Tên ghế không được vượt quá 255 ký tự!')
                     .run(req),
-                body('TOA_X')
-                    .notEmpty().withMessage('Tọa độ X không được để trống!')
-                    .isInt().withMessage('Tọa độ X phải là dạng số')
-                    .run(req),
-                body('TOA_Y')
-                    .notEmpty().withMessage('Tọa độ Y không được để trống!')
-                    .isInt().withMessage('Tọa độ Y phải là dạng số')
-                    .run(req),
-                body('TRANG_THAI')
-                    .notEmpty().withMessage('Trạng thái không được để trống!')
-                    .isInt().withMessage('Trạng thái phải là số nguyên')
-                    .run(req),
-                body('ID_KHONG_GIAN')
-                    .notEmpty().withMessage('ID không gian không được để trống!')
-                    .isInt().withMessage('ID không gian phải là số nguyên')
-                    .custom(async (value, { req }) => {
-                        const checkid = await KhongGianModel.kiemtraid(value);
-                        if(!checkid) throw new Error('ID không gian không tồn tại!');
-                        return true;
-                    })
-                    .run(req),
-                body('ID_DANH_MUC')
-                    .notEmpty().withMessage('ID danh mục không được để trống!')
-                    .isInt().withMessage('ID danh mục phải là số nguyên')
-                    .custom(async (value, { req }) => {
-                        const testid = await dmGhe.testid(value);
-                        if(!testid)  throw new Error('ID không tồn tại!');
-                        return true;
-                    })
-                    .run(req)
             ]);
 
             const errors = validationResult(req);
@@ -179,17 +150,11 @@ export default class gheController {
                 });
             }
 
-            // Lấy ID_GHE từ body ra cùng các trường khác giống hệt create
-            const { ID_GHE, TEN_GHE, TOA_X, TOA_Y, TRANG_THAI, ID_KHONG_GIAN, ID_DANH_MUC } = req.body;
+           
+            const { ID_GHE, TEN_GHE } = req.body;
+           
 
-            const updated = await GheModel.update(ID_GHE, {
-                TEN_GHE: TEN_GHE.trim(),
-                TOA_X,
-                TOA_Y,
-                TRANG_THAI,
-                ID_KHONG_GIAN,
-                ID_DANH_MUC
-            });
+            const updated = await GheModel.CapNhat_TenGhe(ID_GHE,TEN_GHE.trim());
 
             if (!updated) {
                 return res.status(404).json({ success: false, message: "Ghế không tồn tại hoặc dữ liệu không có thay đổi!" });
@@ -199,4 +164,265 @@ export default class gheController {
             res.status(500).json({ success: false, message: error.message });
         }
     }
+    static async LayDanhSach_Theo_IDKG(req,res){
+        const id = req.query.id;
+        try {
+            if(!id || id<0){
+                return res.status(401).json({
+                    success:false,
+                    message:'Vui lòng kiểm tra lại thông tin!'
+                })
+            }
+            const kiemtra = await KhongGianModel.kiemtraid(id);
+            if(!kiemtra){
+                return res.status(401).json({
+                    success:false,
+                    message:'Không tìm thấy ID không gian!'
+                })
+            }
+            const Ghe = await GheModel.getIDkhongian(id);
+            return res.status(200).json({
+                success:true,
+                dulieu:Ghe
+            })
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+
+    static async CapNhat_TaoDo_Ghe(req, res){
+        try {
+            const stringDanhSachGhe = req.body.danhSachGhe;
+            if (!stringDanhSachGhe) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Không nhận được dữ liệu danh sách ghế."
+                });
+            }
+            const danhSachGhe = JSON.parse(stringDanhSachGhe);
+            if (!Array.isArray(danhSachGhe) || danhSachGhe.length === 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Dữ liệu ghế không đúng định dạng mảng hoặc bị rỗng."
+                });
+            }
+            let coLoiCapNhat = false;
+            await Promise.all(
+                danhSachGhe.map(async (ghe) => {
+                    const { ID_GHE, TOA_X, TOA_Y } = ghe;
+                    const CapNhat = await GheModel.CapNhatToaDo(TOA_X,TOA_Y,ID_GHE);
+                    if (!CapNhat) {
+                        coLoiCapNhat = true;
+                    }
+            })
+        );
+        if (coLoiCapNhat) {
+            return res.status(400).json({
+                success: false,
+                message: 'Có lỗi xảy ra, một số ghế cập nhật tọa độ thất bại!'
+            });
+        }
+        return res.status(200).json({
+            success: true,
+            message: "Cập nhật vị trí sơ đồ ghế thành công!"
+        });
+
+    } catch (error) {
+        console.error("Lỗi xử lý tại Controller cập nhật sơ đồ ghế:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi hệ thống, không thể lưu sơ đồ ghế.",
+            error: error.message
+        });
+    }
+};
+    static async ThonhTin_Ghe_DatDon(req,res){
+        const dulieu = req.query.ID_GHE;
+        try {
+            if(!dulieu){
+                return res.status(401).json({
+                    success:false,
+                    message:'Không tìm thấy ghế cần tìm!'
+                })
+            }
+            const kiemtra = await GheModel.testId(dulieu);
+            if(!kiemtra){
+                return res.status(401).json({
+                    success:false,
+                    message:'Không tồn ghế!'
+                })
+            }
+            const kq = await GheModel.laythongtin(dulieu);
+            if(!kq){
+                return res.status(401).json({
+                    success:false,
+                    message:'Không thể truy vấn ghế!'
+                })
+            }
+            return res.status(200).json({
+                success:true,
+                dulieu : kq
+            })
+
+        } catch (error) {
+            console.error("Lỗi xử lý tại Controller chi tiết ghế:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Lỗi hệ thống, không thể lấy thông tin chi tiết của ghế.",
+                error: error.message
+            });
+    
+        }
+    }
+    static async CapNhatDanhMuc_ghe(req,res){
+        const id = req.body.ID_GHE;
+        const id_danh_muc = req.body.ID_DANH_MUC;
+        try {
+                if(!id || !id_danh_muc){
+                    return res.status(401).json({
+                        success:false,
+                        message:'Không tìm thấy id cần chỉnh sửa!'
+                    })
+                }
+                const kiemtra1 =await GheModel.testId(id);
+                if(!kiemtra1){
+                    return res.status(401).json({
+                        success: false,
+                        message:'không tìm thấy ghế cần sửa!'
+                    })
+                }
+                const kiemtra2 = await dmGhe.testid(id_danh_muc);
+                if(!kiemtra2){
+                    return res.status(401).json({
+                        success:false,
+                        message:'Không tìm thấy danh mục cần sửa!'
+                    })
+                }
+                const capnhat = await GheModel.CapNhatDanhMuc_ghe(id,id_danh_muc);
+                if(!capnhat){
+                    return res.status(401).json({
+                        success: false,
+                        message:'Cập nhật danh mục ghế thất bại! '
+                    })
+                }
+                return res.status(200).json({
+                    success:true,
+                    message:'Cập nhật danh mục ghế thành công!'
+                })
+        } catch (error) {
+             console.error("Lỗi xử lý tại Controller cập nhật danh mục ghế:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Lỗi hệ thống, không thể cập nhật thông tin ghế.",
+                error: error.message
+            });
+        }
+    }
+    static async CapNhatTrangThai_ghe(req,res){
+        const id = req.body.ID_GHE;
+        const trangthai = req.body.TRANG_THAI;
+        try {
+             const kiemtra1 =await GheModel.testId(id);
+                if(!kiemtra1){
+                    return res.status(401).json({
+                        success: false,
+                        message:'không tìm thấy ghế cần sửa!'
+                    })
+                }
+                if(trangthai !== '1' && trangthai !=='2'){
+                    return res.status(401).json({
+                        success:false,
+                        message: 'Không tìm thấy trạng thái cần sửa!'
+                    })
+                }
+                const capnhat = await GheModel.CapNhatTrangThai(id,trangthai);
+                if(!trangthai){
+                    return res.status(401).json({
+                        success:false,
+                        message:'Cập nhật thông tin thất bại!'
+                    })
+                }
+                //phát tín hiệu cập nhật ghế
+                 const idkg= await GheModel.Tim_IDKG_GHE(id);
+                 const loai = await KhongGianModel.LayLoai_KG(idkg)
+                 io.to(`space_type_${loai}_id_${idkg}`).emit('update_schedule', {success:true});
+                return res.status(200).json({
+                    success:true,
+                    message: 'Cập nhật thông tin thành công!'
+                })
+        } catch (error) {
+              console.error("Lỗi xử lý tại Controller cập nhật trạng thái ghế:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Lỗi hệ thống, không thể cập nhật thông tin ghế.",
+                error: error.message
+            });
+        }
+    }
+  static async danhsachghe_thoigian(req, res) {
+    const id = req.query.id;
+    const BatDau = req.query.BatDau;
+    const KetThuc = req.query.KetThuc;
+
+    try {
+        await Promise.all([
+            query('BatDau')
+                .notEmpty().withMessage('Thời gian bắt đầu không được để trống.')
+                .isISO8601().withMessage('Thời gian bắt đầu không đúng định dạng ngày tháng.')
+                .custom((value) => {
+                    if (new Date(value) < new Date()) throw new Error('Không thể đặt lịch cho thời gian trong quá khứ.');
+                    const formats = ['YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DDTHH:mm:ss', 'YYYY-MM-DD'];
+                    const dateCheck = moment(value, formats, true);
+                    if (!dateCheck.isValid()) throw new Error('Thời gian bắt đầu không hợp lệ!');
+                    return true;
+                })
+                .run(req),
+
+            query('KetThuc')
+                .notEmpty().withMessage('Thời gian kết thúc không được để trống.')
+                .isISO8601().withMessage('Thời gian kết thúc không đúng định dạng ngày tháng.')
+                .custom((value, { req }) => {
+                    // 🔥 SỬA TẠI ĐÂY: Lấy từ req.query.BatDau thay vì req.body.BatDau
+                    if (new Date(value) <= new Date(req.query.BatDau)) {
+                        throw new Error('Thời gian kết thúc phải lớn hơn thời gian bắt đầu.');
+                    }
+                    const formats = ['YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DDTHH:mm:ss', 'YYYY-MM-DD'];
+                    const dateCheck = moment(value, formats, true);
+                    if (!dateCheck.isValid()) throw new Error('Thời gian kết thúc không hợp lệ!');
+                    return true;
+                })
+                .run(req),
+
+            query('id')
+                .notEmpty().withMessage('Lỗi không gian!.')
+                .custom(async (idValue) => { // Đổi tên từ body -> idValue cho rõ nghĩa
+                    const kiemtra = await KhongGianModel.kiemtraid(idValue);
+                    if (!kiemtra) throw new Error('Không gian không tồn tại!!');
+                    return true;
+                })
+                .run(req)
+        ]);
+
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                validate: true,
+                message: 'Dữ liệu không hợp lệ!',
+                errors: errors.array().map(err => err.msg)
+            });
+        }
+        const danhsach = await GheModel.danhsachghe_thoigian(id, BatDau, KetThuc);
+        return res.status(200).json({
+            success: true,
+            Ghe: danhsach
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi thông tin ghế.",
+            error: error.message
+        });
+    }
+}
 }

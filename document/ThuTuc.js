@@ -1,6 +1,52 @@
+//thủ tục check xem lịch đã check-out chưa
+/**
+ * DELIMITER $$
+
+CREATE FUNCTION KiemTraTrangThaiDatLich(p_id_lich_dat INT)
+RETURNS BOOLEAN
+DETERMINISTIC
+BEGIN
+    DECLARE v_khung_batdau DATETIME;
+    DECLARE v_khung_ketthuc DATETIME;
+    DECLARE v_thoigian_ra DATETIME;
+    DECLARE v_exists INT DEFAULT 0;
+
+    -- 1. Lấy thông tin thời gian của lịch đặt dựa vào ID truyền vào
+    SELECT KHUNG_BATDAU, KHUNG_KETTHUC, THOIGIAN_RA, 1
+    INTO v_khung_batdau, v_khung_ketthuc, v_thoigian_ra, v_exists
+    FROM LICH_DAT -- Thay 'LICH_DAT' bằng tên bảng thực tế của bạn
+    WHERE ID_LICH_DAT = p_id_lich_dat;
+
+    -- Nếu không tìm thấy ID lịch đặt này, trả về TRUE (hoặc tùy bạn xử lý)
+    IF v_exists = 0 THEN
+        RETURN TRUE;
+    END IF;
+
+    -- 2. Kiểm tra xem thời gian hiện tại (NOW()) có nằm trong khung giờ đặt hay không
+    IF NOW() BETWEEN v_khung_batdau AND v_khung_ketthuc THEN
+        -- Đang trong khung giờ đặt (Có người đặt) -> Kiểm tra THOIGIAN_RA đã có dữ liệu chưa
+        IF v_thoigian_ra IS NULL THEN
+            RETURN FALSE; -- Chưa check-out (trả về false)
+        ELSE
+            RETURN TRUE;  -- Đã check-out (trả về true)
+        END IF;
+    ELSE
+        -- Thời gian hiện tại không nằm trong khung giờ đặt (Không có người đặt)
+        RETURN TRUE;
+    END IF;
+END$$
+
+DELIMITER ;
+ * 
+ * 
+ */
+
 // Viết thủ tục đặt lịch, kiểm tra trùng lịch
 /**
- *DELIMITER //
+-- BƯỚC CẦN THIẾT: Xóa thủ tục cũ để nạp code mới
+DROP PROCEDURE IF EXISTS sp_CreateBooking;
+
+DELIMITER //
 
 CREATE PROCEDURE sp_CreateBooking(
     IN p_PhongHopID INT,
@@ -11,6 +57,16 @@ CREATE PROCEDURE sp_CreateBooking(
     OUT p_BookingID INT
 )
 BEGIN
+    -- Mặc định thất bại
+    SET p_BookingID = 0;
+
+    -- Tự động hủy nếu có lỗi hệ thống phát sinh
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_BookingID = 0;
+        RESIGNAL;
+    END;
+
     -- 1. Kiểm tra tính hợp lệ của thời gian
     IF p_StartTime >= p_EndTime THEN
         SIGNAL SQLSTATE '45000' 
@@ -22,47 +78,49 @@ BEGIN
         SET MESSAGE_TEXT = 'Không thể đặt lịch cho thời gian trong quá khứ.';
     END IF;
 
-    -- 2. Kiểm tra trùng lịch dựa theo cột nào KHÁC NULL
+    -- 1.5 Kiểm tra người dùng
+    IF NOT EXISTS (
+        SELECT 1 FROM nguoidung WHERE IDND = p_UserID
+    ) THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Tài khoản người dùng không tồn tại trên hệ thống.';
+    END IF;
+
+    -- 2. Kiểm tra trùng lịch độc lập
     
-    -- TRƯỜNG HỢP A: Người dùng ĐẶT PHÒNG (p_PhongHopID không NULL)
-    IF p_PhongHopID IS NOT NULL THEN
+    -- TRƯỜNG HỢP A: Người dùng ĐẶT PHÒNG
+    IF p_PhongHopID IS NOT NULL AND p_PhongHopID > 0 THEN
         IF EXISTS (
             SELECT 1 FROM lichdat 
             WHERE ID_KHONG_GIAN = p_PhongHopID 
-              AND TRANG_THAI <> 2
-              AND p_StartTime < EndTime 
-              AND p_EndTime > StartTime
+              AND ID_KHONG_GIAN IS NOT NULL -- Ép buộc chỉ xét các dòng đặt phòng
+              AND IFNULL(TRANG_THAI, 0) <> 2
+              AND p_StartTime < KHUNG_KETTHUC 
+              AND p_EndTime > KHUNG_BATDAU
         ) THEN
             SIGNAL SQLSTATE '45000' 
             SET MESSAGE_TEXT = 'Phòng họp này đã có người đặt trong khoảng thời gian trên.';
         END IF;
     END IF;
 
-    -- TRƯỜNG HỢP B: Người dùng ĐẶT GHẾ (p_GheID không NULL)
-    IF p_GheID IS NOT NULL THEN
+    -- TRƯỜNG HỢP B: Người dùng ĐẶT GHẾ
+    IF p_GheID IS NOT NULL AND p_GheID > 0 THEN
         IF EXISTS (
             SELECT 1 FROM lichdat 
             WHERE ID_GHE = p_GheID 
-              AND Status <> 2
-              AND p_StartTime < EndTime 
-              AND p_EndTime > StartTime
+              AND ID_GHE IS NOT NULL -- Ép buộc chỉ xét các dòng đặt ghế
+              AND IFNULL(TRANG_THAI, 0) <> 2
+              AND p_StartTime < KHUNG_KETTHUC 
+              AND p_EndTime > KHUNG_BATDAU
         ) THEN
             SIGNAL SQLSTATE '45000' 
             SET MESSAGE_TEXT = 'Ghế ngồi này đã có người đặt trong khoảng thời gian trên!';
         END IF;
     END IF;
-    IF NOT EXISTS (
-        SELECT 1 
-        FROM nguoidung
-        WHERE IDND = p_UserID -- p_UserID là tên tham số đầu vào của người dùng trong thủ tục
-    ) THEN
-        SIGNAL SQLSTATE '45000' 
-        SET MESSAGE_TEXT = 'Tài khoản người dùng không tồn tại trên hệ thống.';
-    END IF;
 
-    -- 3. Tiến hành đặt lịch nếu hợp lệ
-    INSERT INTO Booking (ID_KHONG_GIAN, ID_GHE, KHUNG_BATDAU, KHUNG_KETTHUC, IDND)
-    VALUES (p_PhongHopID, p_GheID, p_StartTime, p_EndTime, p_UserID);
+    -- 3. Tiến hành đặt lịch nếu tất cả bộ lọc trên hợp lệ
+    INSERT INTO lichdat (ID_KHONG_GIAN, ID_GHE, KHUNG_BATDAU, KHUNG_KETTHUC, IDND, TRANG_THAI)
+    VALUES (p_PhongHopID, p_GheID, p_StartTime, p_EndTime, p_UserID, 1); -- Mặc định trạng thái = 1 (hoạt động)
 
     -- 4. Trả về ID vừa tạo
     SET p_BookingID = LAST_INSERT_ID();
@@ -115,3 +173,67 @@ END //
 DELIMITER ;
  * 
  */
+// Doanh thu tạm tính theo tháng :
+/*SELECT 
+    SUM(GIA_TIEN) AS DoanhThuTamTinh
+FROM 
+    hoadon
+WHERE 
+    YEAR(NGAY_TAO) = YEAR(CURRENT_DATE()) 
+    AND MONTH(NGAY_TAO) = MONTH(CURRENT_DATE())
+    AND TRANG_THAI = 1;*/
+
+// ghế đang sử dụng 
+/**
+ * SELECT 
+    -- Tổng số ghế trong hệ thống
+    (SELECT COUNT(*) FROM ghe) AS TongSoGhe,
+    
+    -- Số lượng ghế đang được sử dụng hiện tại
+    COUNT(DISTINCT ld.ID_GHE) AS SoGheDangSuDung,
+    
+    -- Tính tỷ lệ phần trăm %
+    ROUND(
+        (COUNT(DISTINCT ld.ID_GHE) / (SELECT COUNT(*) FROM ghe)) * 100, 
+        2
+    ) AS PhanTramDangSuDung
+FROM 
+    lichdat ld
+WHERE 
+    -- Điều kiện 1: Thời gian hiện tại nằm trong khoảng lịch đặt
+    NOW() BETWEEN ld.THOI_GIAN_BAT_DAU AND ld.THOI_GIAN_KET_THUC
+    
+    -- Điều kiện 2: Ghế không bị trống (ID_GHE hợp lệ)
+    AND ld.ID_GHE IS NOT NULL
+    
+    -- Điều kiện 3 (Tùy chọn): Chỉ tính các lịch đặt có trạng thái hợp lệ/thành công (Ví dụ TRANG_THAI = 1)
+    AND ld.TRANG_THAI = 1;
+ */
+//phòng 
+/**
+ * SELECT 
+    -- 1. Tổng số phòng hiện có trong hệ thống
+    (SELECT COUNT(*) FROM khonggian) AS TongSoPhong,
+    
+    -- 2. Số phòng đang được sử dụng ở thời điểm hiện tại
+    COUNT(DISTINCT ld.ID_KHONG_GIAN) AS SoPhongDangSuDung,
+    
+    -- 3. Tỷ lệ phần trăm (%) phòng đang sử dụng
+    ROUND(
+        (COUNT(DISTINCT ld.ID_KHONG_GIAN) / (SELECT COUNT(*) FROM khonggian)) * 100, 
+        2
+    ) AS PhanTramPhongDangSuDung
+FROM 
+    lichdat ld
+WHERE 
+    -- Điều kiện: Thời gian hiện tại nằm trong khoảng đặt phòng
+    NOW() BETWEEN ld.THOI_GIAN_BAT_DAU AND ld.THOI_GIAN_KET_THUC
+    
+    -- Đảm bảo đây là lịch đặt phòng (ID_KHONG_GIAN không bị rỗng)
+    AND ld.ID_KHONG_GIAN IS NOT NULL
+    
+    -- Chỉ tính lịch đặt có trạng thái hợp lệ (Ví dụ TRANG_THAI = 1 là đã xác nhận/thành công)
+    AND ld.TRANG_THAI = 1;
+ */
+
+    /**/

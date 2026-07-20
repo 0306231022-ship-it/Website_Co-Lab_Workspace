@@ -16,10 +16,7 @@ export default function NavLink({ href, children, activeClassName, className = "
   // Xử lý thông minh: 
   // Trang chủ "/" thì check bằng nhau tuyệt đối
   // Các trang khác (như /NguoiDung) thì check xem pathname hiện tại có bắt đầu bằng href đó không (để ăn cả /NguoiDung/5)
-  const isActive = href === "/" 
-    ? pathname === href 
-    : pathname.startsWith(href);
-
+  const isActive = pathname === href;
   return (
     <Link 
       href={href} 
