@@ -412,6 +412,18 @@ static async ThongKe(id) {
              throw new Error('Database query failed: ' + error.message);
         }
     }
+    static async KiemtraHoatDong(ID_KHONG_GIAN){
+        try {
+            const [kiemtra] = await execute(`
+                SELECT TRANG_THAI
+                FROM khonggian
+                WHERE ID_KHONG_GIAN = ?
+                `,[ID_KHONG_GIAN]);
+            return kiemtra[0].TRANG_THAI === 1;
+        } catch (error) {
+            throw new Error('Database query failed: ' + error.message);
+        }
+    }
     
     
 

@@ -12,7 +12,6 @@ export default class LichDatController{
         const dulieu = req.body;
         const userId = req.user.id;
         const id = req.body.id;
-
         try {
             await Promise.all([
                 body('KHUNG_BATDAU')
@@ -52,10 +51,14 @@ export default class LichDatController{
                     if(ID_KHONG_GIAN){
                         const kiemtra = await KhongGianModel.kiemtraid(ID_KHONG_GIAN);
                         if(!kiemtra) throw new Error('Phòng họp không tồn tại!');
+                        const kiemtra1 = await KhongGianModel.KiemtraHoatDong(ID_KHONG_GIAN);
+                        if(!kiemtra1) throw new Error('Không thể đặt không gian đang trong thời gian bảo trì!');
                     }
                     if(ID_GHE){
                         const kiemtra2= await GheModel.testId(ID_GHE)
                         if(!kiemtra2) throw new Error('Ghế không tồn tại!');
+                        const kiemtra3 = await GheModel.kiemtraHoatDong(ID_GHE);
+                        if(!kiemtra3) throw new Error('Không thể đặt ghế đang trong thời gian bảo trì!');
                     }
                     return true;
                 }).run(req)
@@ -75,7 +78,6 @@ export default class LichDatController{
                     message:'Đặt lịch thất bại!'
                 })
             }
-            //phát sự kiện
               const loai = await KhongGianModel.LayLoai_KG(id)
               io.to(`space_type_${loai}_id_${id}`).emit('update_schedule', {success:true});
             return res.status(200).json({

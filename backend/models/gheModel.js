@@ -245,4 +245,16 @@ static async danhsachghe_thoigian(id, BatDau, KetThuc) {
             throw new Error("Database query failed: " + error.message); 
         }
     }
+    static async kiemtraHoatDong(ID_GHE){
+        try {
+            const [ketqua] = await execute(`
+                SELECT TRANG_THAI
+                FROM ghe
+                WHERE ID_GHE = ?
+                `,[ID_GHE]);
+            return ketqua[0].TRANG_THAI === 1;
+        } catch (error) {
+             throw new Error("Database query failed: " + error.message); 
+        }
+    }
 }

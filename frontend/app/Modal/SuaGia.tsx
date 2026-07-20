@@ -21,7 +21,6 @@ export interface UpdateGiaRequest {
   MOTA?: string;
   DON_GIA: number;
   DANHMUC_GHE: number;
-  PHUONG_THUC_CAP_NHAT: "overwrite" | "history";
 }
 
 
@@ -50,7 +49,7 @@ export default function SuaGia({
     MOTA: "",
     DON_GIA: 0,
     DANHMUC_GHE: 1,
-    PHUONG_THUC_CAP_NHAT: "history",
+  
   });
 
 
@@ -66,7 +65,7 @@ export default function SuaGia({
       try {
         const [res1, res2] = await Promise.all([
           api.CallAPI(undefined, { url: `/admin/chitietgia?ID_GIA=${id}`, PhuongThuc: 2 }),
-          api.CallAPI(undefined, { url: `/admin/loaidanhmuc`, PhuongThuc: 2 })
+          api.CallAPI(undefined, { url: `/admin/loaidanhmuc?Loai=2`, PhuongThuc: 2 })
         ]);
 
         const targetData =
@@ -86,7 +85,7 @@ export default function SuaGia({
             MOTA: targetData.MOTA || "",
             DON_GIA: Number(giaGoc) || 0,
             DANHMUC_GHE: Number(targetData.DANHMUC_GHE) || 1,
-            PHUONG_THUC_CAP_NHAT: "history",
+           
           });
         } else {
           ThongBao.ThongBao_Loi("Không thể tải thông tin bảng giá cần chỉnh sửa!");
@@ -141,7 +140,7 @@ export default function SuaGia({
     dataGuiDi.append("MOTA", formData.MOTA || "");
     dataGuiDi.append("DON_GIA", String(formData.DON_GIA));
     dataGuiDi.append("DANHMUC_GHE", String(formData.DANHMUC_GHE));
-    dataGuiDi.append("PHUONG_THUC_CAP_NHAT", formData.PHUONG_THUC_CAP_NHAT);
+   
 
     setLoading(true);
     try {
@@ -265,60 +264,6 @@ export default function SuaGia({
             <span className="absolute right-3.5 text-xs font-bold text-slate-400 pointer-events-none">
               đ / giờ
             </span>
-          </div>
-        </div>
-
-        {/* PHƯƠNG THỨC CẬP NHẬT */}
-        <div className="space-y-2">
-          <label className="text-xs font-bold text-slate-600 uppercase tracking-wide flex items-center gap-1">
-            Phương thức cập nhật hệ thống <span className="text-rose-500">*</span>
-          </label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <label className={`p-3.5 border rounded-xl flex items-start gap-3 cursor-pointer transition-all ${
-              formData.PHUONG_THUC_CAP_NHAT === "history" 
-                ? "border-indigo-500 bg-indigo-50/25 ring-2 ring-indigo-50" 
-                : "border-slate-200 bg-white hover:bg-slate-50"
-            }`}>
-              <input
-                type="radio"
-                name="PHUONG_THUC_CAP_NHAT"
-                value="history"
-                checked={formData.PHUONG_THUC_CAP_NHAT === "history"}
-                onChange={handleChange}
-                className="mt-0.5 accent-indigo-600 cursor-pointer"
-              />
-              <div className="flex flex-col cursor-pointer">
-                <span className="text-xs font-bold text-indigo-700 flex items-center gap-1">
-                  <i className="fa-solid fa-shield-halved"></i> Tách giá tự động (An toàn)
-                </span>
-                <span className="text-[11px] font-medium text-slate-400 mt-1 leading-normal">
-                  Nếu mã giá này đang được Không gian/Phòng họp dùng chung, hệ thống sẽ tự sinh bản ghi giá riêng để tránh làm đổi giá phòng.
-                </span>
-              </div>
-            </label>
-
-            <label className={`p-3.5 border rounded-xl flex items-start gap-3 cursor-pointer transition-all ${
-              formData.PHUONG_THUC_CAP_NHAT === "overwrite" 
-                ? "border-amber-500 bg-amber-50/25 ring-2 ring-amber-50" 
-                : "border-slate-200 bg-white hover:bg-slate-50"
-            }`}>
-              <input
-                type="radio"
-                name="PHUONG_THUC_CAP_NHAT"
-                value="overwrite"
-                checked={formData.PHUONG_THUC_CAP_NHAT === "overwrite"}
-                onChange={handleChange}
-                className="mt-0.5 accent-amber-600 cursor-pointer"
-              />
-              <div className="flex flex-col cursor-pointer">
-                <span className="text-xs font-bold text-amber-700 flex items-center gap-1">
-                  <i className="fa-solid fa-triangle-exclamation"></i> Ghi đè trực tiếp
-                </span>
-                <span className="text-[11px] font-medium text-slate-400 mt-1 leading-normal">
-                  Sửa đổi số tiền trực tiếp trên mã giá cũ. Lưu ý: Mọi phòng họp hay danh mục khác sử dụng chung mã giá này đều đổi theo.
-                </span>
-              </div>
-            </label>
           </div>
         </div>
 

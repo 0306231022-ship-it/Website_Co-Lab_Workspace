@@ -113,9 +113,10 @@ export default class giaController {
           .isInt({ min: 1 })
           .withMessage("Danh mục ghế phải là số nguyên dương!")
           .custom(async (value) => {
-              
              const check = await dmGhe.testid(value);
                if (!check) throw new Error('ID danh mục ghế không tồn tại!');
+              const check2 = await dmGhe.test1(value);
+              if(check2) throw new Error('Danh mục ghế đã được áp dụng cho đơn giá khác!!');
               return true;
            })
           .run(req),
@@ -193,12 +194,13 @@ export default class giaController {
         .withMessage("Danh mục ghế không được bỏ trống!")
         .isInt({ min: 1 })
         .withMessage("Danh mục ghế phải là số nguyên dương!")
-        .run(req),
-      body("PHUONG_THUC_CAP_NHAT")
-        .notEmpty()
-        .withMessage("Phương thức cập nhật không được bỏ trống!")
-        .isIn(["overwrite", "history"])
-        .withMessage("Phương thức cập nhật không hợp lệ!")
+        .custom(async (value) => {
+             const check = await dmGhe.testid(value);
+               if (!check) throw new Error('ID danh mục ghế không tồn tại!');
+              const check2 = await dmGhe.test1(value);
+              if(check2) throw new Error('Danh mục ghế đã được áp dụng cho đơn giá khác!');
+              return true;
+           })
         .run(req),
     ]);
 
@@ -213,14 +215,13 @@ export default class giaController {
       });
     }
 
-    
+
     const updateSuccess = await giaModel.update(
       ID_GIA,
       TEN_GIA.trim(),
       MOTA ? MOTA.trim() : null,
       DON_GIA,
       DANHMUC_GHE,
-      PHUONG_THUC_CAP_NHAT
     );
 
     if (!updateSuccess) {

@@ -81,6 +81,18 @@ export default class dmGhe {
              throw new Error("Không thể truy vấn thông tin danh mục ghế!");
         }
     }
+    static async test1(value){
+      try {
+        const [ketqqua] = await execute(`
+          SELECT DANHMUC_GHE 
+          FROM banggia
+          WHERE DANHMUC_GHE = ?
+          `,[value]);
+          return ketqqua && ketqqua.length > 0;
+      } catch (error) {
+         throw new Error("Database query failed: " + error.message);
+      }
+    }
   
 
 
