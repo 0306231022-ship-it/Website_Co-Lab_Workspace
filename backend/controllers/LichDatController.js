@@ -241,7 +241,7 @@ export default class LichDatController{
                     message: 'Bạn không có quyền truy cập chi tiết lịch đặt này.'
                 });
             }
-            const kiemtra3 = await hoadonModel.kiemtraid_hoadon(id)
+            const kiemtra3 = await hoadonModel.kiemtraid_hoadon(id);
             const lichDat = await DatLichModel.ChiTiet_LichDat_theoIDDL(id);
             if (!lichDat.success) {
                 return res.status(404).json({
@@ -478,7 +478,6 @@ export default class LichDatController{
             const timeHienTai = new Date().getTime();
             const mocCheckInSom = thongtin_batdau - (15 * 60 * 1000);
             if (timeHienTai >= mocCheckInSom && timeHienTai <= thongtin_batdau) {
-                //xem vị trị người đặt có đang tróng hay không
                 const kiemtra_ckeckin= await DatLichModel.kiemtra_trangthai_lichdat(id);
                 if(!kiemtra_ckeckin){
                     io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-checkin', {
@@ -486,12 +485,23 @@ export default class LichDatController{
                         message: "Hiện tại, lịch đặt của bạn đang được sử dụng cho khách trước. Vui lòng check-in sau ít phút!"
                     });
                 }
+                const kiemtra = await hoadonModel.kiemtraid_hoadon(id);
+                if(!kiemtra){
+                    io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-checkin', {
+                        success: false,
+                        message: "Vui lòng thanh toán trước khi sử dung!"
+                    });
+                    res.end();
+                    return;
+                }
                const check = await DatLichModel.checkin(id);
                if(!check){
                     io.to(`QuanLi_khunggio-${id}`).emit('thong-bao-checkin', {
                         success: false,
                         message: "Check-in thất bại! Vui lòng thực hiện trong giây lát"
                     });
+                    res.end();
+                    return;
                }
                const idkg= await DatLichModel.layidkg_idlich(id);
                const loai = await KhongGianModel.LayLoai_KG(idkg)
@@ -500,8 +510,6 @@ export default class LichDatController{
                     success: true,
                     message: "Check-in thành công!"
                 });
-               
-
                 res.end();
                 return;
             } else if (timeHienTai < mocCheckInSom) {
@@ -671,6 +679,42 @@ export default class LichDatController{
                 success: false,
                 message: 'Lấy thông tin đặt đơn thất bại: ' + error.message
             });
+        }
+    }
+    static async huylichdat(req,res){
+         const userId = req.user.id;
+         const id = req.query.id;
+        try {
+            const kiemtra1 = await DatLichModel.kiemtraid(id);
+            if(!kiemtra1){
+                return res.status(401).json({
+                    success:false,
+                    message:'Không tìm thấy lịch đặt cần hủy!'
+                })
+            }
+            const kiemtra2 = await DatLichModel.Kiemtra2(id,userId);
+            if(!kiemtra2){
+                return res.status(401).json({
+                    success:false,
+                    message:'Lịch đặt này không phải của bạn!'
+                })
+            }
+            const Huy = await DatLichModel.HuyLichTheoId(id);
+            if(!Huy){
+                return res.status(401).json({
+                    success:false,
+                    message:'Không thewer hủy lịch đặt của bạn!'
+                })
+            }
+            return res.status(200).json({
+                success:true,
+                message:'Hủy lịch dặt thành công!'
+            })
+        } catch (error) {
+             return res.status(401).json({
+                success: false,
+                message: 'Hủ thông tin lịch đặt thất bại: ' + error.message
+            })
         }
     }
 }

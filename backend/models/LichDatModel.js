@@ -254,7 +254,7 @@ export default class DatLichModel{
             }
             //dựa vào id lấy thông tin thời gian
             const [ChiTiet_ThoiGian] =await connection.query(`
-                SELECT KHUNG_BATDAU, KHUNG_KETTHUC, TRANG_THAI, THOIGIAN_VAO, THOIGIAN_RA
+                SELECT KHUNG_BATDAU, KHUNG_KETTHUC, TRANG_THAI, THOIGIAN_VAO, THOIGIAN_RA, NGAY_TAO
                 FROM lichdat
                 WHERE ID_LICH_DAT = ?
                 `,[id]);
@@ -896,6 +896,19 @@ WHERE ld.ID_LICH_DAT = ?;
                 return thongtin[0].ID_KHONG_GIAN;
         } catch (error) {
              throw new Error("Database query failed: " + error.message);
+        }
+    }
+    static async Kiemtra2(id,userId){
+        try {
+            const [kt] = await execute(`
+                SELECT ID_LICH_DAT, IDND
+                FROM lichdat
+                WHERE ID_LICH_DAT = ? AND IDND = ?
+                LIMIT 1
+                `,[id,userId]);
+            return !!kt;
+        } catch (error) {
+            throw new Error("Database query failed: " + error.message);
         }
     }    
 }

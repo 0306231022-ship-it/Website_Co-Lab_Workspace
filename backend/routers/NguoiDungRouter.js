@@ -29,6 +29,7 @@ nguoidungRouter.get('/TimKiem', NguoiDungController.TimKiem_Ten);
 nguoidungRouter.get('/lichsu_datlich', verifyToken, LichDatController.LichSuDat_theoIDND);
 nguoidungRouter.get('/lichsu_datlich_nguoidung', LichDatController.LichSuDat_theoIDND);
 nguoidungRouter.get('/lich-dat', verifyToken, LichDatController.ChiTiet_LichDat_theoIDDL);
+nguoidungRouter.get('/huy-lich-dat',verifyToken , LichDatController.huylichdat);
 nguoidungRouter.get('/ThongTin' , NguoiDungController.ThongTin);
 nguoidungRouter.get('/check-in', LichDatController.Checkin);
 nguoidungRouter.get('/check-out', LichDatController.Checkout);
