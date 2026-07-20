@@ -342,6 +342,10 @@ export default class gheController {
                         message:'Cập nhật thông tin thất bại!'
                     })
                 }
+                //phát tín hiệu cập nhật ghế
+                 const idkg= await GheModel.Tim_IDKG_GHE(id);
+                 const loai = await KhongGianModel.LayLoai_KG(idkg)
+                 io.to(`space_type_${loai}_id_${idkg}`).emit('update_schedule', {success:true});
                 return res.status(200).json({
                     success:true,
                     message: 'Cập nhật thông tin thành công!'

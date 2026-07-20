@@ -267,6 +267,9 @@ function ChiTietKhongGian() {
                                                     <span className="w-3 h-3 rounded bg-red-500 inline-block"></span>
                                                     <span className="text-gray-900">Đã thuê</span>
                                                 </div>
+                                                    <span className="flex items-center gap-1">
+                                <span className="w-2.5 h-2.5 rounded bg-[#f59e0b]"></span> Đang bảo trì
+                            </span>
                                             </div>
                                         </div>
 
@@ -286,6 +289,7 @@ function ChiTietKhongGian() {
                                                             onGheClick={handleGheSelect} 
                                                             setGhe={setghe} 
                                                             isReadOnly={true}
+                                                            isAdmin={true}
                                                         />
                                                     </div>
                                                     <div className="mt-4 bg-slate-900/90 text-white text-[10px] font-bold px-3 py-1.5 rounded-full backdrop-blur-xs flex items-center space-x-2 shadow-sm">

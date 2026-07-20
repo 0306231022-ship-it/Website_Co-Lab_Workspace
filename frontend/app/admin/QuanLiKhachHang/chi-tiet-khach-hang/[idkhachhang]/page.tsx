@@ -7,7 +7,7 @@ import Image from "next/image";
 import * as fun from '@/FUNCTION/function';
 import * as ThongBao from '@/FUNCTION/ThongBao';
 import { LichDatItems } from '@/interface/LichDat';
-
+import Link from "next/link";
 function ChiTietKhachHang(){
     const params = useParams();
     const id = params?.idkhachhang;
@@ -70,7 +70,6 @@ function ChiTietKhachHang(){
             }
             if(CapNhat.success){
                 ThongBao.ThongBao_ThanhCong(CapNhat.message);
-                // Cập nhật lại state UI ngay lập tức mà không cần reload trang
                 setThongTin(prev => prev ? {...prev, TRANG_THAI: TrangThai} : null);
                 return;
             }else{
@@ -243,9 +242,9 @@ function ChiTietKhachHang(){
                                                 </td>
                                                 <td className="py-3.5 px-4">
                                                     <div className="flex items-center justify-center">
-                                                        <button type="button" className="w-7 h-7 text-indigo-600 hover:bg-indigo-50 rounded-lg border border-slate-100 hover:border-indigo-100 transition flex items-center justify-center cursor-pointer" title="Xem hóa đơn chi tiết">
+                                                        <Link href={`/admin/QuanLiKhachHang/chi-tiet-khach-hang/${id}/HoaDon/${item.ID_LICH_DAT}`} className="w-7 h-7 text-indigo-600 hover:bg-indigo-50 rounded-lg border border-slate-100 hover:border-indigo-100 transition flex items-center justify-center cursor-pointer" title="Xem hóa đơn chi tiết">
                                                             <i className="fa-solid fa-file-invoice-dollar text-xs"></i>
-                                                        </button>
+                                                        </Link>
                                                     </div>
                                                 </td>
                                             </tr>

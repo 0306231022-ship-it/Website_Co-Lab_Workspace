@@ -233,4 +233,16 @@ static async danhsachghe_thoigian(id, BatDau, KetThuc) {
         throw error; 
     }
 }
+    static async Tim_IDKG_GHE(id){
+        try {
+            const [ID] = await execute(`
+                SELECT ID_KHONG_GIAN
+                FROM ghe
+                WHERE ID_GHE = ?
+                `,[id]);
+            return ID[0].ID_KHONG_GIAN;
+        } catch (error) {
+            throw new Error("Database query failed: " + error.message); 
+        }
+    }
 }

@@ -294,6 +294,7 @@ function ChiTietChiNhanh() {
                                                         </button>
                                                     ) : isLoaiChung ? (
                                                         <Link
+                                                        
                                                             href={`/chi-tiet-chi-nhanh/${idChiNhanh}/chi-tiet-khong-gian/${space.ID_KHONG_GIAN}`}
                                                             className="bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white border border-blue-100 font-bold py-2 px-3 rounded-xl text-xs transition-all duration-300">
                                                             Xem chi tiết

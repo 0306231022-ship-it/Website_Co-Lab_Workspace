@@ -253,11 +253,11 @@ const ID = parseInt(req.query.IDCN);
                             }
                             //Trường hợp 2: lớn hơn thời gian cuối cùng mà khách thuê
                             const kiemtra_lich = await DatLichModel.LichDatCuoi_IDPHONG(req.body.IDKG);
-                            if(kiemtra_lich.length>0){
-                                const thoigian_ketthuc =  new Date(kiemtra_lich.KHUNG_KETTHUC);
-                                if(startDate<thoigian_ketthuc){
-                                    throw new Error('Ngày bắt đầu chỉnh sửa phải lớn hơn lịch đặt cuối cùng tại phòng đó!');
-                                }
+                            if (kiemtra_lich && kiemtra_lich.KHUNG_KETTHUC) {
+                                const thoigian_ketthuc = new Date(kiemtra_lich.KHUNG_KETTHUC);
+                                    if (startDate < thoigian_ketthuc) {
+                                        throw new Error('Ngày bắt đầu chỉnh sửa phải lớn hơn lịch đặt cuối cùng tại phòng đó!');
+                                    }
                             }
                             return true;
                           }).run(req),
@@ -299,6 +299,9 @@ const ID = parseInt(req.query.IDCN);
                         message:'Cập nhật trạng thái không gian thất bại!'
                     })
                 }
+                //phát tín hiệu cập nhật ghế
+                const loai = await KhongGianModel.LayLoai_KG(dulieu.IDKG)
+                io.to(`space_type_${loai}_id_${idkg}`).emit('update_schedule', {success:true});
                 return res.status(200).json({
                     success:true,
                     message:'Cập nhật trạng thái không gian thành công!'

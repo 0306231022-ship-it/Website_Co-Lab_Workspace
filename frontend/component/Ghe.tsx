@@ -10,17 +10,20 @@ interface SoDoGheCanvasProps {
     onDragGhe?: (idGhe: number, newX: number, newY: number) => void;
     isReadOnly?: boolean;
     setGhe?: React.Dispatch<React.SetStateAction<Ghe[]>>;
+    isAdmin?: boolean; // THÊM PROP PHÂN QUYỀN Ở ĐÂY
 }
 
 export default function SoDoGheCanvas({ 
     danhSachGhe, 
     onGheClick, 
     onDragGhe, 
-    isReadOnly = false 
+    isReadOnly = false,
+    isAdmin = false // Mặc định nếu không truyền vào thì coi như là khách hàng
 }: SoDoGheCanvasProps) {
 
-    const layMauGhe = (trangThai: number) => {
-        if (trangThai === 1) return '#ef4444'; // Đỏ (Đang có người đặt)
+    const layMauGhe = (trangThaiGhe: number, dangCoNguoiDat: number) => {
+        if (Number(trangThaiGhe) === 2) return '#f59e0b'; // Vàng cam (Bảo trì)
+        if (Number(dangCoNguoiDat) === 1) return '#ef4444'; // Đỏ (Đang có người đặt)
         return '#10b981'; // Xanh (Trống)
     };
 
@@ -52,18 +55,30 @@ export default function SoDoGheCanvas({
                             }
                         }
 
-                        // Kiểm tra ghế có đang màu đỏ (đã đặt) hay không
                         const laGheDaDat = Number(item.DangCoNguoiDat) === 1;
+                        const laGheBaoTri = Number(item.TRANG_THAI) === 2; 
 
                         return (
                             <Group
                                 key={item.ID_GHE || index}
                                 x={xChuan}
                                 y={yChuan}
-                                draggable={!isReadOnly && !laGheDaDat} 
+                                // Admin thì vẫn có thể di chuyển vị trí ghế bảo trì (nếu !isReadOnly), khách hàng thì không.
+                                draggable={!isReadOnly && !laGheDaDat && (!laGheBaoTri || isAdmin)} 
                                 
-                                onClick={() => onGheClick && onGheClick(item)}
-                                onTap={() => onGheClick && onGheClick(item)}
+                                // LOGIC PHÂN QUYỀN CLICK: 
+                                // Nếu KHÔNG PHẢI ghế bảo trì -> ai cũng click được.
+                                // Nếu LÀ ghế bảo trì -> chỉ có Admin (isAdmin === true) mới kích hoạt hàm onGheClick.
+                                onClick={() => {
+                                    if (!laGheBaoTri || isAdmin) {
+                                        if (onGheClick) onGheClick(item);
+                                    }
+                                }}
+                                onTap={() => {
+                                    if (!laGheBaoTri || isAdmin) {
+                                        if (onGheClick) onGheClick(item);
+                                    }
+                                }}
                                 
                                 onDragEnd={(e) => {
                                     const node = e.target; 
@@ -75,7 +90,7 @@ export default function SoDoGheCanvas({
                                 <Rect
                                     width={50}
                                     height={50}
-                                    fill={layMauGhe(item.DangCoNguoiDat)}
+                                    fill={layMauGhe(item.TRANG_THAI, item.DangCoNguoiDat)}
                                     cornerRadius={8}
                                     stroke="#ffffff"
                                     strokeWidth={2}
@@ -86,12 +101,12 @@ export default function SoDoGheCanvas({
                                 />
                                 
                                 <Text
-                                    text={nhanGhe}
+                                    text={laGheBaoTri ? "Maint" : nhanGhe}
                                     width={50}
                                     y={18}
                                     align="center"
                                     fill="#ffffff"
-                                    fontSize={10}
+                                    fontSize={laGheBaoTri ? 8 : 10}
                                     fontStyle="bold"
                                 />
                             </Group>

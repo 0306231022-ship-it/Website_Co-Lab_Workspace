@@ -179,6 +179,9 @@ function GheNgoi({ DuLieu }: { DuLieu: Ghe[] }) {
                             <span className="flex items-center gap-1">
                                 <span className="w-2.5 h-2.5 rounded bg-red-500"></span> Đang có người
                             </span>
+                               <span className="flex items-center gap-1">
+                                <span className="w-2.5 h-2.5 rounded bg-[#f59e0b]"></span> Đang bảo trì
+                            </span>
                         </div>
                     </div>
                 
