@@ -185,7 +185,7 @@ function GheNgoi({ DuLieu }: { DuLieu: Ghe[] }) {
                         </div>
                     </div>
                 
-                    <SoDoGheCanvas danhSachGhe={danhSachGheHienTai} onGheClick={handleGheSelect} isReadOnly={false} />
+                    <SoDoGheCanvas danhSachGhe={danhSachGheHienTai} onGheClick={handleGheSelect} isReadOnly={true} />
                     <div className="mt-4 p-3 bg-gray-50 border border-gray-200 text-gray-400 rounded-xl text-center text-xs font-medium max-w-md mx-auto">
                         Vui lòng chọn một ghế trống bất kỳ trên sơ đồ
                     </div>

@@ -5,7 +5,7 @@ import { DanhMucGhe } from "@/interface/DanhMucGhe";
 import * as ThongBao from '@/FUNCTION/ThongBao';
 import { Ghe } from "@/interface/ghe";
 import { useModalContext } from "@/context/QuanLiMoal";
-
+import * as fun from '@/FUNCTION/function';
 interface gheProps {
     id: number;
 }
@@ -166,7 +166,7 @@ function ChinhSuaGhe({ DuLieu }: { DuLieu: gheProps }) {
                                 {DanhMuc && DanhMuc.length > 0 ? (
                                     DanhMuc.map((item) => (
                                         <option key={item.ID_DANHMUC} value={item.ID_DANHMUC}>
-                                            {item.TEN_DANHMUC}
+                                           {`${item.TEN_DANHMUC}(${fun.formatCurrency(item.DON_GIA)})`}
                                         </option>
                                     ))
                                 ) : (

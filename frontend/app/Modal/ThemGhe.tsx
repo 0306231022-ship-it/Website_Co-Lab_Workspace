@@ -4,6 +4,7 @@ import * as ThongBao from '@/FUNCTION/ThongBao';
 import * as api from '@/API/API';
 import { DanhMucGhe } from "@/interface/DanhMucGhe";
 import { useModalContext } from "@/context/QuanLiMoal";
+import * as fun from '@/FUNCTION/function';
 interface ID{
     id: number,
     toa_x: number,
@@ -82,7 +83,7 @@ function ThemGhe({DuLieu} : {DuLieu: ID}){
                         {
                             DanhMuc && DanhMuc.length>0 ? (
                                 DanhMuc.map((item)=>(
-                                     <option key={item.ID_DANHMUC} value={item.ID_DANHMUC}>{item.TEN_DANHMUC}</option>
+                                     <option key={item.ID_DANHMUC} value={item.ID_DANHMUC}>{`${item.TEN_DANHMUC}(${fun.formatCurrency(item.DON_GIA)})`}</option>
                                 ))
                                
                             ):(

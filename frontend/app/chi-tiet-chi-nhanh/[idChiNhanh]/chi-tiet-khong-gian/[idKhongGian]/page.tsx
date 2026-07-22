@@ -372,7 +372,7 @@ function ChiTietKhongGian() {
           {/* SƠ ĐỒ GHẾ TRỰC QUAN */}
             {
               khonggian?.LOAI_KHONG_GIAN === 1 ? (
-                <GheNgoi DuLieu={ghe} />
+                <GheNgoi DuLieu={ghe}  />
 
               ) : (
                 <DatPhong DuLieu={String(khonggian?.DON_GIA)} />

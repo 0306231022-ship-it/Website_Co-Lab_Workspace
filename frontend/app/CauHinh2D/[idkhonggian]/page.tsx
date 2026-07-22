@@ -163,6 +163,7 @@ function CauHinh2D() {
             onGheClick={handleGheSelect} 
             setGhe={setGhe} 
             isReadOnly={false}
+            isAdmin={true}
             onDragGhe={handleDragGhe}
         />
     </div>

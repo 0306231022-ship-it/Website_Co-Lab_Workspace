@@ -1,4 +1,5 @@
 export interface DanhMucGhe {
     ID_DANHMUC: number,
-    TEN_DANHMUC: string
+    TEN_DANHMUC: string,
+    DON_GIA:number;
 }

@@ -69,9 +69,9 @@ export default class dmGhe {
         try {
             const phanloai = parseInt(loai) === 1 ? 'IN' : 'NOT IN';
             const [ketqua] = await execute(`
-              SELECT ID_DANHMUC, TEN_DANHMUC
-              FROM danhmucghe
-              WHERE TRANG_THAI = 1
+              SELECT dm.ID_DANHMUC, dm.TEN_DANHMUC , bg.DON_GIA
+              FROM danhmucghe dm, banggia bg
+              WHERE TRANG_THAI = 1 AND dm.ID_DANHMUC = bg.DANHMUC_GHE
               ${parseInt(loai) === 1 || parseInt(loai) === 2 ? 
                 `AND ID_DANHMUC ${phanloai} (SELECT DISTINCT DANHMUC_GHE FROM banggia WHERE DANHMUC_GHE IS NOT NULL)` : ''}
         `,[]);
